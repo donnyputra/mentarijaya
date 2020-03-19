@@ -25,5 +25,7 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/profile', 'HomeController@profile')->name('profile');
+Route::get('/book', 'HomeController@book')->name('book');
+Route::get('/preferences', 'HomeController@preferences')->name('preferences');
 
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');
