@@ -55,6 +55,10 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('profile') }}">
+                                        {{ __('Profile') }}
+                                    </a>
+
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
@@ -71,6 +75,18 @@
                 </div>
             </div>
         </nav>
+
+        @if (\Session::has('success'))
+        <div class="alert alert-success">
+            {!! \Session::get('success') !!}
+        </div>
+        @endif
+
+        @if (\Session::has('error'))
+        <div class="alert alert-error">
+            {!! \Session::get('error') !!}
+        </div>
+        @endif
 
         <main class="py-4">
             @yield('content')
