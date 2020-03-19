@@ -12,6 +12,12 @@ class UserController extends Controller
 
     public function profileUpdate(Request $request) {
     	try {
+    		$validatedData = $request->validate([
+				'name' => ['required', 'string', 'max:50'],
+	            'username' => ['required', 'string', 'max:50'],
+	            'email' => ['required', 'string', 'email', 'max:50'],
+    		]);
+
     		\App\User::where('id', $request->input('id'))
 			->update([
 				'name' => $request->input('name'),
