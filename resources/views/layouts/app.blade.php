@@ -33,12 +33,14 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
+                        @auth
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('book') }}">{{ __('Book') }}</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('preferences') }}">{{ __('System Preferences') }}</a>
                         </li>
+                        @endauth
                     </ul>
 
                     <!-- Right Side Of Navbar -->
