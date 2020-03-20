@@ -31,8 +31,4 @@ class HomeController extends Controller
     public function book() {
         return view('book');
     }
-
-    public function preferences() {
-        return view('preferences');
-    }
 }

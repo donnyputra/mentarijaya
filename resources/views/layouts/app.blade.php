@@ -15,6 +15,7 @@
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -32,13 +33,21 @@
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav mr-auto">
+                    <ul class="nav nav-pills mr-auto">
                         @auth
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('book') }}">{{ __('Book') }}</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('preferences') }}">{{ __('System Preferences') }}</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('System Preferences') }}</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{{ route('preferences.store') }}">{{ __("Store") }}</a>
+                                <a class="dropdown-item" href="{{ route('preferences.category') }}">{{ __("Category") }}</a>
+                                <a class="dropdown-item" href="{{ route('preferences.allocation') }}">{{ __("Allocation") }}</a>
+                                <a class="dropdown-item" href="{{ route('preferences.itemstatus') }}">{{ __("Item Status") }}</a>
+                                <a class="dropdown-item" href="{{ route('preferences.buybackstatus') }}">{{ __("Buyback Status") }}</a>
+                                <a class="dropdown-item" href="{{ route('preferences.salesstatus') }}">{{ __("Sales Status") }}</a>
+                            </div>
                         </li>
                         @endauth
                     </ul>
