@@ -27,11 +27,9 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/profile', 'HomeController@profile')->name('profile');
 Route::get('/book', 'HomeController@book')->name('book');
 
-Route::get('/preferences/store', 'PreferencesController@store')->name('preferences.store');
-Route::get('/preferences/category', 'PreferencesController@category')->name('preferences.category');
-Route::get('/preferences/allocation', 'PreferencesController@allocation')->name('preferences.allocation');
-Route::get('/preferences/itemstatus', 'PreferencesController@itemStatus')->name('preferences.itemstatus');
-Route::get('/preferences/buybackstatus', 'PreferencesController@buybackStatus')->name('preferences.buybackstatus');
-Route::get('/preferences/salesstatus', 'PreferencesController@salesStatus')->name('preferences.salesstatus');
+// System Preferences > Stores
+Route::resource('stores', 'StoreController')->only('index', 'create', 'store', 'edit');
+Route::post('stores/{store}/update', 'StoreController@update')->name('stores.update');
+Route::post('stores/{store}/delete', 'StoreController@delete')->name('stores.delete');
 
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');

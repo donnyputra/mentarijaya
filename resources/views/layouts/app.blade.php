@@ -45,12 +45,12 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('System Preferences') }}</a>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="{{ route('preferences.store') }}">{{ __("Store") }}</a>
-                                <a class="dropdown-item" href="{{ route('preferences.category') }}">{{ __("Category") }}</a>
-                                <a class="dropdown-item" href="{{ route('preferences.allocation') }}">{{ __("Allocation") }}</a>
-                                <a class="dropdown-item" href="{{ route('preferences.itemstatus') }}">{{ __("Item Status") }}</a>
-                                <a class="dropdown-item" href="{{ route('preferences.buybackstatus') }}">{{ __("Buyback Status") }}</a>
-                                <a class="dropdown-item" href="{{ route('preferences.salesstatus') }}">{{ __("Sales Status") }}</a>
+                                <a class="dropdown-item" href="{{ route('stores.index') }}">{{ __("Store") }}</a>
+                                <a class="dropdown-item" href="#">{{ __("Category") }}</a>
+                                <a class="dropdown-item" href="#">{{ __("Allocation") }}</a>
+                                <a class="dropdown-item" href="#">{{ __("Item Status") }}</a>
+                                <a class="dropdown-item" href="#">{{ __("Buyback Status") }}</a>
+                                <a class="dropdown-item" href="#">{{ __("Sales Status") }}</a>
                             </div>
                         </li>
                         @endauth
