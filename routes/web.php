@@ -27,9 +27,14 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/profile', 'HomeController@profile')->name('profile');
 Route::get('/book', 'HomeController@book')->name('book');
 
-// System Preferences > Stores
+// System Configuration > Stores
 Route::resource('stores', 'StoreController')->only('index', 'create', 'store', 'edit');
 Route::post('stores/{store}/update', 'StoreController@update')->name('stores.update');
 Route::post('stores/{store}/delete', 'StoreController@delete')->name('stores.delete');
+
+// System Configuration > Categories
+Route::resource('categories', 'CategoryController')->only('index', 'create', 'store', 'edit');
+Route::post('category/{category}/update', 'CategoryController@update')->name('categories.update');
+Route::post('category/{category}/delete', 'CategoryController@delete')->name('categories.delete');
 
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');

@@ -14,22 +14,22 @@
             <div class="row">
                 <div class="col-12 mb-3">
                     <h3>
-                        {{ __("Manage Stores") }}
-                        <small class="text-muted">{{ __("- View, Create, Update your stores.") }}</small>
+                        {{ __("Manage Categories") }}
+                        <small class="text-muted">{{ __("- View, Create, Update your categories.") }}</small>
                     </h3>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-12">
-                    <a class="btn btn-primary float-right mb-3" href="{{ route('stores.create') }}" role="button">{{ __("Add New") }}</a>
+                    <a class="btn btn-primary float-right mb-3" href="{{ route('categories.create') }}" role="button">{{ __("Add New") }}</a>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-12">
                     <div class="table-responsive">
-                        @livewire('stores-table')
+                        @livewire('categories-table')
                     </div>
                 </div>
             </div>

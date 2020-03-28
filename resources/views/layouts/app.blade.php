@@ -49,7 +49,7 @@
                             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('System Preferences') }}</a>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="{{ route('stores.index') }}">{{ __("Store") }}</a>
-                                <a class="dropdown-item" href="#">{{ __("Category") }}</a>
+                                <a class="dropdown-item" href="{{ route('categories.index') }}"">{{ __("Category") }}</a>
                                 <a class="dropdown-item" href="#">{{ __("Allocation") }}</a>
                                 <a class="dropdown-item" href="#">{{ __("Item Status") }}</a>
                                 <a class="dropdown-item" href="#">{{ __("Buyback Status") }}</a>
