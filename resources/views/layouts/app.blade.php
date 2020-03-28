@@ -46,7 +46,7 @@
                             <a class="nav-link" href="{{ route('book') }}">{{ __('Book') }}</a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('System Preferences') }}</a>
+                            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('Configuration') }}</a>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="{{ route('stores.index') }}">{{ __("Store") }}</a>
                                 <a class="dropdown-item" href="{{ route('categories.index') }}"">{{ __("Category") }}</a>
