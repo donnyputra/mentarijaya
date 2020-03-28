@@ -37,4 +37,9 @@ Route::resource('categories', 'CategoryController')->only('index', 'create', 'st
 Route::post('category/{category}/update', 'CategoryController@update')->name('categories.update');
 Route::post('category/{category}/delete', 'CategoryController@delete')->name('categories.delete');
 
+// System Configuration > Item Status
+Route::resource('itemstatuses', 'ItemStatusController')->only('index', 'create', 'store', 'edit');
+Route::post('itemstatus/{itemstatus}/update', 'ItemStatusController@update')->name('itemstatuses.update');
+Route::post('itemstatus/{itemstatus}/delete', 'ItemStatusController@delete')->name('itemstatuses.delete');
+
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');
