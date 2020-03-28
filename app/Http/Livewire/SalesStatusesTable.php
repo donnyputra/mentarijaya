@@ -5,7 +5,7 @@ namespace App\Http\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ItemStatusesTable extends Component
+class SalesStatusesTable extends Component
 {
 	use WithPagination;	
 
@@ -29,8 +29,8 @@ class ItemStatusesTable extends Component
 
     public function render()
     {
-        return view('livewire.itemstatuses-table', [
-            'itemstatuses' => \App\ItemStatus::search($this->search)
+        return view('livewire.salesstatuses-table', [
+            'salesstatuses' => \App\SalesStatus::search($this->search)
                 ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
                 ->paginate($this->perPage),
         ]);

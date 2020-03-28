@@ -47,4 +47,14 @@ Route::resource('allocations', 'AllocationController')->only('index', 'create', 
 Route::post('allocation/{allocation}/update', 'AllocationController@update')->name('allocations.update');
 Route::post('allocation/{allocation}/delete', 'AllocationController@delete')->name('allocations.delete');
 
+// System Configuration > Sales Status
+Route::resource('salesstatuses', 'SalesStatusController')->only('index', 'create', 'store', 'edit');
+Route::post('salesstatus/{salesstatus}/update', 'SalesStatusController@update')->name('salesstatuses.update');
+Route::post('salesstatus/{salesstatus}/delete', 'SalesStatusController@delete')->name('salesstatuses.delete');
+
+// System Configuration > Buyback Status
+Route::resource('buybackstatuses', 'BuybackStatusController')->only('index', 'create', 'store', 'edit');
+Route::post('buybackstatus/{buybackstatus}/update', 'BuybackStatusController@update')->name('buybackstatuses.update');
+Route::post('buybackstatus/{buybackstatus}/delete', 'BuybackStatusController@delete')->name('buybackstatuses.delete');
+
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');
