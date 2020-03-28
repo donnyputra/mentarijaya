@@ -5,7 +5,7 @@ namespace App\Http\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class BuybackStatusesTable extends Component
+class BuybackstatusesTable extends Component
 {
 	use WithPagination;	
 
