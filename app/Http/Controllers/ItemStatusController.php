@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Category;
+use App\ItemStatus;
 
-class CategoryController extends Controller
+class ItemStatusController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -23,7 +23,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return view('categories.index');
+        return view('itemstatuses.index');
     }
 
     /**
@@ -33,7 +33,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('categories.create');
+        return view('itemstatuses.create');
     }
 
     /**
@@ -45,17 +45,17 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'category_code' => 'required',
-            'category_description' => 'required'
+            'itemstatus_code' => 'required',
+            'itemstatus_description' => 'required'
         ]);
         
-        $category = new Category([
-            'code' => $request->get('category_code'),
-            'description' => $request->get('category_description'),
+        $category = new ItemStatus([
+            'code' => $request->get('itemstatus_code'),
+            'description' => $request->get('itemstatus_description'),
         ]);
         $category->save();
 
-        return redirect('/categories')->with('success', __('Category has been created.'));
+        return redirect('/itemstatuses')->with('success', __('Item status has been created.'));
     }
 
     /**
@@ -67,13 +67,13 @@ class CategoryController extends Controller
     public function edit($id)
     {
         try {
-            $category = Category::findOrFail($id);
+            $itemstatus = ItemStatus::findOrFail($id);
         } catch (Exception $ex) {
-            return redirect()->route('categories.index')->withError($ex->getMessage());
+            return redirect()->route('itemstatuses.index')->withError($ex->getMessage());
         }
 
-        return view('categories.edit')
-            ->with('category', $category);
+        return view('itemstatuses.edit')
+            ->with('itemstatus', $itemstatus);
     }
 
     /**
@@ -87,20 +87,20 @@ class CategoryController extends Controller
     {
         try {
             $request->validate([
-                'category_code' => 'required',
-                'category_description' => 'required'
+                'itemstatus_code' => 'required',
+                'itemstatus_description' => 'required'
             ]);
 
-            $category = Category::findOrFail($id);
-            $category->code = $request->get("category_code");
-            $category->description = $request->get("category_description");
-            $category->save();
+            $itemstatus = ItemStatus::findOrFail($id);
+            $itemstatus->code = $request->get("itemstatus_code");
+            $itemstatus->description = $request->get("itemstatus_description");
+            $itemstatus->save();
 
         } catch (Exception $ex) {
-            return redirect('/categories')->with('error', $ex->getMessage());
+            return redirect('/itemstatuses')->with('error', $ex->getMessage());
         }
 
-        return redirect('/categories')->with('success', __('Category has been updated.'));
+        return redirect('/itemstatuses')->with('success', __('Item status has been updated.'));
     }
 
     /**
@@ -112,12 +112,12 @@ class CategoryController extends Controller
     public function delete($id)
     {
         try {
-            $category = Category::findOrFail($id);
-            $category->delete();
+            $itemstatus = ItemStatus::findOrFail($id);
+            $itemstatus->delete();
         } catch (Exception $ex) {
-            return redirect('/categories')->with('error', $ex->getMessage());
+            return redirect('/itemstatuses')->with('error', $ex->getMessage());
         }
 
-        return redirect('/categories')->with('success', __('Category has been deleted.'));
+        return redirect('/itemstatuses')->with('success', __('Item status has been deleted.'));
     }
 }

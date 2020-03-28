@@ -4,11 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Kyslik\ColumnSortable\Sortable;
 
 class Store extends Model
 {
-	use SoftDeletes, Sortable;
+	use SoftDeletes;
 
     protected $guarded = [];
 

@@ -10,7 +10,7 @@
                     
                     <div class="card uper">
                         <div class="card-header">
-                            {{ __("Edit Category") }}
+                            {{ __("Edit Item Status") }}
                         </div>
                         <div class="card-body">
                             @if ($errors->any())
@@ -23,15 +23,15 @@
                             </div>
                             <br /> @endif
 
-                            <form method="post" action="{{ route('categories.update', $category->id) }}">
+                            <form method="post" action="{{ route('itemstatuses.update', $itemstatus->id) }}">
                                 <div class="form-group">
                                     @csrf
-                                    <label for="category_code">Category Code</label>
-                                    <input type="text" class="form-control" name="category_code" value="{{ $category->code }}" />
+                                    <label for="itemstatus_code">Item Status Code</label>
+                                    <input type="text" class="form-control" name="itemstatus_code" value="{{ $itemstatus->code }}" />
                                 </div>
                                 <div class="form-group">
-                                    <label for="category_description">Category Description</label>
-                                    <textarea class="form-control" name="category_description" rows="3">{{ $category->description }}</textarea>
+                                    <label for="itemstatus_description">Item Status Description</label>
+                                    <textarea class="form-control" name="itemstatus_description" rows="3">{{ $itemstatus->description }}</textarea>
                                 </div>
 
                                 <div class="float-right">

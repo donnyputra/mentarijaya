@@ -5,13 +5,13 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Category extends Model
+class ItemStatus extends Model
 {
-	use SoftDeletes;
+    use SoftDeletes;
 
     protected $guarded = [];
 
-    protected $table = 'category';
+    protected $table = 'item_status';
 
     /**
      * The attributes that are mass assignable.
