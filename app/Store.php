@@ -10,6 +10,8 @@ class Store extends Model
 {
 	use SoftDeletes, Sortable;
 
+    protected $guarded = [];
+
     protected $table = 'store';
 
     /**
@@ -24,4 +26,13 @@ class Store extends Model
     public $sortable = [
         'code', 'name', 'address', 'phone_no', 'created_at', 'updated_at',
     ];
+
+    public static function search($query)
+    {
+        return empty($query) ? static::query()
+            : static::where('code', 'like', '%'.$query.'%')
+                ->orWhere('name', 'like', '%'.$query.'%')
+                ->orWhere('phone_no', 'like', '%'.$query.'%')
+                ->orWhere('address', 'like', '%'.$query.'%');
+    }
 }
