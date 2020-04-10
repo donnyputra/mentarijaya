@@ -19,6 +19,10 @@
         <table class="table table-condensed table-hover table-striped">
             <thead>
                 <tr>
+                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('store_id')" role="button" href="#">
+                        Store
+                        @include('includes._sort-icon', ['field' => 'store_id'])
+                    </a></th>
                     <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_no')" role="button" href="#">
                         Item No
                         @include('includes._sort-icon', ['field' => 'item_no'])
@@ -26,6 +30,18 @@
                     <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_name')" role="button" href="#">
                         Item Name
                         @include('includes._sort-icon', ['field' => 'item_name'])
+                    </a></th>
+                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('category_id')" role="button" href="#">
+                        Category
+                        @include('includes._sort-icon', ['field' => 'category_id'])
+                    </a></th>
+                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('allocation_id')" role="button" href="#">
+                        Allocation
+                        @include('includes._sort-icon', ['field' => 'allocation_id'])
+                    </a></th>
+                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_status_id')" role="button" href="#">
+                        Item Status
+                        @include('includes._sort-icon', ['field' => 'item_status_id'])
                     </a></th>
                     <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_weight')" role="button" href="#">
                         Item Weight
@@ -48,25 +64,9 @@
                         Sales By
                         @include('includes._sort-icon', ['field' => 'sales_by'])
                     </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_status_id')" role="button" href="#">
-                        Item Status
-                        @include('includes._sort-icon', ['field' => 'item_status_id'])
-                    </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('category_id')" role="button" href="#">
-                        Category
-                        @include('includes._sort-icon', ['field' => 'category_id'])
-                    </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('allocation_id')" role="button" href="#">
-                        Allocation
-                        @include('includes._sort-icon', ['field' => 'allocation_id'])
-                    </a></th>
                     <th class="col-with-min-width"><a wire:click.prevent="sortBy('sales_status_id')" role="button" href="#">
                         Sales Status
                         @include('includes._sort-icon', ['field' => 'sales_status_id'])
-                    </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('store_id')" role="button" href="#">
-                        Store
-                        @include('includes._sort-icon', ['field' => 'store_id'])
                     </a></th>
 
                     <th class="col-with-min-width"><a wire:click.prevent="sortBy('created_at')" role="button" href="#">
@@ -85,20 +85,20 @@
             <tbody>
                 @foreach ($items as $item)
                     <tr>
-                        <td>{{ $items->item_no }}</td>
-                        <td>{{ $items->item_name }}</td>
-                        <td>{{ $items->item_weight }}</td>
-                        <td>{{ $items->item_gold_rate }}</td>
-                        <td>{{ $items->sales_price }}</td>
-                        <td>{{ $items->sales_at }}</td>
-                        <td>{{ $items->sales_by }}</td>
-                        <td>{{ $items->item_status_id}}</td>
-                        <td>{{ $items->category_id }}</td>
-                        <td>{{ $items->allocation_id }}</td>
-                        <td>{{ $items->sales_status_id }}</td>
-                        <td>{{ $items->store_id }}</td>
-                        <td>{{ $items->created_at }}</td>
-                        <td>{{ $items->updated_at }}</td>
+                        <td>{{ $item->store_name }} ({{ $item->store_code }})</td>
+                        <td>{{ $item->item_no }}</td>
+                        <td>{{ $item->item_name }}</td>
+                        <td>{{ $item->category_description }}</td>
+                        <td>{{ $item->allocation_description }}</td>
+                        <td>{{ $item->item_status_description}}</td>
+                        <td>{{ ($item->item_weight) . " gr" }}</td>
+                        <td>{{ ($item->item_gold_rate) . "%" }}</td>
+                        <td>{{ $item->sales_price == null ? "-" : ("Rp " . $item->sales_price) }}</td>
+                        <td>{{ $item->sales_at == null ? "-" : $item->sales_at }}</td>
+                        <td>{{ $item->sales_by == null ? "-" : $item->sales_by }}</td>
+                        <td>{{ $item->sales_status_code }}</td>
+                        <td>{{ $item->created_at }}</td>
+                        <td>{{ $item->updated_at }}</td>
 
                         
                         <td>
