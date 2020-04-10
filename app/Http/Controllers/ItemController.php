@@ -38,6 +38,7 @@ class ItemController extends Controller
         $allocations = \App\Allocation::all();
         $itemstatuses = \App\ItemStatus::all();
         $salesstatuses = \App\SalesStatus::all();
+        $users = \App\User::all();
 
         return view('items.create', [
             'stores' => $stores,
@@ -45,6 +46,7 @@ class ItemController extends Controller
             'allocations' => $allocations,
             'itemstatuses' => $itemstatuses,
             'salesstatuses' => $salesstatuses,
+            'users' => $users
         ]);
     }
 

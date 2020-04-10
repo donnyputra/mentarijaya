@@ -166,8 +166,9 @@
 							                <label for="sales_by" class="col-3 col-form-label">Sales By</label>
 							                <div class="col-9">
 							                	<select class="form-control" name="sales_by">
-							                		<option value="1">one</option>
-							                		<option value="2">two</option>
+							                		@foreach ($users as $user)
+							                			<option value="{{ $user->id }}">{{ $user->name }}</option>
+							                		@endforeach
 							                	</select>
 							                </div>
 							            </div>
