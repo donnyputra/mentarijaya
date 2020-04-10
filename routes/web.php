@@ -25,7 +25,7 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/profile', 'HomeController@profile')->name('profile');
-Route::get('/book', 'HomeController@book')->name('book');
+// Route::get('/book', 'HomeController@book')->name('book');
 
 // System Configuration > Stores
 Route::resource('stores', 'StoreController')->only('index', 'create', 'store', 'edit');
@@ -56,5 +56,10 @@ Route::post('salesstatus/{salesstatus}/delete', 'SalesStatusController@delete')-
 Route::resource('buybackstatuses', 'BuybackStatusController')->only('index', 'create', 'store', 'edit');
 Route::post('buybackstatus/{buybackstatus}/update', 'BuybackStatusController@update')->name('buybackstatuses.update');
 Route::post('buybackstatus/{buybackstatus}/delete', 'BuybackStatusController@delete')->name('buybackstatuses.delete');
+
+// Book (Items)
+Route::resource('items', 'ItemController')->only('index', 'create', 'store', 'edit');
+Route::post('item/{item}/update', 'ItemController@update')->name('items.update');
+Route::post('item/{item}/delete', 'ItemController@delete')->name('items.delete');
 
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');
