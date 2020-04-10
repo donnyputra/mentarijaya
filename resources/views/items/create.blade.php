@@ -139,7 +139,7 @@
 							                <div class="col-9">
 							                	<select class="form-control" name="sales_status_id">
 							                		@foreach ($salesstatuses as $salesstatus)
-							                			<option value="{{ $allocation->id }}">{{ $salesstatus->code }}</option>
+							                			<option value="{{ $salesstatus->id }}">{{ $salesstatus->code }}</option>
 							                		@endforeach
 							                	</select>
 							                </div>
