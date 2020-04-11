@@ -8,6 +8,8 @@ use App\Item;
 
 class ItemController extends Controller
 {
+    const ITEM_NO_SEPARATOR = '-';
+
     /**
      * Create a new controller instance.
      *
@@ -67,21 +69,39 @@ class ItemController extends Controller
         ]);
     }
 
-    private function getNextItemIncrementId() {
-        $id = DB::table('INFORMATION_SCHEMA.TABLES')
-            ->select('AUTO_INCREMENT as id')
-            ->where('TABLE_SCHEMA', env('DB_DATABASE', ''))
-            ->where('TABLE_NAME', 'item')
-            ->get();
+    private function getCurrentCountGroupByCategoryID() {
+        // $id = DB::table('INFORMATION_SCHEMA.TABLES')
+        //     ->select('AUTO_INCREMENT as id')
+        //     ->where('TABLE_SCHEMA', env('DB_DATABASE', ''))
+        //     ->where('TABLE_NAME', 'item')
+        //     ->get();
 
-        return ($id[0]->id);
+        // return ($id[0]->id);
+
+        $result = DB::table('item')
+                    ->select(DB::raw('category_id, count(*) as cnt'))
+                    ->groupBy('category_id')
+                    ->orderBy('category_id', 'asc')
+                    ->get();
+
+        if($result->count() <= 0)
+            return null;
+
+        return $result->keyBy('category_id')->toArray();
     }
 
-    private function generateItemNo() {
+    private function generateItemNo($categoryId) {
         $currentYear = date("Y");
-        $nextItemIncrementId = $this->getNextItemIncrementId();
+        $category = \App\Category::findOrFail($categoryId);
+
+        $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
+        $nextItemIncrementId = 1;
+        if($arrCurrentCount != null & array_key_exists($categoryId, $arrCurrentCount))
+            $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
+
         $paddedId = str_pad($nextItemIncrementId, 6, "0", STR_PAD_LEFT);
-        $itemNo = $currentYear . '-' . $paddedId;
+
+        $itemNo = $category->code . self::ITEM_NO_SEPARATOR . $currentYear . self::ITEM_NO_SEPARATOR . $paddedId;
 
         return $itemNo;
     }
@@ -111,7 +131,7 @@ class ItemController extends Controller
         ]);
         
         $item = new Item([
-            'item_no' => $this->generateItemNo(),
+            'item_no' => $this->generateItemNo($request->get('category_id')),
             'item_name' => $request->get('item_name'),
             'item_weight' => $request->get('item_weight'),
             'item_gold_rate' => $request->get('item_gold_rate'),
