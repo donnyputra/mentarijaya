@@ -19,7 +19,7 @@ class CreateItemTable extends Migration
             $table->string('item_name');
             $table->decimal('item_weight', 8, 2);
             $table->decimal('item_gold_rate', 8, 2);
-            $table->decimal('sales_price', 8, 2)->nullable();
+            $table->decimal('sales_price', 12, 2)->nullable();
             $table->timestamp('sales_at', 0)->nullable();
 
             $table->unsignedBigInteger('item_status_id');
