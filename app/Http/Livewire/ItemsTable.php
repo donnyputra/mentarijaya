@@ -30,12 +30,9 @@ class ItemsTable extends Component
 
     public function render()
     {
-        return view('livewire.items-table', [
-            // 'items' => \App\Item::search($this->search)
-            //     ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
-            //     ->paginate($this->perPage),
+        // DB::enableQueryLog();
 
-            'items' => DB::table('item')
+        $items = DB::table('item')
                     ->join('store', 'store.id', '=', 'item.store_id')
                     ->join('category', 'category.id', '=', 'item.category_id')
                     ->join('allocation', 'allocation.id', '=', 'item.allocation_id')
@@ -53,8 +50,24 @@ class ItemsTable extends Component
                         'users.name as sales_by_name'
                     )
                     ->where('item.deleted_at', '=', null)
+                    ->where(function($query1){
+                        return $query1->when($this->search, function($query2, $searchKeyword) {
+                            return $query2->where('item.item_name', 'like', '%'.$searchKeyword.'%')
+                                    ->orWhere('store.name', 'like', '%'.$searchKeyword.'%')
+                                    ->orWhere('category.description', 'like', '%'.$searchKeyword.'%')
+                                    ->orWhere('allocation.description', 'like', '%'.$searchKeyword.'%')
+                                    ->orWhere('item_status.description', 'like', '%'.$searchKeyword.'%')
+                                    ->orWhere('sales_status.description', 'like', '%'.$searchKeyword.'%')
+                                    ->orWhere('users.name', 'like', '%'.$searchKeyword.'%');
+                        });
+                    })
                     ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
-                    ->paginate($this->perPage),
+                    ->paginate($this->perPage);
+
+                    // dd(DB::getQueryLog());
+
+        return view('livewire.items-table', [
+            'items' => $items
         ]);
     }
 }
