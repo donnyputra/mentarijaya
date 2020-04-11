@@ -112,7 +112,7 @@
 							                <div class="col-9">
 							                	<select class="form-control" name="allocation_id">
 							                		@foreach ($allocations as $allocation)
-							                			<option value="{{ $allocation->id }}">{{ $allocation->description }} ({{ $allocation->code }})</option>
+							                			<option value="{{ $allocation->id }}">{{ $allocation->description }}</option>
 							                		@endforeach
 							                	</select>
 							                </div>
@@ -120,11 +120,16 @@
 							            <div class="form-group row">
 							                <label for="item_status_id" class="col-3 col-form-label">Item Status <span style="color: red">*</span></label>
 							                <div class="col-9">
-							                	<select class="form-control" name="item_status_id">
+							                	<!-- <select class="form-control" name="item_status_id" readonly> -->
 							                		@foreach ($itemstatuses as $itemstatus)
-							                			<option value="{{ $itemstatus->id }}">{{ $itemstatus->description }} ({{ $itemstatus->code }})</option>
+							                			@if ($itemstatus->code == 'new')
+							                				<input type="text" class="form-control" name="item_status_id" readonly hidden value="{{ $itemstatus->id }}" />
+							                				<input type="text" class="form-control" name="item_status" readonly value="{{ $itemstatus->description }}" />
+							                				@break
+							                			@endif
+							                			<!-- <option value="{{ $itemstatus->id }}" {{ $itemstatus->code == 'new' ? 'selected' : '' }}>{{ $itemstatus->description }}</option> -->
 							                		@endforeach
-							                	</select>
+							                	<!-- </select> -->
 							                </div>
 							            </div>
 								    </div>
@@ -138,6 +143,7 @@
 							                <label for="sales_status_id" class="col-3 col-form-label">Sales Status</label>
 							                <div class="col-9">
 							                	<select class="form-control" name="sales_status_id">
+							                		<option selected></option>
 							                		@foreach ($salesstatuses as $salesstatus)
 							                			<option value="{{ $salesstatus->id }}">{{ $salesstatus->code }}</option>
 							                		@endforeach

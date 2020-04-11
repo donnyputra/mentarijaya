@@ -40,7 +40,7 @@ class ItemsTable extends Component
                     ->join('category', 'category.id', '=', 'item.category_id')
                     ->join('allocation', 'allocation.id', '=', 'item.allocation_id')
                     ->join('item_status', 'item_status.id', '=', 'item.item_status_id')
-                    ->join('sales_status', 'sales_status.id', '=', 'item.sales_status_id')
+                    ->leftJoin('sales_status', 'sales_status.id', '=', 'item.sales_status_id')
                     ->select(
                         'item.*',
                         'store.code as store_code',

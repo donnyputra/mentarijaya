@@ -25,7 +25,7 @@ class CreateItemTable extends Migration
             $table->unsignedBigInteger('item_status_id');
             $table->unsignedBigInteger('category_id');
             $table->unsignedBigInteger('allocation_id');
-            $table->unsignedBigInteger('sales_status_id');
+            $table->unsignedBigInteger('sales_status_id')->nullable();
             $table->unsignedBigInteger('sales_by')->nullable();
             $table->unsignedBigInteger('store_id');
 

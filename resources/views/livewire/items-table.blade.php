@@ -96,7 +96,7 @@
                         <td>{{ $item->sales_price == null ? "-" : ("Rp " . $item->sales_price) }}</td>
                         <td>{{ $item->sales_at == null ? "-" : $item->sales_at }}</td>
                         <td>{{ $item->sales_by == null ? "-" : $item->sales_by }}</td>
-                        <td>{{ $item->sales_status_code }}</td>
+                        <td>{{ $item->sales_status_code == null ? "-" : $item->sales_status_code }}</td>
                         <td>{{ $item->created_at }}</td>
                         <td>{{ $item->updated_at }}</td>
 

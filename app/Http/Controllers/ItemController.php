@@ -126,8 +126,8 @@ class ItemController extends Controller
             'store_id' => 'numeric|required',
             'sales_price' => 'numeric|nullable',
             'sales_at' => 'date|nullable',
-            'sales_by' => 'numeric|nullable',
-            'sales_status_id' => 'numeric|required',
+            'sales_by' => 'nullable',
+            'sales_status_id' => 'nullable',
 
         ]);
         
