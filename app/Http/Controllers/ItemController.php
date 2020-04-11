@@ -96,8 +96,9 @@ class ItemController extends Controller
 
         $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
         $nextItemIncrementId = 1;
-        if($arrCurrentCount != null & array_key_exists($categoryId, $arrCurrentCount))
-            $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
+        if($arrCurrentCount != null)
+            if(array_key_exists($categoryId, $arrCurrentCount))
+                $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
 
         $paddedId = str_pad($nextItemIncrementId, 6, "0", STR_PAD_LEFT);
 
