@@ -14,7 +14,7 @@
             <div class="row">
                 <div class="col-12 mb-3">
                     <h3>
-                        {{ __("Manage Sales Statuses") }}
+                        {{ __("Manage Item Statuses") }}
                         <small class="text-muted">{{ __("- View, Create, Update your item statuses.") }}</small>
                     </h3>
                 </div>
