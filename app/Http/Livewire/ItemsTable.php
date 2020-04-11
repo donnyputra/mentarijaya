@@ -40,6 +40,7 @@ class ItemsTable extends Component
                     ->join('category', 'category.id', '=', 'item.category_id')
                     ->join('allocation', 'allocation.id', '=', 'item.allocation_id')
                     ->join('item_status', 'item_status.id', '=', 'item.item_status_id')
+                    ->leftJoin('users', 'users.id', '=', 'item.sales_by')
                     ->leftJoin('sales_status', 'sales_status.id', '=', 'item.sales_status_id')
                     ->select(
                         'item.*',
@@ -48,7 +49,8 @@ class ItemsTable extends Component
                         'category.description as category_description',
                         'allocation.description as allocation_description',
                         'item_status.description as item_status_description',
-                        'sales_status.code as sales_status_code'
+                        'sales_status.code as sales_status_code',
+                        'users.name as sales_by_name'
                     )
                     ->where('item.deleted_at', '=', null)
                     ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
