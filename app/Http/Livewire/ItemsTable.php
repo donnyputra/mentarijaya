@@ -50,6 +50,7 @@ class ItemsTable extends Component
                         'item_status.description as item_status_description',
                         'sales_status.code as sales_status_code'
                     )
+                    ->where('item.deleted_at', '=', null)
                     ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
                     ->paginate($this->perPage),
         ]);

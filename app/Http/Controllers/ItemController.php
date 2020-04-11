@@ -95,6 +95,7 @@ class ItemController extends Controller
         $category = \App\Category::findOrFail($categoryId);
 
         $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
+
         $nextItemIncrementId = 1;
         if($arrCurrentCount != null)
             if(array_key_exists($categoryId, $arrCurrentCount))
@@ -130,7 +131,7 @@ class ItemController extends Controller
             'sales_status_id' => 'nullable',
 
         ]);
-        
+
         $item = new Item([
             'item_no' => $this->generateItemNo($request->get('category_id')),
             'item_name' => $request->get('item_name'),
@@ -141,7 +142,7 @@ class ItemController extends Controller
             'allocation_id' => $request->get('allocation_id'),
             'store_id' => $request->get('store_id'),
             'sales_price' => $request->get('sales_price'),
-            'sales_at' => $request->get('sales_at'),
+            'sales_at' => ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null,
             'sales_by' => $request->get('sales_by'),
             'sales_status_id' => $request->get('sales_status_id'),
         ]);
@@ -169,7 +170,28 @@ class ItemController extends Controller
      */
     public function edit($id)
     {
-        //
+        try {
+            $item = Item::findOrFail($id);
+        } catch (Exception $ex) {
+            return redirect()->route('items.index')->withError($ex->getMessage());
+        }
+
+        $stores = \App\Store::all();
+        $categories = \App\Category::all();
+        $allocations = \App\Allocation::all();
+        $itemstatuses = \App\ItemStatus::all();
+        $salesstatuses = \App\SalesStatus::all();
+        $users = \App\User::all();
+
+        return view('items.edit', [
+            'stores' => $stores,
+            'categories' => $categories,
+            'allocations' => $allocations,
+            'itemstatuses' => $itemstatuses,
+            'salesstatuses' => $salesstatuses,
+            'users' => $users,
+            'item' => $item,
+        ]);
     }
 
     /**
@@ -181,7 +203,43 @@ class ItemController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $request->validate([
+                'item_no' => 'required',
+                'item_name' => 'required',
+                'item_weight' => 'required',
+                'item_gold_rate' => 'required',
+                'item_status_id' => 'numeric|required',
+                'category_id' => 'numeric|required',
+                'allocation_id' => 'numeric|required',
+                'store_id' => 'numeric|required',
+                'sales_price' => 'numeric|nullable',
+                'sales_at' => 'date|nullable',
+                'sales_by' => 'nullable',
+                'sales_status_id' => 'nullable',
+
+            ]);
+
+            $item = Item::findOrFail($id);
+            $item->item_no = $request->get("item_no");
+            $item->item_name = $request->get("item_name");
+            $item->item_weight = $request->get("item_weight");
+            $item->item_gold_rate = $request->get("item_gold_rate");
+            $item->item_status_id = $request->get("item_status_id");
+            $item->category_id = $request->get("category_id");
+            $item->allocation_id = $request->get("allocation_id");
+            $item->store_id = $request->get("store_id");
+            $item->sales_price = $request->get("sales_price");
+            $item->sales_at = \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s');
+            $item->sales_by = $request->get("sales_by");
+            $item->sales_status_id = $request->get("sales_status_id");
+            $item->save();
+
+        } catch (Exception $ex) {
+            return redirect('/items')->with('error', $ex->getMessage());
+        }
+
+        return redirect('/items')->with('success', __('Item has been updated.'));
     }
 
     /**
@@ -190,8 +248,15 @@ class ItemController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete($id)
     {
-        //
+        try {
+            $item = Item::findOrFail($id);
+            $item->delete();
+        } catch (Exception $ex) {
+            return redirect('/items')->with('error', $ex->getMessage());
+        }
+
+        return redirect('/items')->with('success', __('Item has been deleted.'));
     }
 }
