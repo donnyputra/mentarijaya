@@ -22,7 +22,9 @@
 
             <div class="row">
                 <div class="col-12">
-                    <a class="btn btn-primary float-right mb-3" href="{{ route('salesstatuses.create') }}" role="button">{{ __("Add New") }}</a>
+                    <!-- <a class="btn btn-primary float-right mb-3" href="{{ route('salesstatuses.create') }}" role="button">{{ __("Add New") }}</a> -->
+                    <p class="text-muted">{{ __("This is predefined options by system. It can't be changed.") }}</p>
+                    <br/>
                 </div>
             </div>
 

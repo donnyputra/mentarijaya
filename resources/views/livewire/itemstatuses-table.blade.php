@@ -27,7 +27,7 @@
                         Item Status Description
                         @include('includes._sort-icon', ['field' => 'description'])
                     </a></th>
-                    <th>Action</th>
+                    <!-- <th>Action</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -35,7 +35,7 @@
                     <tr>
                         <td>{{ $itemstatus->code }}</td>
                         <td>{{ $itemstatus->description }}</td>
-                        <td>
+                        <!-- <td>
                         	<a href="{{ route('itemstatuses.edit', $itemstatus->id) }}"><span><i class="fa fa-edit"></i></span></a>
                             <a href="{{ route('itemstatuses.delete', $itemstatus->id) }}" 
                                 onclick="event.preventDefault();
@@ -45,7 +45,7 @@
                                 @csrf
                                 <input type="text" class="form-control" name="id" value="{{ $itemstatus->id }}" hidden />
                             </form>
-                        </td>
+                        </td> -->
                     </tr>
                 @endforeach
             </tbody>
