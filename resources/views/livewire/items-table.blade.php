@@ -15,6 +15,46 @@
         </div>
     </div>
 
+    <div class="row mb-3">
+        <div class="col form-inline">
+            Advanced Filter: &nbsp;
+            <select wire:model="filterStore" class="form-control">
+                <option value="">- All Stores -</option>
+                @foreach ($stores as $store)
+                <option value="{{ $store->id }}">{{ $store->name }}</option>
+                @endforeach
+            </select>
+            &nbsp;
+            <select wire:model="filterCategory" class="form-control">
+                <option value="">- All Categories -</option>
+                @foreach ($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->description }}</option>
+                @endforeach
+            </select>
+            &nbsp;
+            <select wire:model="filterAllocation" class="form-control">
+                <option value="">- All Allocations -</option>
+                @foreach ($allocations as $allocation)
+                <option value="{{ $allocation->id }}">{{ $allocation->description }}</option>
+                @endforeach
+            </select>
+            &nbsp;
+            <select wire:model="filterItemStatus" class="form-control">
+                <option value="">- All Item Statuses -</option>
+                @foreach ($itemstatuses as $itemstatus)
+                <option value="{{ $itemstatus->id }}">{{ $itemstatus->description }}</option>
+                @endforeach
+            </select>
+            &nbsp;
+            <select wire:model="filterSalesStatus" class="form-control">
+                <option value="">- All Sales Statuses -</option>
+                @foreach ($salesstatuses as $salesstatus)
+                <option value="{{ $salesstatus->id }}">{{ $salesstatus->description }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
     <div class="clearfix">
         <table class="table table-condensed table-hover table-striped">
             <thead>

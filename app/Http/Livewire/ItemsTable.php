@@ -17,6 +17,13 @@ class ItemsTable extends Component
     public $sortAsc = true;
     public $search = '';
 
+    // FILTER
+    public $filterStore = '';
+    public $filterCategory = '';
+    public $filterAllocation = '';
+    public $filterItemStatus = '';
+    public $filterSalesStatus = '';
+
     public function sortBy($field)
     {
         if ($this->sortField === $field) {
@@ -50,9 +57,38 @@ class ItemsTable extends Component
                         'users.name as sales_by_name'
                     )
                     ->where('item.deleted_at', '=', null)
-                    ->where(function($query1){
-                        return $query1->when($this->search, function($query2, $searchKeyword) {
-                            return $query2->where('item.item_name', 'like', '%'.$searchKeyword.'%')
+
+                    // apply advanced filter
+                    ->where(function($queryFilterStoreInput) {
+                        return $queryFilterStoreInput->when($this->filterStore, function($queryFilterStoreResult, $filterStoreId){
+                            return $queryFilterStoreResult->where('item.store_id', '=', $filterStoreId);
+                        });
+                    })
+                    ->where(function($queryFilterCategoryInput) {
+                        return $queryFilterCategoryInput->when($this->filterCategory, function($queryFilterCategoryResult, $filterCategoryId){
+                            return $queryFilterCategoryResult->where('item.category_id', '=', $filterCategoryId);
+                        });
+                    })
+                    ->where(function($queryFilterAllocationInput) {
+                        return $queryFilterAllocationInput->when($this->filterAllocation, function($queryFilterAllocationResult, $filterAllocationId){
+                            return $queryFilterAllocationResult->where('item.allocation_id', '=', $filterAllocationId);
+                        });
+                    })
+                    ->where(function($queryFilterItemStatusInput) {
+                        return $queryFilterItemStatusInput->when($this->filterItemStatus, function($queryFilterItemStatusResult, $filterItemStatusId){
+                            return $queryFilterItemStatusResult->where('item.item_status_id', '=', $filterItemStatusId);
+                        });
+                    })
+                    ->where(function($queryFilterSalesStatusInput) {
+                        return $queryFilterSalesStatusInput->when($this->filterSalesStatus, function($queryFilterSalesStatusResult, $filterSalesStatusId){
+                            return $queryFilterSalesStatusResult->where('item.sales_status_id', '=', $filterSalesStatusId);
+                        });
+                    })
+
+                    // apply search textbox
+                    ->where(function($querySearchInput){
+                        return $querySearchInput->when($this->search, function($querySearchResult, $searchKeyword) {
+                            return $querySearchResult->where('item.item_name', 'like', '%'.$searchKeyword.'%')
                                     ->orWhere('store.name', 'like', '%'.$searchKeyword.'%')
                                     ->orWhere('category.description', 'like', '%'.$searchKeyword.'%')
                                     ->orWhere('allocation.description', 'like', '%'.$searchKeyword.'%')
@@ -67,7 +103,12 @@ class ItemsTable extends Component
                     // dd(DB::getQueryLog());
 
         return view('livewire.items-table', [
-            'items' => $items
+            'items' => $items,
+            'stores' => \App\Store::all(),
+            'categories' => \App\Category::all(),
+            'allocations' => \App\Allocation::all(),
+            'itemstatuses' => \App\ItemStatus::all(),
+            'salesstatuses' => \App\SalesStatus::all(),
         ]);
     }
 }
