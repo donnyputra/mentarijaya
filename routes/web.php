@@ -24,7 +24,8 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/testemail', function() {
-    Mail::send('testemail', [], function($message) {
+	$message = "Hello World!!!!";
+    Mail::send('emails.send', ['title' => 'Test Email', 'message' => $message], function($message) {
         $message->to('donny.p.perdana@gmail.com')->subject('Testing mails');
     });
 });
