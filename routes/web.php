@@ -64,6 +64,11 @@ Route::resource('buybackstatuses', 'BuybackStatusController')->only('index', 'cr
 Route::post('buybackstatus/{buybackstatus}/update', 'BuybackStatusController@update')->name('buybackstatuses.update');
 Route::post('buybackstatus/{buybackstatus}/delete', 'BuybackStatusController@delete')->name('buybackstatuses.delete');
 
+// System Configuration > Roles
+Route::resource('roles', 'RoleController')->only('index', 'create', 'store', 'edit');
+Route::post('salesstatus/{role}/update', 'RoleController@update')->name('roles.update');
+Route::post('salesstatus/{role}/delete', 'RoleController@delete')->name('roles.delete');
+
 // Book (Items)
 Route::resource('items', 'ItemController')->only('index', 'create', 'store', 'edit');
 Route::post('item/{item}/update', 'ItemController@update')->name('items.update');
