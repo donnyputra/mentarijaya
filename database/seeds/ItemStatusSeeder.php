@@ -12,7 +12,7 @@ class ItemStatusSeeder extends Seeder
      */
     public function run()
     {
-    	// DB::table('item_status')->truncate();
+    	DB::table('item_status')->truncate();
     	$currentTimestamp = now();
 
         DB::table('item_status')
