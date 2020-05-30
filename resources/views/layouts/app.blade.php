@@ -57,7 +57,13 @@
                                 <a class="dropdown-item" href="{{ route('itemstatuses.index') }}">{{ __("Item Status") }}</a>
                                 <a class="dropdown-item" href="{{ route('buybackstatuses.index') }}">{{ __("Buyback Status") }}</a>
                                 <a class="dropdown-item" href="{{ route('salesstatuses.index') }}">{{ __("Sales Status") }}</a>
-                                <a class="dropdown-item" href="{{ route('roles.index') }}">{{ __("Roles") }}</a>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('Access Permission') }}</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{{ route('users.index') }}">{{ __("User") }}</a>
+                                <a class="dropdown-item" href="{{ route('roles.index') }}">{{ __("Role") }}</a>
                             </div>
                         </li>
                         @endauth

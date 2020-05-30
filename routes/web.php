@@ -64,10 +64,17 @@ Route::resource('buybackstatuses', 'BuybackStatusController')->only('index', 'cr
 Route::post('buybackstatus/{buybackstatus}/update', 'BuybackStatusController@update')->name('buybackstatuses.update');
 Route::post('buybackstatus/{buybackstatus}/delete', 'BuybackStatusController@delete')->name('buybackstatuses.delete');
 
+// System Configuration > Users
+Route::resource('users', 'UserController')->only('index', 'create', 'store', 'edit');
+Route::get('users/{user}/changepassword', 'UserController@changepassword')->name('users.changepassword');
+Route::post('users/{user}/update', 'UserController@update')->name('users.update');
+Route::post('users/{user}/delete', 'UserController@delete')->name('users.delete');
+Route::post('users/{user}/updatepassword', 'UserController@updatepassword')->name('users.updatepassword');
+
 // System Configuration > Roles
 Route::resource('roles', 'RoleController')->only('index', 'create', 'store', 'edit');
-Route::post('salesstatus/{role}/update', 'RoleController@update')->name('roles.update');
-Route::post('salesstatus/{role}/delete', 'RoleController@delete')->name('roles.delete');
+Route::post('roles/{role}/update', 'RoleController@update')->name('roles.update');
+Route::post('roles/{role}/delete', 'RoleController@delete')->name('roles.delete');
 
 // Book (Items)
 Route::resource('items', 'ItemController')->only('index', 'create', 'store', 'edit');
