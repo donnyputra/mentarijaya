@@ -25,7 +25,7 @@ Auth::routes();
 
 Route::get('/testemail', function() {
 	$message = "Hello World!!!!";
-    Mail::send('emails.send', ['title' => 'Test Email', 'message' => $message], function($message) {
+    Mail::send('welcome', ['title' => 'Test Email', 'message' => $message], function($message) {
         $message->to('donny.p.perdana@gmail.com')->subject('Testing mails');
     });
 });
