@@ -11,7 +11,7 @@
         </div>
 
         <div class="col">
-            <input wire:model="search" class="form-control" type="text" placeholder="Search Item Status...">
+            <input wire:model="search" class="form-control" type="text" placeholder="Search Role...">
         </div>
     </div>
 
