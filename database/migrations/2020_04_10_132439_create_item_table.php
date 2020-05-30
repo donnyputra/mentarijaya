@@ -32,12 +32,12 @@ class CreateItemTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('item_status_id')->references('id')->on('item_status');
-            $table->foreign('category_id')->references('id')->on('category');
-            $table->foreign('allocation_id')->references('id')->on('allocation');
-            $table->foreign('sales_status_id')->references('id')->on('sales_status');
-            $table->foreign('sales_by')->references('id')->on('users');
-            $table->foreign('store_id')->references('id')->on('store');
+            $table->foreign('item_status_id')->references('id')->on('item_status')->onDelete('cascade');
+            $table->foreign('category_id')->references('id')->on('category')->onDelete('cascade');
+            $table->foreign('allocation_id')->references('id')->on('allocation')->onDelete('cascade');
+            $table->foreign('sales_status_id')->references('id')->on('sales_status')->onDelete('cascade');
+            $table->foreign('sales_by')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('store_id')->references('id')->on('store')->onDelete('cascade');
         });
     }
 

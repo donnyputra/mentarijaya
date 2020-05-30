@@ -3,7 +3,7 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class UserSeeder extends Seeder
+class RoleSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,19 +12,21 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        // DB::table('users')->truncate();
+        // DB::table('roles')->truncate();
         $currentTimestamp = now();
         
-        DB::table('users')
-            ->insert(
+        DB::table('roles')
+            ->insert([
                 [
-                    'name' => 'System Administrator',
-                    'username' => 'admin',
-                    'email' => 'admin@admin.com',
-                    'password' => bcrypt('admin'),
+                    'name' => 'admin',
+                    'created_at' => $currentTimestamp,
+                    'updated_at' => $currentTimestamp,
+                ],
+                [
+                    'name' => 'employee',
                     'created_at' => $currentTimestamp,
                     'updated_at' => $currentTimestamp,
                 ]
-            );
+            ]);
     }
 }
