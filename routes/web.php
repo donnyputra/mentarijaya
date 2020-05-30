@@ -23,6 +23,12 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::get('/testemail', function() {
+    Mail::send('testemail', [], function($message) {
+        $message->to('donny.p.perdana@gmail.com')->subject('Testing mails');
+    });
+});
+
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/profile', 'HomeController@profile')->name('profile');
 // Route::get('/book', 'HomeController@book')->name('book');
