@@ -48,7 +48,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('items.index') }}">{{ __('Items') }}</a>
                         </li>
-                        @if(Auth::user()->username == 'admin')
+                        @if(Auth::user()->authRole()->name == 'admin')
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('Configuration') }}</a>
                                 <div class="dropdown-menu">

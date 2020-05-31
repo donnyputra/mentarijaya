@@ -184,14 +184,14 @@ class ItemController extends Controller
         $itemstatuses = \App\ItemStatus::all();
         
         $salesstatuses = null;
-        if(Auth::user()->username == 'admin') {
+        if(Auth::user()->authRole()->name == 'admin') {
             $salesstatuses = \App\SalesStatus::all();
         } else {
             $salesstatuses = \App\SalesStatus::where('code', 'submitted')->get();
         }
         
         $users = null;
-        if(Auth::user()->username == 'admin') {
+        if(Auth::user()->authRole()->name == 'admin') {
             $users = \App\User::all();
         } else {
             $users = [Auth::user()];   

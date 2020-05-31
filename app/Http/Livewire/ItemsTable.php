@@ -41,7 +41,7 @@ class ItemsTable extends Component
         // DB::enableQueryLog();
         $items = null;
 
-        if(Auth::user()->username == 'admin') {
+        if(Auth::user()->authRole()->name == 'admin') {
             $items = DB::table('item')
                         ->join('store', 'store.id', '=', 'item.store_id')
                         ->join('category', 'category.id', '=', 'item.category_id')
