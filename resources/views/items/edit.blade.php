@@ -130,6 +130,18 @@
 							                		@endforeach
 							                	</select>
 							                </div>
+										</div>
+										<div class="form-group row">
+							                <label for="created_by" class="col-3 col-form-label">Created By</label>
+							                <div class="col-9">
+												@foreach ($users as $user)
+													@if($user->id == $item->created_by)
+														<input type="text" class="form-control" name="created_by" value="{{ $user->id }}" hidden />
+														<input type="text" class="form-control" name="created_by_name" value="{{ $user->name }}" readonly />
+														@break
+													@endif
+												@endforeach
+							                </div>
 							            </div>
 								    </div>
 								</div>

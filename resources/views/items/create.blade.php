@@ -131,6 +131,17 @@
 							                		@endforeach
 							                	<!-- </select> -->
 							                </div>
+										</div>
+										<div class="form-group row">
+							                <label for="created_by" class="col-3 col-form-label">Created By</label>
+							                <div class="col-9">
+							                	<select class="form-control" name="created_by">
+							                		<option></option>
+							                		@foreach ($users as $user)
+							                			<option value="{{ $user->id }}">{{ $user->name }}</option>
+							                		@endforeach
+							                	</select>
+							                </div>
 							            </div>
 								    </div>
 								</div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Item;
 
 class ItemController extends Controller
@@ -65,7 +66,7 @@ class ItemController extends Controller
             'allocations' => $allocations,
             'itemstatuses' => $itemstatuses,
             'salesstatuses' => $salesstatuses,
-            'users' => $users
+            'users' => [Auth::user()],
         ]);
     }
 
@@ -129,7 +130,7 @@ class ItemController extends Controller
             'sales_at' => 'date|nullable',
             'sales_by' => 'nullable',
             'sales_status_id' => 'nullable',
-
+            'created_by' => 'required',
         ]);
 
         $item = new Item([
@@ -145,6 +146,7 @@ class ItemController extends Controller
             'sales_at' => ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null,
             'sales_by' => $request->get('sales_by'),
             'sales_status_id' => $request->get('sales_status_id'),
+            'created_by' => $request->get('created_by'),
         ]);
         $item->save();
 
@@ -217,7 +219,7 @@ class ItemController extends Controller
                 'sales_at' => 'date|nullable',
                 'sales_by' => 'nullable',
                 'sales_status_id' => 'nullable',
-
+                'created_by' => 'required',
             ]);
 
             $item = Item::findOrFail($id);
@@ -233,6 +235,7 @@ class ItemController extends Controller
             $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
             $item->sales_by = $request->get("sales_by");
             $item->sales_status_id = $request->get("sales_status_id");
+            $item->created_by = $request->get('created_by');
             $item->save();
 
         } catch (Exception $ex) {

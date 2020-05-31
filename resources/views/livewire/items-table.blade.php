@@ -125,7 +125,7 @@
             <tbody>
                 @foreach ($items as $item)
                     <tr>
-                        <td>{{ $item->store_name }} ({{ $item->store_code }})</td>
+                        <td>{{ $item->store_name }}</td>
                         <td>{{ $item->item_no }}</td>
                         <td>{{ $item->item_name }}</td>
                         <td>{{ $item->category_description }}</td>
