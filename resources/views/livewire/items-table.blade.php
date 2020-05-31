@@ -91,6 +91,10 @@
                         Gold Rate
                         @include('includes._sort-icon', ['field' => 'item_gold_rate'])
                     </a></th>
+                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('created_by')" role="button" href="#">
+                        Created By
+                        @include('includes._sort-icon', ['field' => 'created_by'])
+                    </a></th>
 
                     <th class="col-with-min-width"><a wire:click.prevent="sortBy('sales_price')" role="button" href="#">
                         Sales Price
@@ -133,6 +137,7 @@
                         <td>{{ $item->item_status_description}}</td>
                         <td>{{ ($item->item_weight) . " gr" }}</td>
                         <td>{{ ($item->item_gold_rate) . "%" }}</td>
+                        <td>{{ $item->created_by == null ? "-" : $item->created_by_name }}</td>
                         <td>{{ $item->sales_price == null ? "-" : ("Rp " . number_format($item->sales_price, 2, ',', '.')) }}</td>
                         <td>{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('m/d/Y') }}</td>
                         <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}</td>
