@@ -187,6 +187,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
 
+                        @if(Auth::user()->authRole()->name == 'admin')
                         <li class="nav-header">{{ __('CONFIGURATION') }}</li>
 
                         <li class="nav-item">
@@ -232,8 +233,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 <span class="badge badge-danger navbar-badge">Under Dev</span>
                             </a>
                         </li>
+                        @endif
                         
-                        <li class="nav-header">{{ __('CONFIGURATION') }}</li>
+                        <li class="nav-header">{{ __('OPERATION') }}</li>
 
                         <li class="nav-item">
                             <a href="{{ route('items.index') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'items.') !== false) active @endif">
@@ -242,6 +244,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             </a>
                         </li>
 
+                        @if(Auth::user()->authRole()->name == 'admin')
                         <li class="nav-header">{{ __('USER PERMISSION') }}</li>
 
                         <li class="nav-item">
@@ -257,6 +260,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 <p>{{ __('User') }}</p>
                             </a>
                         </li>
+                        @endif
 
                     </ul>
                 </nav>
