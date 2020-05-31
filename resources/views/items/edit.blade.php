@@ -154,7 +154,7 @@
 							                <label for="sales_status_id" class="col-3 col-form-label">Sales Status</label>
 							                <div class="col-9">
 							                	<select class="form-control" name="sales_status_id">
-							                		<option selected></option>
+													<option selected></option>
 							                		@foreach ($salesstatuses as $salesstatus)
 							                			<option value="{{ $salesstatus->id }}" {{ $salesstatus->id == $item->sales_status_id ? 'selected' : '' }}>{{ $salesstatus->code }}</option>
 							                		@endforeach

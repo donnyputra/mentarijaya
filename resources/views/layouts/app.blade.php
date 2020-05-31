@@ -48,24 +48,26 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('items.index') }}">{{ __('Items') }}</a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('Configuration') }}</a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="{{ route('stores.index') }}">{{ __("Store") }}</a>
-                                <a class="dropdown-item" href="{{ route('categories.index') }}"">{{ __("Category") }}</a>
-                                <a class="dropdown-item" href="{{ route('allocations.index') }}">{{ __("Allocation") }}</a>
-                                <a class="dropdown-item" href="{{ route('itemstatuses.index') }}">{{ __("Item Status") }}</a>
-                                <a class="dropdown-item" href="{{ route('buybackstatuses.index') }}">{{ __("Buyback Status") }}</a>
-                                <a class="dropdown-item" href="{{ route('salesstatuses.index') }}">{{ __("Sales Status") }}</a>
-                            </div>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('Access Permission') }}</a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="{{ route('users.index') }}">{{ __("User") }}</a>
-                                <a class="dropdown-item" href="{{ route('roles.index') }}">{{ __("Role") }}</a>
-                            </div>
-                        </li>
+                        @if(Auth::user()->username == 'admin')
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('Configuration') }}</a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{{ route('stores.index') }}">{{ __("Store") }}</a>
+                                    <a class="dropdown-item" href="{{ route('categories.index') }}"">{{ __("Category") }}</a>
+                                    <a class="dropdown-item" href="{{ route('allocations.index') }}">{{ __("Allocation") }}</a>
+                                    <a class="dropdown-item" href="{{ route('itemstatuses.index') }}">{{ __("Item Status") }}</a>
+                                    <a class="dropdown-item" href="{{ route('buybackstatuses.index') }}">{{ __("Buyback Status") }}</a>
+                                    <a class="dropdown-item" href="{{ route('salesstatuses.index') }}">{{ __("Sales Status") }}</a>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ __('Access Permission') }}</a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{{ route('users.index') }}">{{ __("User") }}</a>
+                                    <a class="dropdown-item" href="{{ route('roles.index') }}">{{ __("Role") }}</a>
+                                </div>
+                            </li>
+                        @endif
                         @endauth
                     </ul>
 

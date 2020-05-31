@@ -182,8 +182,20 @@ class ItemController extends Controller
         $categories = \App\Category::all();
         $allocations = \App\Allocation::all();
         $itemstatuses = \App\ItemStatus::all();
-        $salesstatuses = \App\SalesStatus::all();
-        $users = \App\User::all();
+        
+        $salesstatuses = null;
+        if(Auth::user()->username == 'admin') {
+            $salesstatuses = \App\SalesStatus::all();
+        } else {
+            $salesstatuses = \App\SalesStatus::where('code', 'submitted')->get();
+        }
+        
+        $users = null;
+        if(Auth::user()->username == 'admin') {
+            $users = \App\User::all();
+        } else {
+            $users = [Auth::user()];   
+        }
 
         return view('items.edit', [
             'stores' => $stores,
