@@ -47,6 +47,7 @@ class ItemsTable extends Component
                         ->join('category', 'category.id', '=', 'item.category_id')
                         ->join('allocation', 'allocation.id', '=', 'item.allocation_id')
                         ->join('item_status', 'item_status.id', '=', 'item.item_status_id')
+                        ->leftJoin('users as create_users', 'create_users.id', '=', 'item.created_by')
                         ->leftJoin('users', 'users.id', '=', 'item.sales_by')
                         ->leftJoin('sales_status', 'sales_status.id', '=', 'item.sales_status_id')
                         ->select(
@@ -58,7 +59,8 @@ class ItemsTable extends Component
                             'item_status.description as item_status_description',
                             'sales_status.code as sales_status_code',
                             'sales_status.description as sales_status_description',
-                            'users.name as sales_by_name'
+                            'users.name as sales_by_name',
+                            'create_users.name as created_by_name'
                         )
                         ->where('item.deleted_at', '=', null)
 
