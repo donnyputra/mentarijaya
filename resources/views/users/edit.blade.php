@@ -26,7 +26,7 @@
                                 <div class="form-group">
                                     @csrf
                                     <label for="username">Username</label>
-                                    <input type="text" class="form-control" name="username" value="{{ $user->username }}" @if($user->username == 'admin') disabled @endif />
+                                    <input type="text" class="form-control" name="username" value="{{ $user->username }}" @if($user->username == 'admin') readonly @endif />
                                 </div>
 					            <div class="form-group">
 					                <label for="name">Name</label>
@@ -35,7 +35,26 @@
 					            <div class="form-group">
 					                <label for="email">Email Address</label>
 					                <input type="text" class="form-control" name="email" value="{{ $user->email }}" />
-					            </div>
+								</div>
+								@if($user->username == 'admin')
+								<div class="form-group">
+									<label for="role_id">Role</label>
+									<input type="text" class="form-control" name="role_id" value="{{ $role->id }}" hidden />
+									<input type="text" class="form-control" name="role_name" value="{{ $role->name }}" readonly />
+								</div>
+								@else
+								<div class="form-group">
+									<label for="role_id">Role</label>
+									<div>
+										<select class="form-control" name="role_id">
+											<option></option>
+											@foreach ($roles as $role)
+												<option value="{{ $role->id }}" {{ $role->id == $userRole->role_id ? 'selected' : '' }}>{{ $role->name }}</option>
+											@endforeach
+										</select>
+									</div>
+								</div>
+								@endif
 
 					            <div class="float-right">
 					            	<a class="btn btn-secondary" href="{{ url()->previous() }}" role="button">{{ __("Back") }}</a>

@@ -96,13 +96,19 @@ class UserController extends Controller
     public function edit($id)
     {
         try {
-            $user = User::findOrFail($id);
+            $user = User::where('id', '=', $id)->first();
+            $userRole = UserRole::where('user_id', '=', $user->id)->first();
+            $role = Role::where('id', '=', $userRole->role_id)->first();
         } catch (Exception $ex) {
             return redirect()->route('users.index')->withError($ex->getMessage());
         }
 
-        return view('users.edit')
-            ->with('user', $user);
+        return view('users.edit', [
+            'user' => $user,
+            'userRole' => $userRole,
+            'role' => $role,
+            'roles' => Role::all(),
+        ]);
     }
 
     /**
@@ -119,7 +125,8 @@ class UserController extends Controller
                 'name' => 'required',
 				'email' => 'required|email',
 				// 'password' => 'required',
-				'username' => 'required',
+                'username' => 'required',
+                'role_id' => 'required',
             ]);
 
             $user = User::findOrFail($id);
@@ -128,6 +135,10 @@ class UserController extends Controller
             // $user->password = bcrypt($request->get("password"));
             $user->username = $request->get("username");
             $user->save();
+
+            $userRole = UserRole::where('user_id', '=', $id)->first();
+            $userRole->role_id = $request->get('role_id');
+            $userRole->save();
 
         } catch (Exception $ex) {
             return redirect('/users')->with('error', $ex->getMessage());
