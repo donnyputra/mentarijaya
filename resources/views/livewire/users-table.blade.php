@@ -51,7 +51,10 @@
                                 @if ($user->username != 'admin')
                                     <a href="{{ route('users.delete', $user->id) }}" 
                                         onclick="event.preventDefault();
-                                            document.getElementById('delete-user-form-{{ $user->id }}').submit();"><span><i class="fa fa-trash-o" title="delete" style="color:red"></i></span></a>
+                                            var r = confirm('Are you sure you want to delete this?');
+                                            if(r == true) {
+                                                document.getElementById('delete-user-form-{{ $user->id }}').submit();
+                                            }"><span><i class="fa fa-trash" style="color:red"></i></span></a>
         
                                     <form id="delete-user-form-{{ $user->id }}" method="POST" action="{{ route('users.delete', $user->id) }}">
                                         @csrf

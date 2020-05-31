@@ -36,10 +36,13 @@
                         <td>{{ $allocation->code }}</td>
                         <td>{{ $allocation->description }}</td>
                         <td>
-                        	<a href="{{ route('allocations.edit', $allocation->id) }}"><span><i class="fa fa-edit"></i></span></a>
+                            <a href="{{ route('allocations.edit', $allocation->id) }}"><span><i class="fa fa-edit"></i></span></a>
                             <a href="{{ route('allocations.delete', $allocation->id) }}" 
                                 onclick="event.preventDefault();
-                                     document.getElementById('delete-allocation-form-{{ $allocation->id }}').submit();"><span><i class="fa fa-trash-o" style="color:red"></i></span></a>
+                                    var r = confirm('Are you sure you want to delete this?');
+                                    if(r == true) {
+                                        document.getElementById('delete-allocation-form-{{ $allocation->id }}').submit();
+                                    }"><span><i class="fa fa-trash" style="color:red"></i></span></a>
 
                             <form id="delete-allocation-form-{{ $allocation->id }}" method="POST" action="{{ route('allocations.delete', $allocation->id) }}">
                                 @csrf

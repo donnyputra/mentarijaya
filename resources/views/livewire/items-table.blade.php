@@ -83,7 +83,7 @@
                         Item Status
                         @include('includes._sort-icon', ['field' => 'item_status_id'])
                     </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_weight')" role="button" href="#">
+                    {{-- <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_weight')" role="button" href="#">
                         Item Weight
                         @include('includes._sort-icon', ['field' => 'item_weight'])
                     </a></th>
@@ -107,20 +107,20 @@
                     <th class="col-with-min-width"><a wire:click.prevent="sortBy('sales_by')" role="button" href="#">
                         Sales By
                         @include('includes._sort-icon', ['field' => 'sales_by'])
-                    </a></th>
+                    </a></th> --}}
                     <th class="col-with-min-width"><a wire:click.prevent="sortBy('sales_status_id')" role="button" href="#">
                         Sales Status
                         @include('includes._sort-icon', ['field' => 'sales_status_id'])
                     </a></th>
 
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('created_at')" role="button" href="#">
+                    {{-- <th class="col-with-min-width"><a wire:click.prevent="sortBy('created_at')" role="button" href="#">
                         Created At
                         @include('includes._sort-icon', ['field' => 'created_at'])
                     </a></th>
                     <th class="col-with-min-width"><a wire:click.prevent="sortBy('updated_at')" role="button" href="#">
                         Updated At
                         @include('includes._sort-icon', ['field' => 'updated_at'])
-                    </a></th>
+                    </a></th> --}}
 
 
                     <th>Action</th>
@@ -135,22 +135,25 @@
                         <td>{{ $item->category_description }}</td>
                         <td>{{ $item->allocation_description }}</td>
                         <td>{{ $item->item_status_description}}</td>
-                        <td>{{ ($item->item_weight) . " gr" }}</td>
+                        {{-- <td>{{ ($item->item_weight) . " gr" }}</td>
                         <td>{{ ($item->item_gold_rate) . "%" }}</td>
                         <td>{{ $item->created_by == null ? "-" : $item->created_by_name }}</td>
                         <td>{{ $item->sales_price == null ? "-" : ("Rp " . number_format($item->sales_price, 2, ',', '.')) }}</td>
                         <td>{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('m/d/Y') }}</td>
-                        <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}</td>
+                        <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}</td> --}}
                         <td>{{ $item->sales_status_description == null ? "-" : $item->sales_status_description }}</td>
-                        <td>{{ Carbon\Carbon::parse($item->created_at)->format('m/d/Y') }}</td>
-                        <td>{{ Carbon\Carbon::parse($item->updated_at)->format('m/d/Y') }}</td>
+                        {{-- <td>{{ Carbon\Carbon::parse($item->created_at)->format('m/d/Y') }}</td>
+                        <td>{{ Carbon\Carbon::parse($item->updated_at)->format('m/d/Y') }}</td> --}}
 
                         
                         <td>
-                        	<a href="{{ route('items.edit', $item->id) }}"><span><i class="fa fa-edit"></i></span></a>
+                            <a href="{{ route('items.edit', $item->id) }}"><span><i class="fa fa-edit"></i></span></a>
                             <a href="{{ route('items.delete', $item->id) }}" 
                                 onclick="event.preventDefault();
-                                     document.getElementById('delete-item-form-{{ $item->id }}').submit();"><span><i class="fa fa-trash-o" style="color:red"></i></span></a>
+                                    var r = confirm('Are you sure you want to delete this?');
+                                    if(r == true) {
+                                        document.getElementById('delete-item-form-{{ $item->id }}').submit();
+                                    }"><span><i class="fa fa-trash" style="color:red"></i></span></a>
 
                             <form id="delete-item-form-{{ $item->id }}" method="POST" action="{{ route('items.delete', $item->id) }}">
                                 @csrf

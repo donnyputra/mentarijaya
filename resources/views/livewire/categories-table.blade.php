@@ -39,7 +39,10 @@
                         	<a href="{{ route('categories.edit', $category->id) }}"><span><i class="fa fa-edit"></i></span></a>
                             <a href="{{ route('categories.delete', $category->id) }}" 
                                 onclick="event.preventDefault();
-                                     document.getElementById('delete-category-form-{{ $category->id }}').submit();"><span><i class="fa fa-trash-o" style="color:red"></i></span></a>
+                                    var r = confirm('Are you sure you want to delete this?');
+                                    if(r == true) {
+                                        document.getElementById('delete-category-form-{{ $category->id }}').submit();
+                                    }"><span><i class="fa fa-trash" style="color:red"></i></span></a>
 
                             <form id="delete-category-form-{{ $category->id }}" method="POST" action="{{ route('categories.delete', $category->id) }}">
                                 @csrf

@@ -39,7 +39,10 @@
                         	<a href="{{ route('salesstatuses.edit', $salesstatus->id) }}"><span><i class="fa fa-edit"></i></span></a>
                             <a href="{{ route('salesstatuses.delete', $salesstatus->id) }}" 
                                 onclick="event.preventDefault();
-                                     document.getElementById('delete-salesstatus-form-{{ $salesstatus->id }}').submit();"><span><i class="fa fa-trash-o" style="color:red"></i></span></a>
+                                    var r = confirm('Are you sure you want to delete this?');
+                                    if(r == true) {
+                                        document.getElementById('delete-salesstatus-form-{{ $salesstatus->id }}').submit();
+                                    }"><span><i class="fa fa-trash" style="color:red"></i></span></a>
 
                             <form id="delete-salesstatus-form-{{ $salesstatus->id }}" method="POST" action="{{ route('salesstatuses.delete', $salesstatus->id) }}">
                                 @csrf

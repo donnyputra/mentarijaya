@@ -49,7 +49,10 @@
                         	<a href="{{ route('stores.edit', $store->id) }}"><span><i class="fa fa-edit"></i></span></a>
                             <a href="{{ route('stores.delete', $store->id) }}" 
                                 onclick="event.preventDefault();
-                                     document.getElementById('delete-store-form-{{ $store->id }}').submit();"><span><i class="fa fa-trash-o" style="color:red"></i></span></a>
+                                    var r = confirm('Are you sure you want to delete this?');
+                                    if(r == true) {
+                                        document.getElementById('delete-store-form-{{ $store->id }}').submit();
+                                    }"><span><i class="fa fa-trash" style="color:red"></i></span></a>
 
                             <form id="delete-store-form-{{ $store->id }}" method="POST" action="{{ route('stores.delete', $store->id) }}">
                                 @csrf
