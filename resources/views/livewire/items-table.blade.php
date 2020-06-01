@@ -56,71 +56,70 @@
     </div>
 
     <div class="clearfix">
-        <table class="table table-condensed table-hover table-striped">
+        <table class="table table-responsive table-hover table-striped table-head-fixed text-nowrap">
             <thead>
                 <tr>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('store_id')" role="button" href="#">
+                    <th><a wire:click.prevent="sortBy('store_id')" role="button" href="#">
                         Store
                         @include('includes._sort-icon', ['field' => 'store_id'])
                     </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_no')" role="button" href="#">
+                    <th><a wire:click.prevent="sortBy('item_no')" role="button" href="#">
                         Item No
                         @include('includes._sort-icon', ['field' => 'item_no'])
                     </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_name')" role="button" href="#">
+                    <th><a wire:click.prevent="sortBy('item_name')" role="button" href="#">
                         Item Name
                         @include('includes._sort-icon', ['field' => 'item_name'])
                     </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('category_id')" role="button" href="#">
+                    <th><a wire:click.prevent="sortBy('category_id')" role="button" href="#">
                         Category
                         @include('includes._sort-icon', ['field' => 'category_id'])
                     </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('allocation_id')" role="button" href="#">
-                        Allocation
-                        @include('includes._sort-icon', ['field' => 'allocation_id'])
-                    </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_status_id')" role="button" href="#">
-                        Item Status
-                        @include('includes._sort-icon', ['field' => 'item_status_id'])
-                    </a></th>
-                    {{-- <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_weight')" role="button" href="#">
+                    <th><a wire:click.prevent="sortBy('item_weight')" role="button" href="#">
                         Item Weight
                         @include('includes._sort-icon', ['field' => 'item_weight'])
                     </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('item_gold_rate')" role="button" href="#">
-                        Gold Rate
-                        @include('includes._sort-icon', ['field' => 'item_gold_rate'])
-                    </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('created_by')" role="button" href="#">
-                        Created By
-                        @include('includes._sort-icon', ['field' => 'created_by'])
-                    </a></th>
-
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('sales_price')" role="button" href="#">
+                    <th><a wire:click.prevent="sortBy('sales_price')" role="button" href="#">
                         Sales Price
                         @include('includes._sort-icon', ['field' => 'sales_price'])
                     </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('sales_at')" role="button" href="#">
+                    <th><a wire:click.prevent="sortBy('sales_at')" role="button" href="#">
                         Sales At
                         @include('includes._sort-icon', ['field' => 'sales_at'])
                     </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('sales_by')" role="button" href="#">
-                        Sales By
-                        @include('includes._sort-icon', ['field' => 'sales_by'])
-                    </a></th> --}}
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('sales_status_id')" role="button" href="#">
+                    <th><a wire:click.prevent="sortBy('sales_status_id')" role="button" href="#">
                         Sales Status
                         @include('includes._sort-icon', ['field' => 'sales_status_id'])
                     </a></th>
 
-                    {{-- <th class="col-with-min-width"><a wire:click.prevent="sortBy('created_at')" role="button" href="#">
+                    <th><a wire:click.prevent="sortBy('allocation_id')" role="button" href="#">
+                        Allocation
+                        @include('includes._sort-icon', ['field' => 'allocation_id'])
+                    </a></th>
+                    <th><a wire:click.prevent="sortBy('item_status_id')" role="button" href="#">
+                        Item Status
+                        @include('includes._sort-icon', ['field' => 'item_status_id'])
+                    </a></th>
+                    <th><a wire:click.prevent="sortBy('item_gold_rate')" role="button" href="#">
+                        Gold Rate
+                        @include('includes._sort-icon', ['field' => 'item_gold_rate'])
+                    </a></th>
+                    <th><a wire:click.prevent="sortBy('created_by')" role="button" href="#">
+                        Created By
+                        @include('includes._sort-icon', ['field' => 'created_by'])
+                    </a></th>
+                    <th><a wire:click.prevent="sortBy('sales_by')" role="button" href="#">
+                        Sales By
+                        @include('includes._sort-icon', ['field' => 'sales_by'])
+                    </a></th>
+                    <th><a wire:click.prevent="sortBy('created_at')" role="button" href="#">
                         Created At
                         @include('includes._sort-icon', ['field' => 'created_at'])
                     </a></th>
-                    <th class="col-with-min-width"><a wire:click.prevent="sortBy('updated_at')" role="button" href="#">
+                    <th><a wire:click.prevent="sortBy('updated_at')" role="button" href="#">
                         Updated At
                         @include('includes._sort-icon', ['field' => 'updated_at'])
-                    </a></th> --}}
+                    </a></th>
 
 
                     <th>Action</th>
@@ -133,17 +132,18 @@
                         <td>{{ $item->item_no }}</td>
                         <td>{{ $item->item_name }}</td>
                         <td>{{ $item->category_description }}</td>
-                        <td>{{ $item->allocation_description }}</td>
-                        <td>{{ $item->item_status_description}}</td>
-                        {{-- <td>{{ ($item->item_weight) . " gr" }}</td>
-                        <td>{{ ($item->item_gold_rate) . "%" }}</td>
-                        <td>{{ $item->created_by == null ? "-" : $item->created_by_name }}</td>
+                        <td>{{ ($item->item_weight) . " gr" }}</td>
                         <td>{{ $item->sales_price == null ? "-" : ("Rp " . number_format($item->sales_price, 2, ',', '.')) }}</td>
                         <td>{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('m/d/Y') }}</td>
-                        <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}</td> --}}
                         <td>{{ $item->sales_status_description == null ? "-" : $item->sales_status_description }}</td>
-                        {{-- <td>{{ Carbon\Carbon::parse($item->created_at)->format('m/d/Y') }}</td>
-                        <td>{{ Carbon\Carbon::parse($item->updated_at)->format('m/d/Y') }}</td> --}}
+
+                        <td>{{ $item->allocation_description }}</td>
+                        <td>{{ $item->item_status_description}}</td>
+                        <td>{{ ($item->item_gold_rate) . "%" }}</td>
+                        <td>{{ $item->created_by == null ? "-" : $item->created_by_name }}</td>
+                        <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}</td>
+                        <td>{{ Carbon\Carbon::parse($item->created_at)->format('m/d/Y') }}</td>
+                        <td>{{ Carbon\Carbon::parse($item->updated_at)->format('m/d/Y') }}</td>
 
                         
                         <td>
