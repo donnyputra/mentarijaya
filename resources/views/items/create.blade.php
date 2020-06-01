@@ -89,7 +89,7 @@
 																<label for="item_gold_rate" class="col-3 col-form-label">Gold Rate <span style="color: red">*</span></label>
 																<div class="col-9">
 																	<div class="input-group">
-																		<input type="text" class="form-control" name="item_gold_rate" required value="{{ old('item_gold_rate') }}" />
+																		<input type="number" step="any" min="0" class="form-control" name="item_gold_rate" required value="{{ old('item_gold_rate') }}" placeholder="Ex: 37.5"/>
 																		<div class="input-group-append">
 																			<div class="input-group-text">%</div>
 																		</div>
@@ -169,7 +169,7 @@
 																		<div class="input-group-prepend">
 																				<div class="input-group-text">Rp</div>
 																		</div>
-																		<input type="text" class="form-control" name="sales_price" value="{{ old('sales_price') }}" />
+																		<input type="number" step="any" min="0" class="form-control" name="sales_price" value="{{ old('sales_price') }}" />
 																	</div>
 																</div>
 															</div>
@@ -214,9 +214,11 @@
         </div>
     </div>
 </div>
+@endsection
 
+@section('custom-script')
 <script type="text/javascript">
-	$(function () {
+	$(function() {
         $('#sales_at').datepicker();
     });
 </script>
