@@ -86,24 +86,25 @@
 																</div>
 															</div>
 															<div class="form-group row">
-																<label for="item_gold_rate" class="col-3 col-form-label">Gold Rate <span style="color: red">*</span></label>
-																<div class="col-9">
-																	<div class="input-group">
-																		<input type="number" step="any" min="0" class="form-control" name="item_gold_rate" required value="{{ old('item_gold_rate') }}" placeholder="Ex: 37.5"/>
-																		<div class="input-group-append">
-																			<div class="input-group-text">%</div>
-																		</div>
-																	</div>
-																</div>
-															</div>
-															<div class="form-group row">
 																<label for="category_id" class="col-3 col-form-label">Category <span style="color: red">*</span></label>
 																<div class="col-9">
-																	<select class="form-control" name="category_id">
+																	<select class="form-control" name="category_id" id="category_id">
 																		@foreach ($categories as $category)
 																			<option value="{{ $category->id }}">{{ $category->description }} ({{ $category->code }})</option>
 																		@endforeach
 																	</select>
+																</div>
+															</div>
+															<div class="form-group row">
+																<label for="item_gold_rate" class="col-3 col-form-label">Gold Rate <span style="color: red">*</span></label>
+																<div class="col-9">
+																	<div class="input-group">
+																		{{-- <input type="number" step="0.1" min="0" class="form-control" name="item_gold_rate" id="item_gold_rate" required value="{{ old('item_gold_rate') }}" placeholder="Ex: 37.5"/> --}}
+																		<input type="text" class="form-control" name="item_gold_rate" id="item_gold_rate" required value="{{ old('item_gold_rate') }}" placeholder="Ex: 37.5"/>
+																		<div class="input-group-append">
+																			<div class="input-group-text">%</div>
+																		</div>
+																	</div>
 																</div>
 															</div>
 															<div class="form-group row">
@@ -221,5 +222,14 @@
 	$(function() {
         $('#sales_at').datepicker();
     });
+
+	$('#category_id').on('change', function(e) {
+		var categoryText = (this.options[this.selectedIndex].text).toLowerCase();
+		if(categoryText == "kalung (k)") {
+			document.getElementById("item_gold_rate").value = 42.0;
+		} else {
+			document.getElementById("item_gold_rate").value = 37.5;
+		}
+	});
 </script>
 @endsection
