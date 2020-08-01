@@ -87,17 +87,6 @@
 																</div>
 															</div>
 															<div class="form-group row">
-																<label for="item_gold_rate" class="col-3 col-form-label">Gold Rate <span style="color: red">*</span></label>
-																<div class="col-9">
-																	<div class="input-group">
-																		<input type="text" class="form-control" name="item_gold_rate" required value="{{ $item->item_gold_rate }}" />
-																		<div class="input-group-append">
-																			<div class="input-group-text">%</div>
-																		</div>
-																	</div>
-																</div>
-															</div>
-															<div class="form-group row">
 																<label for="category_id" class="col-3 col-form-label">Category <span style="color: red">*</span></label>
 																<div class="col-9">
 																	<!-- <select class="form-control" name="category_id"> -->
@@ -109,6 +98,17 @@
 																			@endif
 																		@endforeach
 																	<!-- </select> -->
+																</div>
+															</div>
+															<div class="form-group row">
+																<label for="item_gold_rate" class="col-3 col-form-label">Gold Rate <span style="color: red">*</span></label>
+																<div class="col-9">
+																	<div class="input-group">
+																		<input type="text" class="form-control" name="item_gold_rate" required value="{{ $item->item_gold_rate }}" />
+																		<div class="input-group-append">
+																			<div class="input-group-text">%</div>
+																		</div>
+																	</div>
 																</div>
 															</div>
 															<div class="form-group row">

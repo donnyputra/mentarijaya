@@ -78,7 +78,8 @@
 																<label for="item_weight" class="col-3 col-form-label">Item Weight <span style="color: red">*</span></label>
 																<div class="col-9">
 																	<div class="input-group">
-																		<input type="number" step="any" min="0" class="form-control" name="item_weight" required value="{{ old('item_weight') }}" placeholder="Ex: 50.45" />
+																		{{-- <input type="number" step="any" min="0" class="form-control" name="item_weight" required value="{{ old('item_weight') }}" placeholder="Ex: 50.45" /> --}}
+																		<input type="text" class="form-control" name="item_weight" required value="{{ old('item_weight') }}" placeholder="Ex: 50.45" />
 																		<div class="input-group-append">
 																			<div class="input-group-text">gr</div>
 																		</div>
