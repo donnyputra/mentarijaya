@@ -46,6 +46,13 @@
                 @endforeach
             </select>
             &nbsp;
+            <select wire:model="filterInventoryStatus" class="form-control">
+                <option value="">- All Inventory Statuses -</option>
+                @foreach ($inventorystatuses as $inventorystatus)
+                <option value="{{ $inventorystatus->id }}">{{ $inventorystatus->description }}</option>
+                @endforeach
+            </select>
+            &nbsp;
             <select wire:model="filterSalesStatus" class="form-control">
                 <option value="">- All Sales Statuses -</option>
                 @foreach ($salesstatuses as $salesstatus)
@@ -100,6 +107,10 @@
                         Item Status
                         @include('includes._sort-icon', ['field' => 'item_status_id'])
                     </a></th>
+                    <th><a wire:click.prevent="sortBy('inventory_status_id')" role="button" href="#">
+                        Inventory Status
+                        @include('includes._sort-icon', ['field' => 'inventory_status_id'])
+                    </a></th>
                     <th><a wire:click.prevent="sortBy('item_gold_rate')" role="button" href="#">
                         Gold Rate
                         @include('includes._sort-icon', ['field' => 'item_gold_rate'])
@@ -139,6 +150,7 @@
 
                         <td>{{ $item->allocation_description }}</td>
                         <td>{{ $item->item_status_description}}</td>
+                        <td>{{ $item->inventory_status_description}}</td>
                         <td>{{ ($item->item_gold_rate) . "%" }}</td>
                         <td>{{ $item->created_by == null ? "-" : $item->created_by_name }}</td>
                         <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}</td>

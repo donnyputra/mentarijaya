@@ -24,6 +24,7 @@ class ItemsTable extends Component
     public $filterAllocation = '';
     public $filterItemStatus = '';
     public $filterSalesStatus = '';
+    public $filterInventoryStatus = '';
 
     public function sortBy($field)
     {
@@ -47,6 +48,7 @@ class ItemsTable extends Component
                         ->join('category', 'category.id', '=', 'item.category_id')
                         ->join('allocation', 'allocation.id', '=', 'item.allocation_id')
                         ->join('item_status', 'item_status.id', '=', 'item.item_status_id')
+                        ->join('inventory_status', 'inventory_status.id', '=', 'item.inventory_status_id')
                         ->leftJoin('users as create_users', 'create_users.id', '=', 'item.created_by')
                         ->leftJoin('users', 'users.id', '=', 'item.sales_by')
                         ->leftJoin('sales_status', 'sales_status.id', '=', 'item.sales_status_id')
@@ -57,6 +59,7 @@ class ItemsTable extends Component
                             'category.description as category_description',
                             'allocation.description as allocation_description',
                             'item_status.description as item_status_description',
+                            'inventory_status.description as inventory_status_description',
                             'sales_status.code as sales_status_code',
                             'sales_status.description as sales_status_description',
                             'users.name as sales_by_name',
@@ -85,6 +88,11 @@ class ItemsTable extends Component
                                 return $queryFilterItemStatusResult->where('item.item_status_id', '=', $filterItemStatusId);
                             });
                         })
+                        ->where(function($queryFilterInventoryStatusInput) {
+                            return $queryFilterInventoryStatusInput->when($this->filterInventoryStatus, function($queryFilterInventoryStatusResult, $filterInventoryStatusId){
+                                return $queryFilterInventoryStatusResult->where('item.inventory_status_id', '=', $filterInventoryStatusId);
+                            });
+                        })
                         ->where(function($queryFilterSalesStatusInput) {
                             return $queryFilterSalesStatusInput->when($this->filterSalesStatus, function($queryFilterSalesStatusResult, $filterSalesStatusId){
                                 return $queryFilterSalesStatusResult->where('item.sales_status_id', '=', $filterSalesStatusId);
@@ -99,6 +107,7 @@ class ItemsTable extends Component
                                         ->orWhere('category.description', 'like', '%'.$searchKeyword.'%')
                                         ->orWhere('allocation.description', 'like', '%'.$searchKeyword.'%')
                                         ->orWhere('item_status.description', 'like', '%'.$searchKeyword.'%')
+                                        ->orWhere('inventory_status.description', 'like', '%'.$searchKeyword.'%')
                                         ->orWhere('sales_status.description', 'like', '%'.$searchKeyword.'%')
                                         ->orWhere('users.name', 'like', '%'.$searchKeyword.'%');
                             });
@@ -115,6 +124,7 @@ class ItemsTable extends Component
                         ->join('category', 'category.id', '=', 'item.category_id')
                         ->join('allocation', 'allocation.id', '=', 'item.allocation_id')
                         ->join('item_status', 'item_status.id', '=', 'item.item_status_id')
+                        ->join('inventory_status', 'inventory_status.id', '=', 'item.inventory_status_id')
                         ->leftJoin('users as create_users', 'create_users.id', '=', 'item.created_by')
                         ->leftJoin('users', 'users.id', '=', 'item.sales_by')
                         ->leftJoin('sales_status', 'sales_status.id', '=', 'item.sales_status_id')
@@ -125,6 +135,7 @@ class ItemsTable extends Component
                             'category.description as category_description',
                             'allocation.description as allocation_description',
                             'item_status.description as item_status_description',
+                            'inventory_status.description as inventory_status_description',
                             'sales_status.code as sales_status_code',
                             'sales_status.description as sales_status_description',
                             'users.name as sales_by_name',
@@ -158,6 +169,11 @@ class ItemsTable extends Component
                                 return $queryFilterItemStatusResult->where('item.item_status_id', '=', $filterItemStatusId);
                             });
                         })
+                        ->where(function($queryFilterInventoryStatusInput) {
+                            return $queryFilterInventoryStatusInput->when($this->filterInventoryStatus, function($queryFilterInventoryStatusResult, $filterInventoryStatusId){
+                                return $queryFilterInventoryStatusResult->where('item.inventory_status_id', '=', $filterInventoryStatusId);
+                            });
+                        })
                         ->where(function($queryFilterSalesStatusInput) {
                             return $queryFilterSalesStatusInput->when($this->filterSalesStatus, function($queryFilterSalesStatusResult, $filterSalesStatusId){
                                 return $queryFilterSalesStatusResult->where('item.sales_status_id', '=', $filterSalesStatusId);
@@ -172,6 +188,7 @@ class ItemsTable extends Component
                                         ->orWhere('category.description', 'like', '%'.$searchKeyword.'%')
                                         ->orWhere('allocation.description', 'like', '%'.$searchKeyword.'%')
                                         ->orWhere('item_status.description', 'like', '%'.$searchKeyword.'%')
+                                        ->orWhere('inventory_status.description', 'like', '%'.$searchKeyword.'%')
                                         ->orWhere('sales_status.description', 'like', '%'.$searchKeyword.'%')
                                         ->orWhere('users.name', 'like', '%'.$searchKeyword.'%');
                             });
@@ -189,6 +206,7 @@ class ItemsTable extends Component
             'categories' => \App\Category::all(),
             'allocations' => \App\Allocation::all(),
             'itemstatuses' => \App\ItemStatus::all(),
+            'inventorystatuses' => \App\InventoryStatus::all(),
             'salesstatuses' => \App\SalesStatus::all(),
         ]);
     }

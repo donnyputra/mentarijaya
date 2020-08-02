@@ -126,7 +126,17 @@
 																<div class="col-9">
 																	<select class="form-control" name="item_status_id">
 																		@foreach ($itemstatuses as $itemstatus)
-																			<option value="{{ $itemstatus->id }}" {{ $itemstatus->code == $item->item_status_id ? 'selected' : '' }}>{{ $itemstatus->description }}</option>
+																			<option value="{{ $itemstatus->id }}" {{ $itemstatus->id == $item->item_status_id ? 'selected' : '' }}>{{ $itemstatus->description }}</option>
+																		@endforeach
+																	</select>
+																</div>
+															</div>
+															<div class="form-group row">
+																<label for="inventory_status_id" class="col-3 col-form-label">Inventory Status <span style="color: red">*</span></label>
+																<div class="col-9">
+																	<select class="form-control" name="inventory_status_id">
+																		@foreach ($inventorystatuses as $inventorystatus)
+																			<option value="{{ $inventorystatus->id }}" {{ $inventorystatus->id == $item->inventory_status_id ? 'selected' : '' }}>{{ $inventorystatus->description }}</option>
 																		@endforeach
 																	</select>
 																</div>

@@ -49,6 +49,11 @@ Route::resource('itemstatuses', 'ItemStatusController')->only('index', 'create',
 Route::post('itemstatus/{itemstatus}/update', 'ItemStatusController@update')->name('itemstatuses.update');
 Route::post('itemstatus/{itemstatus}/delete', 'ItemStatusController@delete')->name('itemstatuses.delete');
 
+// System Configuration > Inventory Status
+Route::resource('inventorystatuses', 'InventoryStatusController')->only('index', 'create', 'store', 'edit');
+Route::post('inventorystatus/{inventorystatus}/update', 'InventoryStatusController@update')->name('inventorystatuses.update');
+Route::post('inventorystatus/{inventorystatus}/delete', 'InventoryStatusController@delete')->name('inventorystatuses.delete');
+
 // System Configuration > Allocation
 Route::resource('allocations', 'AllocationController')->only('index', 'create', 'store', 'edit');
 Route::post('allocation/{allocation}/update', 'AllocationController@update')->name('allocations.update');

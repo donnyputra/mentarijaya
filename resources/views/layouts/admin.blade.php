@@ -221,6 +221,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{{ route('inventorystatuses.index') }}"
+                                class="nav-link @if(strpos(Route::currentRouteName(), 'inventorystatuses.') !== false) active @endif">
+                                <i class="fas fa-bars nav-icon"></i>
+                                <p>{{ __("Inventory Status") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('salesstatuses.index') }}"
                                 class="nav-link @if(strpos(Route::currentRouteName(), 'salesstatuses.') !== false) active @endif">
                                 <i class="fas fa-bars nav-icon"></i>

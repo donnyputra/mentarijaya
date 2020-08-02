@@ -134,6 +134,16 @@
 																</div>
 															</div>
 															<div class="form-group row">
+																<label for="inventory_status_id" class="col-3 col-form-label">Inv Status <span style="color: red">*</span></label>
+																<div class="col-9">
+																	<select class="form-control" name="inventory_status_id">
+																		@foreach ($inventorystatuses as $inventorystatus)
+																			<option value="{{ $inventorystatus->id }}">{{ $inventorystatus->description }}</option>
+																		@endforeach
+																	</select>
+																</div>
+															</div>
+															<div class="form-group row">
 																<label for="created_by" class="col-3 col-form-label">Created By</label>
 																<div class="col-9">
 																	<select class="form-control" name="created_by">

@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
         $this->call(UserRoleSeeder::class);
         $this->call(CategorySeeder::class);
         $this->call(AllocationSeeder::class);
+        $this->call(InventoryStatusSeeder::class);
     }
 }

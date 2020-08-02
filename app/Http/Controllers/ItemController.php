@@ -57,6 +57,7 @@ class ItemController extends Controller
         $categories = \App\Category::all();
         $allocations = \App\Allocation::all();
         $itemstatuses = \App\ItemStatus::all();
+        $inventorystatuses = \App\InventoryStatus::all();
         $salesstatuses = \App\SalesStatus::all();
         $users = \App\User::all();
 
@@ -65,6 +66,7 @@ class ItemController extends Controller
             'categories' => $categories,
             'allocations' => $allocations,
             'itemstatuses' => $itemstatuses,
+            'inventorystatuses' => $inventorystatuses,
             'salesstatuses' => $salesstatuses,
             'users' => [Auth::user()],
         ]);
@@ -123,6 +125,7 @@ class ItemController extends Controller
             'item_weight' => 'required',
             'item_gold_rate' => 'required',
             'item_status_id' => 'numeric|required',
+            'inventory_status_id' => 'numeric|required',
             'category_id' => 'numeric|required',
             'allocation_id' => 'numeric|required',
             'store_id' => 'numeric|required',
@@ -139,6 +142,7 @@ class ItemController extends Controller
             'item_weight' => $request->get('item_weight'),
             'item_gold_rate' => $request->get('item_gold_rate'),
             'item_status_id' => $request->get('item_status_id'),
+            'inventory_status_id' => $request->get('inventory_status_id'),
             'category_id' => $request->get('category_id'),
             'allocation_id' => $request->get('allocation_id'),
             'store_id' => $request->get('store_id'),
@@ -182,6 +186,7 @@ class ItemController extends Controller
         $categories = \App\Category::all();
         $allocations = \App\Allocation::all();
         $itemstatuses = \App\ItemStatus::all();
+        $inventorystatuses = \App\InventoryStatus::all();
         
         $salesstatuses = null;
         if(Auth::user()->authRole()->name == 'admin') {
@@ -202,6 +207,7 @@ class ItemController extends Controller
             'categories' => $categories,
             'allocations' => $allocations,
             'itemstatuses' => $itemstatuses,
+            'inventorystatuses' => $inventorystatuses,
             'salesstatuses' => $salesstatuses,
             'users' => $users,
             'item' => $item,
@@ -224,6 +230,7 @@ class ItemController extends Controller
                 'item_weight' => 'required',
                 'item_gold_rate' => 'required',
                 'item_status_id' => 'numeric|required',
+                'inventory_status_id' => 'numeric|required',
                 'category_id' => 'numeric|required',
                 'allocation_id' => 'numeric|required',
                 'store_id' => 'numeric|required',
@@ -240,6 +247,7 @@ class ItemController extends Controller
             $item->item_weight = $request->get("item_weight");
             $item->item_gold_rate = $request->get("item_gold_rate");
             $item->item_status_id = $request->get("item_status_id");
+            $item->inventory_status_id = $request->get("inventory_status_id");
             $item->category_id = $request->get("category_id");
             $item->allocation_id = $request->get("allocation_id");
             $item->store_id = $request->get("store_id");
