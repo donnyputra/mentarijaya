@@ -282,4 +282,176 @@ class ItemController extends Controller
 
         return redirect('/items')->with('success', __('Item has been deleted.'));
     }
+
+    public function bulkupload() {
+        return view('items.bulkupload');
+    }
+
+    public function downloadCsvTemplate() {
+        try {
+            // echo "download CSV template";
+            $fileName = "items_template.csv";
+            $headers = array(
+                "Content-type"        => "text/csv",
+                "Content-Disposition" => "attachment; filename=$fileName",
+                "Pragma"              => "no-cache",
+                "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+                "Expires"             => "0"
+            );
+
+            $columns = [
+                'item_no', 
+                'item_name', 
+                'item_weight', 
+                'item_gold_rate', 
+                'item_status_code', 
+                'inventory_status_code', 
+                'category_code', 
+                'allocation_code', 
+                // 'sales_status_code', 
+                // 'sales_price', 
+                // 'sales_at', 
+                // 'sales_by', 
+                'store_code'
+            ];
+
+            if(Item::count() > 0) {
+                $itemModel = Item::first();
+                $item = [
+                    $itemModel->item_code,
+                    $itemModel->item_name, 
+                    $itemModel->item_weight, 
+                    $itemModel->item_gold_rate,
+                    'new', //$itemModel->item_status_code, 
+                    'general', // $itemModel->inventory_status_code, 
+                    'K', //$itemModel->category_code, 
+                    'storage', //$itemModel->allocation_code, 
+                    // 'submitted', // $itemModel->sales_status_code, 
+                    // $itemModel->sales_price, 
+                    // $itemModel->sales_at, 
+                    // $itemModel->sales_by, 
+                    \App\Store::where('id', $itemModel->store_id)->first()->code,
+                ];
+            } else {
+                $item = [
+                    'sample', // 'item_no', 
+                    'sample', // 'item_name', 
+                    'sample', // 'item_weight', 
+                    'sample', // 'item_gold_rate', 
+                    'sample', // 'item_status_code', 
+                    'sample', // 'inventory_status_code', 
+                    'sample', // 'category_code', 
+                    'sample', // 'allocation_code', 
+                    // 'sample', // 'sales_status_code', 
+                    // 'sample', // 'sales_price', 
+                    // 'sample (yyyy-mm-dd)', // 'sales_at', 
+                    // 'sample', // 'sales_by', 
+                    'sample', // 'store_code'
+                ];
+            }
+            
+            $callback = function() use($item, $columns) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $columns);
+                fputcsv($file, $item);
+                fclose($file);
+            };
+        
+        } catch (Exception $ex) {
+            return redirect('/items')->with('error', $ex->getMessage());
+        }
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function importcsv(Request $request) {
+        try {
+            $request->validate([
+                'uploaded_csv' => 'required',
+            ]);
+
+            // Read CSV
+            if($request->hasFile('uploaded_csv')) {
+                $file = $request->file('uploaded_csv');
+                $row = 0;
+
+                $arrayItemData = [];
+
+                if (($handle = fopen($file, "r")) !== FALSE) {
+                    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                        
+                        // skip header
+                        if($row > 0) {
+                            $content = [
+                                'item_no' => $data[0],
+                                'item_name' => $data[1],
+                                'item_weight' => $data[2],
+                                'item_gold_rate' => $data[3],
+                                'item_status_code' => $data[4],
+                                'inventory_status_code' => $data[5],
+                                'category_code' => $data[6],
+                                'allocation_code' => $data[7],
+                                'store_code' => $data[8],
+                            ];
+                            array_push($arrayItemData, $content);
+                        }
+
+                        $row++;
+                    }
+                    fclose($handle);
+                }
+
+                try {
+                    DB::beginTransaction();
+
+                    // processing array data to DB
+                    foreach($arrayItemData as $itemData) {
+                        if($itemData['item_no'] != '') { //update
+                            $item = Item::where('item_no', $itemData['item_no'])->first();
+                            if($item->id) {
+                                $item->item_name = $itemData['item_name'];
+                                $item->item_weight = $itemData['item_weight'];
+                                $item->item_gold_rate = $itemData['item_gold_rate'];
+                                $item->item_status_id = \App\ItemStatus::where('code', $itemData['item_status_code'])->first()->id;
+                                $item->inventory_status_id = \App\InventoryStatus::where('code', $itemData['inventory_status_code'])->first()->id;
+                                $item->category_id = \App\Category::where('code', $itemData['category_code'])->first()->id;
+                                $item->allocation_id = \App\Allocation::where('code', $itemData['allocation_code'])->first()->id;
+                                $item->store_id = \App\Store::where('code', $itemData['store_code'])->first()->id;
+                                // $item->updated_by = auth()->user()->id;
+                                $item->save();
+                            } else {
+                                throw new \Exception("Item No is not found.");
+                            }
+                        } else { //insert
+                            $item = new Item([
+                                'item_no' => $this->generateItemNo(\App\Category::where('code', $itemData['category_code'])->first()->id),
+                                'item_name' => $itemData['item_name'],
+                                'item_weight' => $itemData['item_weight'],
+                                'item_gold_rate' => $itemData['item_gold_rate'],
+                                'item_status_id' => \App\ItemStatus::where('code', $itemData['item_status_code'])->first()->id,
+                                'inventory_status_id' => \App\InventoryStatus::where('code', $itemData['inventory_status_code'])->first()->id,
+                                'category_id' => \App\Category::where('code', $itemData['category_code'])->first()->id,
+                                'allocation_id' => \App\Allocation::where('code', $itemData['allocation_code'])->first()->id,
+                                'store_id' => \App\Store::where('code', $itemData['store_code'])->first()->id,
+                                'created_by' => auth()->user()->id,
+                                // 'updated_by' => auth()->user()->id,
+                            ]);
+                            $item->save();                            
+                        }
+                    }
+
+                    DB::commit();
+                    return redirect('/items')->with('success', __('Items bulk upload has been processed successfully.'));
+
+                } catch(Exception $ex) {
+                    DB::rollback();
+                    throw new \Exception($ex->getMessage());
+                }
+            }
+
+        } catch (Exception $ex) {
+            return redirect()->back()->with('error', $ex->getMessage());
+        }
+    }
+
 }

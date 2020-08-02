@@ -85,5 +85,8 @@ Route::post('roles/{role}/delete', 'RoleController@delete')->name('roles.delete'
 Route::resource('items', 'ItemController')->only('index', 'create', 'store', 'edit');
 Route::post('item/{item}/update', 'ItemController@update')->name('items.update');
 Route::post('item/{item}/delete', 'ItemController@delete')->name('items.delete');
+Route::get('items/bulkupload', 'ItemController@bulkupload')->name('items.bulkupload');
+Route::get('items/downloadcsvtemplate', 'ItemController@downloadCsvTemplate')->name('items.downloadcsvtemplate');
+Route::post('items/importcsv', 'ItemController@importcsv')->name('items.importcsv');
 
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');
