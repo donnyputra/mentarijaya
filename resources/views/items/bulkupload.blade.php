@@ -38,10 +38,10 @@
                                                 </div>
                                             </div>
                                             <div class="form-group row">
-                                                <label for="uploaded_csv" class="col-3 col-form-label">Upload CSV</label>
+                                                <label for="uploaded_csv" class="col-3 col-form-label">Upload CSV file</label>
                                                 <div class="col-9">
                                                     <input type="file" accept=".csv" class="custom-file-input" id="uploaded_csv" name="uploaded_csv">
-                                                    <label class="custom-file-label" for="uploaded_csv"><i>{{ __('please choose .csv file') }}</i></label>
+                                                    <label class="custom-file-label" for="uploaded_csv"><i>{{ __('please choose csv file') }}</i></label>
                                                 </div>
                                             </div>
 			

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
 use App\Item;
 
 class ItemController extends Controller
@@ -406,21 +409,27 @@ class ItemController extends Controller
 
                     // processing array data to DB
                     foreach($arrayItemData as $itemData) {
+                        $itemStatus = \App\ItemStatus::where('code', $itemData['item_status_code'])->firstOrFail();
+                        $inventoryStatus = \App\InventoryStatus::where('code', $itemData['inventory_status_code'])->firstOrFail();
+                        $category = \App\Category::where('code', $itemData['category_code'])->firstOrFail();
+                        $allocation = \App\Allocation::where('code', $itemData['allocation_code'])->firstOrFail();
+                        $store = \App\Store::where('code', $itemData['store_code'])->firstOrFail();
+
                         if($itemData['item_no'] != '') { //update
-                            $item = Item::where('item_no', $itemData['item_no'])->first();
-                            if($item->id) {
+                            $item = Item::where('item_no', $itemData['item_no'])->firstOrFail();
+                            if($item != null) {
                                 $item->item_name = $itemData['item_name'];
                                 $item->item_weight = $itemData['item_weight'];
                                 $item->item_gold_rate = $itemData['item_gold_rate'];
-                                $item->item_status_id = \App\ItemStatus::where('code', $itemData['item_status_code'])->first()->id;
-                                $item->inventory_status_id = \App\InventoryStatus::where('code', $itemData['inventory_status_code'])->first()->id;
-                                $item->category_id = \App\Category::where('code', $itemData['category_code'])->first()->id;
-                                $item->allocation_id = \App\Allocation::where('code', $itemData['allocation_code'])->first()->id;
-                                $item->store_id = \App\Store::where('code', $itemData['store_code'])->first()->id;
+                                $item->item_status_id = $itemStatus->id;
+                                $item->inventory_status_id = $inventoryStatus->id;
+                                $item->category_id = $category->id;
+                                $item->allocation_id = $allocation->id;
+                                $item->store_id = $store->id;
                                 // $item->updated_by = auth()->user()->id;
                                 $item->save();
                             } else {
-                                throw new \Exception("Item No is not found.");
+                                throw new \Exception(__('Items bulk upload was failed. "Item No is not found."'));
                             }
                         } else { //insert
                             $item = new Item([
@@ -428,28 +437,54 @@ class ItemController extends Controller
                                 'item_name' => $itemData['item_name'],
                                 'item_weight' => $itemData['item_weight'],
                                 'item_gold_rate' => $itemData['item_gold_rate'],
-                                'item_status_id' => \App\ItemStatus::where('code', $itemData['item_status_code'])->first()->id,
-                                'inventory_status_id' => \App\InventoryStatus::where('code', $itemData['inventory_status_code'])->first()->id,
-                                'category_id' => \App\Category::where('code', $itemData['category_code'])->first()->id,
-                                'allocation_id' => \App\Allocation::where('code', $itemData['allocation_code'])->first()->id,
-                                'store_id' => \App\Store::where('code', $itemData['store_code'])->first()->id,
+                                'item_status_id' => $itemStatus->id,
+                                'inventory_status_id' => $inventoryStatus->id,
+                                'category_id' => $category->id,
+                                'allocation_id' => $allocation->id,
+                                'store_id' => $store->id,
                                 'created_by' => auth()->user()->id,
                                 // 'updated_by' => auth()->user()->id,
                             ]);
                             $item->save();                            
                         }
                     }
-
+                    
                     DB::commit();
                     return redirect('/items')->with('success', __('Items bulk upload has been processed successfully.'));
 
-                } catch(Exception $ex) {
+                } catch(ModelNotFoundException $ex) {
                     DB::rollback();
-                    throw new \Exception($ex->getMessage());
+                    $message = '';
+                    switch(strtolower($ex->getMessage())) {
+                        case 'no query results for model [app\item].':
+                            $message = 'Item is not found.';
+                            break;
+                        case 'no query results for model [app\itemstatus].':
+                            $message = 'Item status is not found.';
+                            break;
+                        case 'no query results for model [app\inventorystatus].':
+                            $message = 'Inventory status is not found.';
+                            break;
+                        case 'no query results for model [app\category].':
+                            $message = 'Category is not found.';
+                            break;
+                        case 'no query results for model [app\allocation].':
+                            $message = 'Allocation is not found.';
+                            break;
+                        case 'no query results for model [app\store].':
+                            $message = 'Store is not found.';
+                            break;
+                        default:
+                            $ex->getMessage();
+                    }
+                    throw new \Exception(__('Items bulk upload was failed. ') . $message);
+                } catch(\Exception $ex) {
+                    DB::rollback();
+                    throw new \Exception(__('Items bulk upload was failed. Please check your data in csv.'));
                 }
             }
 
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             return redirect()->back()->with('error', $ex->getMessage());
         }
     }
