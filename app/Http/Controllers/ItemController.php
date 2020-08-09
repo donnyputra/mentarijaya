@@ -13,6 +13,7 @@ use App\Item;
 class ItemController extends Controller
 {
     const ITEM_NO_SEPARATOR = '-';
+    const MAX_ITEM_NO_IN_BOOK = 9999;
 
     /**
      * Create a new controller instance.
@@ -75,41 +76,37 @@ class ItemController extends Controller
         ]);
     }
 
-    private function getCurrentCountGroupByCategoryID() {
-        // $id = DB::table('INFORMATION_SCHEMA.TABLES')
-        //     ->select('AUTO_INCREMENT as id')
-        //     ->where('TABLE_SCHEMA', env('DB_DATABASE', ''))
-        //     ->where('TABLE_NAME', 'item')
-        //     ->get();
+    // private function getCurrentCountGroupByCategoryID() {
+    //     $result = DB::table('item')
+    //                 ->select(DB::raw('category_id, count(*) as cnt'))
+    //                 ->groupBy('category_id')
+    //                 ->orderBy('category_id', 'asc')
+    //                 ->get();
 
-        // return ($id[0]->id);
+    //     if($result->count() <= 0)
+    //         return null;
 
-        $result = DB::table('item')
-                    ->select(DB::raw('category_id, count(*) as cnt'))
-                    ->groupBy('category_id')
-                    ->orderBy('category_id', 'asc')
-                    ->get();
-
-        if($result->count() <= 0)
-            return null;
-
-        return $result->keyBy('category_id')->toArray();
-    }
+    //     return $result->keyBy('category_id')->toArray();
+    // }
 
     private function generateItemNo($categoryId) {
-        $currentYear = date("Y");
+        // $currentYear = date("Y");
         $category = \App\Category::findOrFail($categoryId);
 
-        $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
+        // $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
 
-        $nextItemIncrementId = 1;
-        if($arrCurrentCount != null)
-            if(array_key_exists($categoryId, $arrCurrentCount))
-                $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
+        // $nextItemIncrementId = 1;
+        // if($arrCurrentCount != null)
+        //     if(array_key_exists($categoryId, $arrCurrentCount))
+        //         $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
 
-        $paddedId = str_pad($nextItemIncrementId, 6, "0", STR_PAD_LEFT);
+        $itemCount = \App\Item::count();
+        $nextItemId = $itemCount + 1;
+        $bookNo = ceil($nextItemId / self::MAX_ITEM_NO_IN_BOOK);
 
-        $itemNo = $category->code . self::ITEM_NO_SEPARATOR . $currentYear . self::ITEM_NO_SEPARATOR . $paddedId;
+        $paddedId = str_pad($nextItemId, 4, "0", STR_PAD_LEFT);
+
+        $itemNo = $category->code . self::ITEM_NO_SEPARATOR . $bookNo . self::ITEM_NO_SEPARATOR . $paddedId;
 
         return $itemNo;
     }
@@ -489,4 +486,13 @@ class ItemController extends Controller
         }
     }
 
+    // public function employeeItemIndex()
+    // {    
+    //     return view('items.employee.item.index');
+    // }
+
+    // public function employeeSalesIndex()
+    // {    
+    //     return view('items.employee.sales.index');
+    // }
 }
