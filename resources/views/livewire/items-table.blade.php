@@ -66,6 +66,7 @@
         <table class="table table-responsive table-hover table-striped table-head-fixed text-nowrap">
             <thead>
                 <tr>
+                    <th>Action</th>
                     <th><a wire:click.prevent="sortBy('store_id')" role="button" href="#">
                         Store
                         @include('includes._sort-icon', ['field' => 'store_id'])
@@ -131,14 +132,25 @@
                         Updated At
                         @include('includes._sort-icon', ['field' => 'updated_at'])
                     </a></th>
-
-
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($items as $item)
                     <tr>
+                        <td>
+                            <a href="{{ route('items.edit', $item->id) }}"><span><i class="fa fa-edit"></i></span></a>
+                            <a href="{{ route('items.delete', $item->id) }}" 
+                                onclick="event.preventDefault();
+                                    var r = confirm('Are you sure you want to delete this?');
+                                    if(r == true) {
+                                        document.getElementById('delete-item-form-{{ $item->id }}').submit();
+                                    }"><span><i class="fa fa-trash" style="color:red"></i></span></a>
+
+                            <form id="delete-item-form-{{ $item->id }}" method="POST" action="{{ route('items.delete', $item->id) }}">
+                                @csrf
+                                <input type="text" class="form-control" name="id" value="{{ $item->id }}" hidden />
+                            </form>
+                        </td>
                         <td>{{ $item->store_name }}</td>
                         <td>{{ $item->item_no }}</td>
                         <td>{{ $item->item_name }}</td>
@@ -156,22 +168,6 @@
                         <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}</td>
                         <td>{{ Carbon\Carbon::parse($item->created_at)->format('m/d/Y') }}</td>
                         <td>{{ Carbon\Carbon::parse($item->updated_at)->format('m/d/Y') }}</td>
-
-                        
-                        <td>
-                            <a href="{{ route('items.edit', $item->id) }}"><span><i class="fa fa-edit"></i></span></a>
-                            <a href="{{ route('items.delete', $item->id) }}" 
-                                onclick="event.preventDefault();
-                                    var r = confirm('Are you sure you want to delete this?');
-                                    if(r == true) {
-                                        document.getElementById('delete-item-form-{{ $item->id }}').submit();
-                                    }"><span><i class="fa fa-trash" style="color:red"></i></span></a>
-
-                            <form id="delete-item-form-{{ $item->id }}" method="POST" action="{{ route('items.delete', $item->id) }}">
-                                @csrf
-                                <input type="text" class="form-control" name="id" value="{{ $item->id }}" hidden />
-                            </form>
-                        </td>
                     </tr>
                 @endforeach
             </tbody>
