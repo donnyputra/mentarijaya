@@ -226,10 +226,21 @@
         </div>
     </div>
 </div>
+@endsection
 
+@section('custom-script')
 <script type="text/javascript">
-	$(function () {
+	$(function() {
         $('#sales_at').datepicker();
     });
+
+	$('#category_id').on('change', function(e) {
+		var categoryText = (this.options[this.selectedIndex].text).toLowerCase();
+		if(categoryText == "kalung (k)") {
+			document.getElementById("item_gold_rate").value = 42.0;
+		} else {
+			document.getElementById("item_gold_rate").value = 37.5;
+		}
+	});
 </script>
 @endsection
