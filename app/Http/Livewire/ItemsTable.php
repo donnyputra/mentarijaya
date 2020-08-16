@@ -11,11 +11,11 @@ class ItemsTable extends Component
 {
 	use WithPagination;	
 
-    const INITIAL_SORT_FIELD = 'item_no';
+    const INITIAL_SORT_FIELD = 'created_at';
 
     public $perPage = 10;
     public $sortField = self::INITIAL_SORT_FIELD;
-    public $sortAsc = true;
+    public $sortAsc = false;
     public $search = '';
 
     // FILTER

@@ -9,13 +9,13 @@
 				<div class="container-fluid">
 					<div class="row mb-2">
 						<div class="col-sm-6">
-							<h1 class="m-0 text-dark">{{ __("New Item Book") }}</h1>
+							<h1 class="m-0 text-dark">{{ __("New Item") }}</h1>
 						</div><!-- /.col -->
 						<div class="col-sm-6">
 							<ol class="breadcrumb float-sm-right">
 								<li class="breadcrumb-item"><a href="/">{{ __("Home") }}</a></li>
-								<li class="breadcrumb-item"><a href="{{ route("items.index") }}">{{ __("Item Book") }}</a></li>
-								<li class="breadcrumb-item active">{{ __("New Item Book") }}</li>
+								<li class="breadcrumb-item"><a href="{{ route("items.employee.index") }}">{{ __("Item") }}</a></li>
+								<li class="breadcrumb-item active">{{ __("New Item") }}</li>
 							</ol>
 						</div><!-- /.col -->
 					</div><!-- /.row -->
@@ -29,7 +29,7 @@
 							<div class="table-responsive">
 								<div class="card">
 									<div class="card-body">
-										<form method="POST" action="{{ route('items.store') }}">
+										<form method="POST" action="{{ route('items.employee.store') }}">
 
 											<div class="row">
 												<div class="col-12 mb-3">
@@ -54,7 +54,7 @@
 											</div>
 					
 											<div class="row">
-												<div class="col-6 mb-3">
+												<div class="col-12 mb-3">
 													<div class="card">
 														<div class="card-header">
 															<div class="card-title">{{ __("Item Information") }}</div>
@@ -146,58 +146,8 @@
 															<div class="form-group row">
 																<label for="created_by" class="col-3 col-form-label">Created By</label>
 																<div class="col-9">
-																	<select class="form-control" name="created_by">
+																	<select class="form-control" name="created_by" readonly>
 																		{{-- <option></option> --}}
-																		@foreach ($users as $user)
-																			<option value="{{ $user->id }}">{{ $user->name }}</option>
-																		@endforeach
-																	</select>
-																</div>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div class="col-6 mb-3">
-													<div class="card">
-														<div class="card-header">
-															<div class="card-title">{{ __("Sales Information") }}</div>
-														</div>
-														<div class="card-body">
-															<div class="form-group row">
-																<label for="sales_status_id" class="col-3 col-form-label">Sales Status</label>
-																<div class="col-9">
-																	<select class="form-control" name="sales_status_id">
-																		<option selected></option>
-																		@foreach ($salesstatuses as $salesstatus)
-																			<option value="{{ $salesstatus->id }}">{{ $salesstatus->code }}</option>
-																		@endforeach
-																	</select>
-																</div>
-															</div>
-															<div class="form-group row">
-																<label for="sales_price" class="col-3 col-form-label">Sales Price</label>
-																<div class="col-9">
-																	<div class="input-group">
-																		<div class="input-group-prepend">
-																				<div class="input-group-text">Rp</div>
-																		</div>
-																		<input type="number" step="any" min="0" class="form-control" name="sales_price" value="{{ old('sales_price') }}" />
-																	</div>
-																</div>
-															</div>
-															<div class="form-group row">
-																<label for="sales_at" class="col-3 col-form-label">Sales At</label>
-																<div class="col-9">
-																	<div class="input-group">
-																		<input type="text" class="form-control dateselect" id="sales_at" name="sales_at" placeholder="select date" />
-																	</div>
-																</div>
-															</div>
-															<div class="form-group row">
-																<label for="sales_by" class="col-3 col-form-label">Sales By</label>
-																<div class="col-9">
-																	<select class="form-control" name="sales_by">
-																		<option></option>
 																		@foreach ($users as $user)
 																			<option value="{{ $user->id }}">{{ $user->name }}</option>
 																		@endforeach
@@ -211,7 +161,8 @@
 					
 											<div class="float-right">
 												<a class="btn btn-secondary" href="{{ url()->previous() }}" role="button">{{ __("Back") }}</a>
-												<button type="submit" class="btn btn-primary">{{ __("Save") }}</button>
+												<button type="submit" class="btn btn-primary" name="action" value="save">{{ __("Save") }}</button>
+												<button type="submit" class="btn btn-primary" name="action" value="save entry sales">{{ __("Save & Entry Sales") }}</button>
 											</div>
 										</form>
 									</div>
@@ -230,11 +181,11 @@
 
 @section('custom-script')
 <script type="text/javascript">
-	$(function() {
-        $('#sales_at').datepicker();
-    });
+	// $(function() {
+    //     $('#sales_at').datepicker();
+    // });
 
-	document.getElementById("item_gold_rate").value = 37.5;
+    document.getElementById("item_gold_rate").value = 37.5;
 	$('#category_id').on('change', function(e) {
 		var categoryText = (this.options[this.selectedIndex].text).toLowerCase();
 		if(categoryText == "kalung (k)") {

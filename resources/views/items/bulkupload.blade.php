@@ -9,12 +9,12 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0 text-dark">{{ __("Item Bulk Upload") }}</h1>
+                            <h1 class="m-0 text-dark">{{ __("Item Book Bulk Upload") }}</h1>
                         </div><!-- /.col -->
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="/">{{ __("Home") }}</a></li>
-                                <li class="breadcrumb-item"><a href="/items">{{ __("Item") }}</a></li>
+                                <li class="breadcrumb-item"><a href="/items">{{ __("Item Book") }}</a></li>
                                 <li class="breadcrumb-item active">{{ __("Bulk Upload") }}</li>
                             </ol>
                         </div><!-- /.col -->

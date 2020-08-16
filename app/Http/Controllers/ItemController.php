@@ -154,6 +154,10 @@ class ItemController extends Controller
         ]);
         $item->save();
 
+        if(Auth::user()->authRole()->name == 'employee') {
+            return redirect('/employee/items/index')->with('success', __('Item has been created.'));
+        }
+        
         return redirect('/items')->with('success', __('Item has been created.'));
     }
 
@@ -262,6 +266,10 @@ class ItemController extends Controller
             return redirect('/items')->with('error', $ex->getMessage());
         }
 
+        if(Auth::user()->authRole()->name == 'employee') {
+            return redirect('/employee/items/index')->with('success', __('Item has been updated.'));
+        }
+
         return redirect('/items')->with('success', __('Item has been updated.'));
     }
 
@@ -278,6 +286,10 @@ class ItemController extends Controller
             $item->delete();
         } catch (Exception $ex) {
             return redirect('/items')->with('error', $ex->getMessage());
+        }
+
+        if(Auth::user()->authRole()->name == 'employee') {
+            return redirect('/employee/items/index')->with('success', __('Item has been deleted.'));
         }
 
         return redirect('/items')->with('success', __('Item has been deleted.'));
@@ -486,13 +498,118 @@ class ItemController extends Controller
         }
     }
 
-    // public function employeeItemIndex()
-    // {    
-    //     return view('items.employee.item.index');
-    // }
+    public function employeeItemIndex() {    
+        return view('items.employee.item.index');
+    }
 
-    // public function employeeSalesIndex()
-    // {    
-    //     return view('items.employee.sales.index');
-    // }
+    public function employeeItemCreate() {
+        $stores = \App\Store::all();
+        $categories = \App\Category::all();
+        $allocations = \App\Allocation::all();
+        $itemstatuses = \App\ItemStatus::all();
+        $inventorystatuses = \App\InventoryStatus::all();
+        $users = \App\User::all();
+
+        return view('items.employee.item.create', [
+            'stores' => $stores,
+            'categories' => $categories,
+            'allocations' => $allocations,
+            'itemstatuses' => $itemstatuses,
+            'inventorystatuses' => $inventorystatuses,
+            'users' => [Auth::user()],
+        ]);
+    }
+
+    public function employeeItemStore(Request $request) {
+        $request->validate([
+            'item_name' => 'required',
+            'item_weight' => 'required',
+            'item_gold_rate' => 'required',
+            'item_status_id' => 'numeric|required',
+            'inventory_status_id' => 'numeric|required',
+            'category_id' => 'numeric|required',
+            'allocation_id' => 'numeric|required',
+            'store_id' => 'numeric|required',
+            'created_by' => 'required',
+        ]);
+
+        $item = new Item([
+            'item_no' => $this->generateItemNo($request->get('category_id')),
+            'item_name' => $request->get('item_name'),
+            'item_weight' => $request->get('item_weight'),
+            'item_gold_rate' => $request->get('item_gold_rate'),
+            'item_status_id' => $request->get('item_status_id'),
+            'inventory_status_id' => $request->get('inventory_status_id'),
+            'category_id' => $request->get('category_id'),
+            'allocation_id' => $request->get('allocation_id'),
+            'store_id' => $request->get('store_id'),
+            'created_by' => $request->get('created_by'),
+        ]);
+        $item->save();
+
+        if($request->get('action') == 'save entry sales') {
+            return redirect('/employee/sales/form/' . $item->id)->with('success', __('Item has been created.'));
+        }
+        
+        return redirect('/employee/items/index')->with('success', __('Item has been created.'));
+    }
+
+    public function employeeSalesEntry() {    
+        return view('items.employee.sales.entry');
+    }
+
+    public function employeeItemFind(Request $request) {
+        $itemNo = $request->get('item_no');
+
+        $item = \App\Item::where('item_no', $itemNo)->first();
+        if($item) {
+            return redirect('/employee/sales/form/' . $item->id);
+        }
+
+        return redirect()->back()->with('error', __('Item No ' . $itemNo . ' is not found.'));
+    }
+
+    public function employeeSalesForm($itemId) {
+        $salesstatus = \App\SalesStatus::where('code', 'submitted')->first();
+
+        $item = \App\Item::where('id', $itemId)->first();
+
+        return view('items.employee.sales.form', [
+            'item' => $item,
+            'salesstatus' => $salesstatus,
+        ]);
+    }
+
+    public function employeeSalesFormSave(Request $request) {
+        $itemId = $request->get('item_id');
+
+        try {
+            $request->validate([
+                'sales_price' => 'numeric|required',
+                'sales_at' => 'date|required',
+                'sales_by_id' => 'required',
+                'sales_status_id' => 'required',
+            ]);
+
+            $item = \App\Item::where('id', $itemId)->first();
+            $item->sales_price = $request->get("sales_price");
+            $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
+            $item->sales_by = $request->get("sales_by_id");
+            $item->sales_status_id = $request->get("sales_status_id");
+            $item->save();
+
+        } catch (Exception $ex) {
+            if(Auth::user()->authRole()->name == 'employee') {
+                return redirect('/employee/items/index')->with('success', __('Item has been updated.'));
+            }
+
+            return redirect('/items')->with('error', $ex->getMessage());
+        }
+
+        if(Auth::user()->authRole()->name == 'employee') {
+            return redirect('/employee/items/index')->with('success', __('Item has been updated.'));
+        }
+
+        return redirect('/items')->with('success', __('Item has been updated.'));
+    }
 }

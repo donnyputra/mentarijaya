@@ -246,12 +246,25 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         
                         <li class="nav-header">{{ __('OPERATION') }}</li>
 
+                        @if(Auth::user()->authRole()->name == 'admin')
                         <li class="nav-item">
                             <a href="{{ route('items.index') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'items.') !== false) active @endif">
                                 <i class="nav-icon fas fa-th-list"></i>
-                                <p>{{ __('Item (Book)') }}</p>
+                                <p>{{ __('Item Book') }}</p>
                             </a>
                         </li>
+                        @else
+                        <li class="nav-item">
+                            <a href="{{ route('items.employee.index') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'items.employee.') !== false) active @endif">
+                                <i class="nav-icon fas fa-th-list"></i>
+                                <p>{{ __('Item') }}</p>
+                            </a>
+                            <a href="{{ route('sales.employee.entry') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'sales.employee.') !== false) active @endif">
+                                <i class="nav-icon fas fa-th-list"></i>
+                                <p>{{ __('Sales') }}</p>
+                            </a>
+                        </li>
+                        @endif
 
                         @if(Auth::user()->authRole()->name == 'admin')
                         <li class="nav-header">{{ __('USER PERMISSION') }}</li>

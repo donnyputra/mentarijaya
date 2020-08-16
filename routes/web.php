@@ -89,4 +89,14 @@ Route::get('items/bulkupload', 'ItemController@bulkupload')->name('items.bulkupl
 Route::get('items/downloadcsvtemplate', 'ItemController@downloadCsvTemplate')->name('items.downloadcsvtemplate');
 Route::post('items/importcsv', 'ItemController@importcsv')->name('items.importcsv');
 
+Route::get('employee/items/index', 'ItemController@employeeItemIndex')->name('items.employee.index');
+Route::get('employee/items/create', 'ItemController@employeeItemCreate')->name('items.employee.create');
+Route::post('employee/items/store', 'ItemController@employeeItemStore')->name('items.employee.store');
+Route::post('employee/items/find', 'ItemController@employeeItemFind')->name('items.employee.find');
+Route::get('employee/sales/entry', 'ItemController@employeeSalesEntry')->name('sales.employee.entry');
+Route::get('employee/sales/form/{itemId}', 'ItemController@employeeSalesForm')->name('sales.employee.form');
+Route::post('employee/sales/form/save', 'ItemController@employeeSalesFormSave')->name('sales.employee.form.save');
+
+// Sales for Employee
+
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');

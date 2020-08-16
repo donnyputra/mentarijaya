@@ -9,13 +9,13 @@
 				<div class="container-fluid">
 					<div class="row mb-2">
 						<div class="col-sm-6">
-							<h1 class="m-0 text-dark">{{ __("Edit Item") }}</h1>
+							<h1 class="m-0 text-dark">{{ __("Edit Item Book") }}</h1>
 						</div><!-- /.col -->
 						<div class="col-sm-6">
 							<ol class="breadcrumb float-sm-right">
 								<li class="breadcrumb-item"><a href="/">{{ __("Home") }}</a></li>
-								<li class="breadcrumb-item"><a href="{{ route("items.index") }}">{{ __("Item") }}</a></li>
-								<li class="breadcrumb-item active">{{ __("Edit Item") }}</li>
+								<li class="breadcrumb-item"><a href="{{ route("items.index") }}">{{ __("Item Book") }}</a></li>
+								<li class="breadcrumb-item active">{{ __("Edit Item Book") }}</li>
 							</ol>
 						</div><!-- /.col -->
 					</div><!-- /.row -->
