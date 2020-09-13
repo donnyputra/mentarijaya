@@ -88,6 +88,7 @@ Route::post('item/{item}/delete', 'ItemController@delete')->name('items.delete')
 Route::get('items/bulkupload', 'ItemController@bulkupload')->name('items.bulkupload');
 Route::get('items/downloadcsvtemplate', 'ItemController@downloadCsvTemplate')->name('items.downloadcsvtemplate');
 Route::post('items/importcsv', 'ItemController@importcsv')->name('items.importcsv');
+Route::post('items/massaction', 'ItemController@massaction')->name('items.massaction');
 
 Route::get('employee/items/index', 'ItemController@employeeItemIndex')->name('items.employee.index');
 Route::get('employee/items/create', 'ItemController@employeeItemCreate')->name('items.employee.create');

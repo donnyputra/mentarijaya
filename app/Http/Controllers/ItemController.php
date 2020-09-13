@@ -108,6 +108,42 @@ class ItemController extends Controller
         ]);
     }
 
+    public function massaction(Request $request) {
+        try {
+            $itemIds = explode(",", $request->get('mass_action_data'));
+            $actionName = strtolower($request->get('mass_action'));
+
+            switch($actionName) {
+                case 'approveitems':
+                    $instockItemStatus = \App\ItemStatus::where('code', '=', 'instock')->first();
+                    foreach($itemIds as $itemId) {
+                        $item = \App\Item::findOrFail($itemId);
+                        if($item->item_status_id == $instockItemStatus->id) continue;
+
+                        $item->item_status_id = $instockItemStatus->id;
+                        $item->save();
+                    }
+                break;
+                case 'approvesales':
+                    $submittedSalesStatus = \App\SalesStatus::where('code', '=', 'submitted')->first();
+                    $completedSalesStatus = \App\SalesStatus::where('code', '=', 'completed')->first();
+                    foreach($itemIds as $itemId) {
+                        $item = \App\Item::findOrFail($itemId);
+                        if($item->sales_status_id == $submittedSalesStatus->id) {
+                            $item->sales_status_id = $completedSalesStatus->id;
+                            $item->save();
+                        }
+                    }
+                break;
+                default:
+            }
+        } catch (\Exception $ex) {
+            return redirect('/items')->with('error', $ex->getMessage());
+        }
+
+        return redirect('/items')->with('success', __('Mass actions has been executed.'));
+    }
+
     /**
      * Show the form for creating a new resource.
      *

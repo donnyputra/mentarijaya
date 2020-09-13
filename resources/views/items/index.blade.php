@@ -40,10 +40,36 @@
                                     <div class="card-body">
 
                                         <div class="row mb-3">
-                                            <div class="col-12">
-                                                <button class="btn btn-secondary float-right" type="button" data-toggle="modal"
-                                                    data-target="#advanceFilter" aria-expanded="false"
-                                                    aria-controls="advanceFilter">Search & Filter</button>
+                                            <div class="col-6">
+                                                <form action="{{ route('items.massaction') }}" method="post">
+                                                    <div class="form-row align-items-center">
+                                                        <div class="col-auto">
+                                                            <label for="mass_action">Mass Action</label>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <select class="form-control" name="mass_action" id="mass_action">
+                                                                <option value="approveitems">Approve Items</option>
+                                                                <option value="approvesales">Approve Sales</option>
+                                                                <!-- <option value="rejectitems">Reject Items</option>
+                                                                <option value="rejectsales">Reject Sales</option> -->
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            @csrf
+                                                            <input type="text" id="mass_action_data" name="mass_action_data" hidden />
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <button id="btnMassAction" type="submit"
+                                                                class="btn btn-primary">{{ __("Submit") }}</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="col-6">
+                                                <button class="btn btn-secondary float-right" type="button"
+                                                    data-toggle="modal" data-target="#advanceFilter"
+                                                    aria-expanded="false" aria-controls="advanceFilter">Search &
+                                                    Filter</button>
                                             </div>
                                         </div>
 
@@ -202,8 +228,7 @@
                                                                     class="btn btn-primary">
                                                                     Apply
                                                                 </button>
-                                                                <button id="btnClearAllFilter"
-                                                                    class="btn btn-warning">
+                                                                <button id="btnClearAllFilter" class="btn btn-warning">
                                                                     Clear All
                                                                 </button>
                                                             </div>
@@ -219,6 +244,10 @@
                                                 class="table table-responsive table-hover table-striped table-head-fixed text-nowrap">
                                                 <thead>
                                                     <tr>
+                                                        <th>
+                                                            <input type="checkbox" class="select-all checkbox"
+                                                                name="select-all" />
+                                                        </th>
                                                         <th>Action</th>
                                                         <th>Store</th>
                                                         <th>Item No</th>
@@ -241,6 +270,10 @@
                                                 <tbody>
                                                     @foreach ($items as $item)
                                                     <tr>
+                                                        <td>
+                                                            <input type="checkbox" class="select-item checkbox"
+                                                                name="select-item" value="{{ $item->id }}" />
+                                                        </td>
                                                         <td>
                                                             <a href="{{ route('items.edit', $item->id) }}"><span><i
                                                                         class="fa fa-edit"></i></span></a>
@@ -378,6 +411,53 @@ $(function() {
         window.location = arr[0];
     });
 
+
+    //button select all or cancel
+    $("#select-all").click(function() {
+        var all = $("input.select-all")[0];
+        all.checked = !all.checked
+        var checked = all.checked;
+        $("input.select-item").each(function(index, item) {
+            item.checked = checked;
+        });
+    });
+    //column checkbox select all or cancel
+    $("input.select-all").click(function() {
+        var checked = this.checked;
+        $("input.select-item").each(function(index, item) {
+            item.checked = checked;
+        });
+    });
+    //check selected items
+    $("input.select-item").click(function() {
+        var checked = this.checked;
+        var all = $("input.select-all")[0];
+        var total = $("input.select-item").length;
+        var len = $("input.select-item:checked:checked").length;
+        all.checked = len === total;
+    });
+
+    $("#btnMassAction").click(function() {
+        var actionName = $("#mass_action").val();
+        var ids = [];
+        $('input[name="select-item"]:checked').each(function (index, item) {
+            ids.push(item.value);
+        });
+
+        $("#mass_action_data").val(ids);
+
+        // $.ajax({
+        //     type: "POST"
+        //     url: "{{ route('items.massaction') }}",
+        //     data: {
+        //         action: actionName,
+        //         array: ids
+        //     },
+        //     success: function(result) {
+        //         window.location = 
+        //     }
+        // });
+    });
 });
 </script>
 @endsection
