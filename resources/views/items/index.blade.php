@@ -211,16 +211,20 @@
                                                                     <div class="col-4">
                                                                         <input type="text"
                                                                             class="form-control dateselect"
-                                                                            id="start_date" name="start_date"
+                                                                            id="dpStartDate" name="dpStartDate"
                                                                             placeholder="Start Date"
                                                                             value="{{ Request::get('startdate') }}" />
                                                                     </div>
                                                                     <div class="col-4">
                                                                         <input type="text"
                                                                             class="form-control dateselect"
-                                                                            id="end_date" name="end_date"
+                                                                            id="dpEndDate" name="dpEndDate"
                                                                             placeholder="End Date"
                                                                             value="{{ Request::get('enddate') }}" />
+                                                                    </div>
+                                                                    <div class="col-4">
+                                                                        <button class="btn btn-secondary" id="btnSetToday">Set Today</button>
+                                                                        <button class="btn btn-secondary" id="btnDpClear">Clear</button>
                                                                     </div>
                                                                 </div>
                                                             </div> <!-- /.modal-body -->
@@ -323,7 +327,7 @@
 
                                         <div class="row">
                                             <div class="col">
-                                                {{ $items->links() }}
+                                                {{ $items->appends(request()->input())->links() }}
                                             </div>
 
                                             <div class="col text-right text-muted">
@@ -364,27 +368,40 @@ $(function() {
         $('#itemperpage').val("{{ Request::get('itemperpage') }}");
 
     //initialize start date
-    $('#start_date').datepicker({
+    $('#dpStartDate').datepicker({
             format: 'dd-mm-yyyy'
         })
-        .datepicker('setDate', "{{ Request::get('startdate') ? Request::get('startdate') : date('d-m-Y') }}")
+        // .datepicker('setDate', "{{ Request::get('startdate') ? Request::get('startdate') : date('d-m-Y') }}")
+        .datepicker('setDate', "{{ Request::get('startdate') }}")
         .on('changeDate', function(e) { // TODO:validate start date
             //start date can't be larger than end date
             console.log(this.value);
         });
 
     //initialize end date
-    $('#end_date').datepicker({
+    $('#dpEndDate').datepicker({
             format: 'dd-mm-yyyy'
         })
-        .datepicker('setDate', "{{ Request::get('enddate') ? Request::get('enddate') : date('d-m-Y') }}")
+        // .datepicker('setDate', "{{ Request::get('enddate') ? Request::get('enddate') : date('d-m-Y') }}")
+        .datepicker('setDate', "{{ Request::get('enddate') }}")
         .on('changeDate', function(e) { // TODO:validate end date
             console.log(this.value);
         });
 
+    $('#btnSetToday').on('click', function(e) {
+        var todayDate = "{{ date('d-m-Y') }}";
+        $('#dpStartDate').val(todayDate);
+        $('#dpEndDate').val(todayDate);
+    });
+
+    $('#btnDpClear').on('click', function(e) {
+        $('#dpStartDate').val("");
+        $('#dpEndDate').val("");
+    });
+
     $('#btnApplyAdvanceFilter').on('click', function(e) {
-        var startDate = $('#start_date').val();
-        var endDate = $('#end_date').val();
+        var startDate = $('#dpStartDate').val();
+        var endDate = $('#dpEndDate').val();
         var filterStore = $('#filterStore').val();
         var filterCategory = $('#filterCategory').val();
         var filterAllocation = $('#filterAllocation').val();
