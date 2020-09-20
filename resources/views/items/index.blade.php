@@ -112,10 +112,11 @@
                                                                 <div class="row mb-3">
                                                                     <div class="col-4">
                                                                         <select class="form-control" id="itemperpage">
-                                                                            <option value="5">5</option>
                                                                             <option value="10">10</option>
-                                                                            <option value="15">15</option>
-                                                                            <option value="25">25</option>
+                                                                            <option value="20">20</option>
+                                                                            <option value="50">50</option>
+                                                                            <option value="100">100</option>
+                                                                            <option value="200">200</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -358,7 +359,7 @@ $(function() {
     $('#txtSearch').val("{{ Request::get('search') }}")
 
     if ("{{ Request::get('itemperpage') }}" == '')
-        $('#itemperpage').val("5");
+        $('#itemperpage').val("10"); //set minimum items per page
     else
         $('#itemperpage').val("{{ Request::get('itemperpage') }}");
 
@@ -366,7 +367,7 @@ $(function() {
     $('#start_date').datepicker({
             format: 'dd-mm-yyyy'
         })
-        .datepicker('setDate', "{{ Request::get('startdate') }}")
+        .datepicker('setDate', "{{ Request::get('startdate') ? Request::get('startdate') : date('d-m-Y') }}")
         .on('changeDate', function(e) { // TODO:validate start date
             //start date can't be larger than end date
             console.log(this.value);
@@ -376,7 +377,7 @@ $(function() {
     $('#end_date').datepicker({
             format: 'dd-mm-yyyy'
         })
-        .datepicker('setDate', "{{ Request::get('enddate') }}")
+        .datepicker('setDate', "{{ Request::get('enddate') ? Request::get('enddate') : date('d-m-Y') }}")
         .on('changeDate', function(e) { // TODO:validate end date
             console.log(this.value);
         });
@@ -445,18 +446,6 @@ $(function() {
         });
 
         $("#mass_action_data").val(ids);
-
-        // $.ajax({
-        //     type: "POST"
-        //     url: "{{ route('items.massaction') }}",
-        //     data: {
-        //         action: actionName,
-        //         array: ids
-        //     },
-        //     success: function(result) {
-        //         window.location = 
-        //     }
-        // });
     });
 });
 </script>

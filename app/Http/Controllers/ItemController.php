@@ -89,7 +89,7 @@ class ItemController extends Controller
         $items = $items->orderBy('item.id', 'desc');
 
         //Implement pagination
-        $itemPerPage = 5; // default
+        $itemPerPage = 10; // default
         if($request->get('itemperpage') != '')
             $itemPerPage = $request->get('itemperpage');
         $items = $items->paginate($itemPerPage);
@@ -125,11 +125,18 @@ class ItemController extends Controller
                     }
                 break;
                 case 'approvesales':
+                    //retrieve salesstatus
                     $submittedSalesStatus = \App\SalesStatus::where('code', '=', 'submitted')->first();
                     $completedSalesStatus = \App\SalesStatus::where('code', '=', 'completed')->first();
+
+                    //retrieve itemstatus
+                    $soldItemStatus = \App\ItemStatus::where('code', '=' , 'sold')->first();
+
+                    //update item
                     foreach($itemIds as $itemId) {
                         $item = \App\Item::findOrFail($itemId);
                         if($item->sales_status_id == $submittedSalesStatus->id) {
+                            $item->item_status_id = $soldItemStatus->id;
                             $item->sales_status_id = $completedSalesStatus->id;
                             $item->save();
                         }
@@ -685,11 +692,15 @@ class ItemController extends Controller
                 'sales_status_id' => 'required',
             ]);
 
+            //retrieve item status
+            $soldItemStatus = \App\ItemStatus::where('code', '=', 'sold')->first();
+
             $item = \App\Item::where('id', $itemId)->first();
             $item->sales_price = $request->get("sales_price");
             $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
             $item->sales_by = $request->get("sales_by_id");
             $item->sales_status_id = $request->get("sales_status_id");
+            $item->item_status_id = $soldItemStatus->id;
             $item->save();
 
         } catch (Exception $ex) {
