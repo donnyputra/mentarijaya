@@ -28,8 +28,8 @@
                             <div class="float-right">
                                 <a class="btn btn-primary mb-3" href="{{ route('items.create') }}"
                                     role="button"><span><i class="nav-icon fas fa-plus"></i></span></a>
-                                <a class="btn btn-secondary mb-3" href="{{ route('items.bulkupload') }}"
-                                    role="button">{{ __("Bulk Upload") }}</a>
+                                <!-- <a class="btn btn-secondary mb-3" href="{{ route('items.bulkupload') }}"
+                                    role="button">{{ __("Bulk Upload") }}</a> -->
                             </div>
                         </div>
                     </div>
