@@ -93,14 +93,27 @@
 
                                                                 <div class="row mb-3">
                                                                     <div class="col-12">
-                                                                        Search by Name
+                                                                        Search by Item No
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row mb-3">
+                                                                    <div class="col-8">
+                                                                        <input class="form-control" type="text"
+                                                                            id="txtSearchItemNo"
+                                                                            placeholder="Search by Item No...">
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mb-3">
+                                                                    <div class="col-12">
+                                                                        Search by Item Name
                                                                     </div>
                                                                 </div>
                                                                 <div class="row mb-3">
                                                                     <div class="col-8">
                                                                         <input class="form-control" type="text"
                                                                             id="txtSearch"
-                                                                            placeholder="Search by Name...">
+                                                                            placeholder="Search by Item Name...">
                                                                     </div>
                                                                 </div>
 
@@ -386,6 +399,7 @@ $(function() {
     $('#filterInventoryStatus').val("{{ Request::get('inventorystatus') }}");
     $('#filterSalesStatus').val("{{ Request::get('salesstatus') }}");
     $('#txtSearch').val("{{ Request::get('search') }}")
+    $('#txtSearchItemNo').val("{{ Request::get('searchitemno') }}")
 
     if ("{{ Request::get('itemperpage') }}" == '')
         $('#itemperpage').val("10"); //set minimum items per page
@@ -467,6 +481,7 @@ $(function() {
         var filterSalesStatus = $('#filterSalesStatus').val();
         var itemPerPage = $('#itemperpage').val();
         var search = $("#txtSearch").val();
+        var searchItemNo = $("#txtSearchItemNo").val();
 
         window.location = "{{ route('items.index') }}" +
             "?startdate=" + startDate +
@@ -480,7 +495,8 @@ $(function() {
             "&inventorystatus=" + filterInventoryStatus +
             "&salesstatus=" + filterSalesStatus +
             "&itemperpage=" + itemPerPage +
-            "&search=" + search;
+            "&search=" + search +
+            "&searchitemno=" + searchItemNo;
     });
 
     $("#btnClearAllFilter").on('click', function(e) {

@@ -63,9 +63,13 @@ class ItemController extends Controller
                     )
                     ->where('item.deleted_at', '=', null);
         
-        // Implement search by name
+        // Implement search by item name
         if($request->get('search') != '')
             $items = $items->whereRaw('LOWER(item.item_name) like ?', ['%'.strtolower($request->get('search')).'%']);
+        
+        // Implement search by item no
+        if($request->get('searchitemno') != '')
+            $items = $items->whereRaw('LOWER(item.item_no) like ?', ['%'.strtolower($request->get('searchitemno')).'%']);
 
         // Implement advanced filters
         if($request->get('startdate') != '')
