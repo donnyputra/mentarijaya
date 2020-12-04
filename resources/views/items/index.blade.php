@@ -292,22 +292,22 @@
                                                                 name="select-all" />
                                                         </th>
                                                         <th>Action</th>
-                                                        <th>Store</th>
+                                                        <th>Category</th>
                                                         <th>Item No</th>
                                                         <th>Item Name</th>
-                                                        <th>Category</th>
                                                         <th>Item Weight</th>
                                                         <th>Sales Price</th>
                                                         <th>Sales At</th>
-                                                        <th>Sales Status</th>
-                                                        <th>Allocation</th>
-                                                        <th>Item Status</th>
-                                                        <th>Inventory Status</th>
                                                         <th>Gold Rate</th>
+                                                        <th>Inventory Status</th>
+                                                        <th>Item Status</th>
+                                                        <th>Sales Status</th>
                                                         <th>Created By</th>
                                                         <th>Sales By</th>
                                                         <th>Created At</th>
                                                         <th>Updated At</th>
+                                                        <th>Allocation</th>
+                                                        <th>Store</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -333,22 +333,19 @@
                                                                     value="{{ $item->id }}" hidden />
                                                             </form>
                                                         </td>
-                                                        <td>{{ $item->store_name }}</td>
+                                                        <td>{{ $item->category_description }}</td>
                                                         <td>{{ $item->item_no }}</td>
                                                         <td>{{ $item->item_name }}</td>
-                                                        <td>{{ $item->category_description }}</td>
                                                         <td>{{ ($item->item_weight) . " gr" }}</td>
                                                         <td>{{ $item->sales_price == null ? "-" : ("Rp " . number_format($item->sales_price, 2, ',', '.')) }}
                                                         </td>
                                                         <td>{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('m/d/Y') }}
                                                         </td>
+                                                        <td>{{ ($item->item_gold_rate) . "%" }}</td>
+                                                        <td>{{ $item->inventory_status_description}}</td>
+                                                        <td>{{ $item->item_status_description}}</td>
                                                         <td>{{ $item->sales_status_description == null ? "-" : $item->sales_status_description }}
                                                         </td>
-
-                                                        <td>{{ $item->allocation_description }}</td>
-                                                        <td>{{ $item->item_status_description}}</td>
-                                                        <td>{{ $item->inventory_status_description}}</td>
-                                                        <td>{{ ($item->item_gold_rate) . "%" }}</td>
                                                         <td>{{ $item->created_by == null ? "-" : $item->created_by_name }}
                                                         </td>
                                                         <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}
@@ -357,6 +354,8 @@
                                                         </td>
                                                         <td>{{ Carbon\Carbon::parse($item->updated_at)->format('m/d/Y') }}
                                                         </td>
+                                                        <td>{{ $item->allocation_description }}</td>
+                                                        <td>{{ $item->store_name }}</td>
                                                     </tr>
                                                     @endforeach
                                                 </tbody>
