@@ -204,7 +204,7 @@
                                                                 </div>
                                                                 <div class="row mb-3">
                                                                     <div class="col-12">
-                                                                        Filter by Date
+                                                                        Filter by Item Entry Date
                                                                     </div>
                                                                 </div>
                                                                 <div class="row mb-3">
@@ -225,6 +225,31 @@
                                                                     <div class="col-4">
                                                                         <button class="btn btn-secondary" id="btnSetToday">Set Today</button>
                                                                         <button class="btn btn-secondary" id="btnDpClear">Clear</button>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row mb-3">
+                                                                    <div class="col-12">
+                                                                        Filter by Sales Entry Date
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row mb-3">
+                                                                    <div class="col-4">
+                                                                        <input type="text"
+                                                                            class="form-control dateselect"
+                                                                            id="dpSalesStartDate" name="dpSalesStartDate"
+                                                                            placeholder="Start Date"
+                                                                            value="{{ Request::get('salesstartdate') }}" />
+                                                                    </div>
+                                                                    <div class="col-4">
+                                                                        <input type="text"
+                                                                            class="form-control dateselect"
+                                                                            id="dpSalesEndDate" name="dpSalesEndDate"
+                                                                            placeholder="End Date"
+                                                                            value="{{ Request::get('salesenddate') }}" />
+                                                                    </div>
+                                                                    <div class="col-4">
+                                                                        <button class="btn btn-secondary" id="btnSalesSetToday">Set Today</button>
+                                                                        <button class="btn btn-secondary" id="btnSalesDpClear">Clear</button>
                                                                     </div>
                                                                 </div>
                                                             </div> <!-- /.modal-body -->
@@ -378,12 +403,31 @@ $(function() {
             console.log(this.value);
         });
 
+    $('#dpSalesStartDate').datepicker({
+            format: 'dd-mm-yyyy'
+        })
+        // .datepicker('setDate', "{{ Request::get('startdate') ? Request::get('startdate') : date('d-m-Y') }}")
+        .datepicker('setDate', "{{ Request::get('salesstartdate') }}")
+        .on('changeDate', function(e) { // TODO:validate start date
+            //start date can't be larger than end date
+            console.log(this.value);
+        });
+
     //initialize end date
     $('#dpEndDate').datepicker({
             format: 'dd-mm-yyyy'
         })
         // .datepicker('setDate', "{{ Request::get('enddate') ? Request::get('enddate') : date('d-m-Y') }}")
         .datepicker('setDate', "{{ Request::get('enddate') }}")
+        .on('changeDate', function(e) { // TODO:validate end date
+            console.log(this.value);
+        });
+    
+    $('#dpSalesEndDate').datepicker({
+            format: 'dd-mm-yyyy'
+        })
+        // .datepicker('setDate', "{{ Request::get('enddate') ? Request::get('enddate') : date('d-m-Y') }}")
+        .datepicker('setDate', "{{ Request::get('salesenddate') }}")
         .on('changeDate', function(e) { // TODO:validate end date
             console.log(this.value);
         });
@@ -394,14 +438,27 @@ $(function() {
         $('#dpEndDate').val(todayDate);
     });
 
+    $('#btnSalesSetToday').on('click', function(e) {
+        var todayDate = "{{ date('d-m-Y') }}";
+        $('#dpSalesStartDate').val(todayDate);
+        $('#dpSalesEndDate').val(todayDate);
+    });
+
     $('#btnDpClear').on('click', function(e) {
         $('#dpStartDate').val("");
         $('#dpEndDate').val("");
     });
 
+    $('#btnSalesDpClear').on('click', function(e) {
+        $('#dpSalesStartDate').val("");
+        $('#dpSalesEndDate').val("");
+    });
+
     $('#btnApplyAdvanceFilter').on('click', function(e) {
         var startDate = $('#dpStartDate').val();
         var endDate = $('#dpEndDate').val();
+        var startDateSales = $('#dpSalesStartDate').val();
+        var endDateSales = $('#dpSalesEndDate').val();
         var filterStore = $('#filterStore').val();
         var filterCategory = $('#filterCategory').val();
         var filterAllocation = $('#filterAllocation').val();
@@ -414,6 +471,8 @@ $(function() {
         window.location = "{{ route('items.index') }}" +
             "?startdate=" + startDate +
             "&enddate=" + endDate +
+            "&salesstartdate=" + startDateSales +
+            "&salesenddate=" + endDateSales +
             "&store=" + filterStore +
             "&category=" + filterCategory +
             "&allocation=" + filterAllocation +
