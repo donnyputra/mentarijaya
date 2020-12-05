@@ -66,14 +66,15 @@ class DashboardController extends Controller
                                 SUM(item.item_weight) AS total_weight,
                                 SUM(item.sales_price) AS total_sales,
                                 ROUND(SUM(item.sales_price) / SUM(item.item_weight)) AS average,
-                                GROUP_CONCAT(category.CODE) AS item_category_list
+                                GROUP_CONCAT(category.CODE) AS item_category_list,
+                                MAX(item.id) AS max_item_id
                             '))
                             ->leftJoin('category', 'item.category_id', '=', 'category.id')
                             ->whereNotNull('item.sales_at')
                             ->groupBy('sales_date', 'item_gold_rate');
 
         //Implement sort
-        $summaryCollection->orderBy('sales_date', 'desc');
+        $summaryCollection->orderBy('max_item_id', 'desc');
 
         // dd($items->toSql());
 
