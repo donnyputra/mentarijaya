@@ -60,30 +60,30 @@ class DashboardController extends Controller
         // EOT;
         // $summaryCollection = DB::select($querySummary);
         $summaryCollection = DB::table('item')
-                            ->select(DB::raw('
-                                DATE(item.sales_at) AS sales_date, 
+                            ->select(DB::raw("
+                                DATE(item.sales_at) AS 'sales_date', 
                                 item.item_gold_rate,
                                 SUM(item.item_weight) AS total_weight,
                                 SUM(item.sales_price) AS total_sales,
                                 ROUND(SUM(item.sales_price) / SUM(item.item_weight)) AS average,
                                 GROUP_CONCAT(category.CODE) AS item_category_list,
                                 MAX(item.id) AS max_item_id
-                            '))
+                            "))
                             ->leftJoin('category', 'item.category_id', '=', 'category.id')
                             ->whereNotNull('item.sales_at')
                             ->groupBy('sales_date', 'item_gold_rate');
 
         //Implement sort
-        $summaryCollection->orderBy('max_item_id', 'desc');
+        $summaryCollection->orderBy('sales_date', 'desc');
 
         // dd($items->toSql());
 
         //Implement pagination
         $itemPerPage = 10; // default
-        $summaryCollection = $summaryCollection->paginate($itemPerPage);
+        // $summaryCollection = $summaryCollection->paginate($itemPerPage);
 
         return view('dashboard.index', [
-            'summaryCollection' => $summaryCollection
+            'summaryCollection' => $summaryCollection->get()
         ]);
         
         

@@ -71,7 +71,7 @@
                                             </table>
                                         </div> <!-- ./Table Grid -->
 
-                                        <div class="row">
+                                        <!-- <div class="row">
                                             <div class="col">
                                                 {{ $summaryCollection->appends(request()->input())->links() }}
                                             </div>
@@ -80,7 +80,7 @@
                                                 Showing {{ $summaryCollection->firstItem() }} to {{ $summaryCollection->lastItem() }} out of
                                                 {{ $summaryCollection->total() }} results
                                             </div>
-                                        </div>
+                                        </div> -->
 
                                     </div>
                                 </div>
