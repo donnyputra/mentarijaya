@@ -71,17 +71,6 @@
                                             </table>
                                         </div> <!-- ./Table Grid -->
 
-                                        <!-- <div class="row">
-                                            <div class="col">
-                                                {{ $summaryCollection->appends(request()->input())->links() }}
-                                            </div>
-
-                                            <div class="col text-right text-muted">
-                                                Showing {{ $summaryCollection->firstItem() }} to {{ $summaryCollection->lastItem() }} out of
-                                                {{ $summaryCollection->total() }} results
-                                            </div>
-                                        </div> -->
-
                                     </div>
                                 </div>
                             </div>
