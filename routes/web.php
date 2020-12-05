@@ -98,6 +98,9 @@ Route::get('employee/sales/entry', 'ItemController@employeeSalesEntry')->name('s
 Route::get('employee/sales/form/{itemId}', 'ItemController@employeeSalesForm')->name('sales.employee.form');
 Route::post('employee/sales/form/save', 'ItemController@employeeSalesFormSave')->name('sales.employee.form.save');
 
+// Dashboard
+Route::resource('dashboard', 'DashboardController')->only('index');
+
 // Sales for Employee
 
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');

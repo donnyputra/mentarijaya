@@ -339,7 +339,7 @@
                                                         <td>{{ ($item->item_weight) . " gr" }}</td>
                                                         <td>{{ $item->sales_price == null ? "-" : ("Rp " . number_format($item->sales_price, 2, ',', '.')) }}
                                                         </td>
-                                                        <td>{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('m/d/Y') }}
+                                                        <td>{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('d-M-Y') }}
                                                         </td>
                                                         <td>{{ ($item->item_gold_rate) . "%" }}</td>
                                                         <td>{{ $item->inventory_status_description}}</td>
@@ -350,9 +350,9 @@
                                                         </td>
                                                         <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}
                                                         </td>
-                                                        <td>{{ Carbon\Carbon::parse($item->created_at)->format('m/d/Y') }}
+                                                        <td>{{ Carbon\Carbon::parse($item->created_at)->format('d-M-Y') }}
                                                         </td>
-                                                        <td>{{ Carbon\Carbon::parse($item->updated_at)->format('m/d/Y') }}
+                                                        <td>{{ Carbon\Carbon::parse($item->updated_at)->format('d-M-Y') }}
                                                         </td>
                                                         <td>{{ $item->allocation_description }}</td>
                                                         <td>{{ $item->store_name }}</td>

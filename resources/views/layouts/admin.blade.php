@@ -248,6 +248,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
                         @if(Auth::user()->authRole()->name == 'admin')
                         <li class="nav-item">
+                            <a href="{{ route('dashboard.index') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'dashboard.') !== false) active @endif">
+                                <i class="nav-icon fas fa-th-list"></i>
+                                <p>{{ __('Dashboard') }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('items.index') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'items.') !== false) active @endif">
                                 <i class="nav-icon fas fa-th-list"></i>
                                 <p>{{ __('Item Book') }}</p>
