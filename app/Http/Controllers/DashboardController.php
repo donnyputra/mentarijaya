@@ -149,6 +149,22 @@ class DashboardController extends Controller
                         WHERE item.sales_at IS NULL
                             AND item_status.CODE = 'instock'
                         GROUP BY item_gold_rate
+                        UNION ALL
+                        SELECT
+                            'TOTAL' AS item_gold_rate,
+                            SUM(CASE WHEN category.code = 'A' THEN item.item_weight ELSE 0 END) AS A,
+                            SUM(CASE WHEN category.code = 'CK' THEN item.item_weight ELSE 0 END) AS CK,
+                            SUM(CASE WHEN category.code = 'C' THEN item.item_weight ELSE 0 END) AS C,
+                            SUM(CASE WHEN category.code = 'GL' THEN item.item_weight ELSE 0 END) AS GL,
+                            SUM(CASE WHEN category.code = 'K' THEN item.item_weight ELSE 0 END) AS K,
+                            SUM(CASE WHEN category.code = 'L' THEN item.item_weight ELSE 0 END) AS L,
+                            SUM(CASE WHEN category.code = 'PT' THEN item.item_weight ELSE 0 END) AS PT,
+                            SUM(CASE WHEN category.code = 'W' THEN item.item_weight ELSE 0 END) AS W
+                        FROM item
+                        JOIN category ON item.category_id = category.id
+                        JOIN item_status ON item.item_status_id = item_status.id
+                        WHERE item.sales_at IS NULL
+                            AND item_status.CODE = 'instock'
                     ");
 
         return $instockItem;

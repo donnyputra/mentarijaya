@@ -31,7 +31,7 @@
                                 <!-- BAR CHART -->
                                 <div class="card">
                                     <div class="card-header">
-                                        <h3 class="card-title"><b>In Stock Item by Category</b></h3>
+                                        <h3 class="card-title">IN STOCK ITEM BY CATEGORY</h3>
 
                                         <div class="card-tools">
                                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -55,7 +55,7 @@
                         <div class="col-8">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title"><b>In Stock Item by Gold Rate</b></h3>
+                                    <h3 class="card-title">IN STOCK ITEM BY GOLD RATE</h3>
 
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -81,8 +81,8 @@
                                         </thead>
                                         <tbody>
                                             @foreach($totalWeightSummaryCollection as $row)
-                                                <tr>
-                                                    <td>{{ $row->item_gold_rate . '%' }}</td>
+                                                <tr @if($row->item_gold_rate == 'TOTAL') class="table-primary" @endif>
+                                                    <td >{{ ($row->item_gold_rate == 'TOTAL') ? $row->item_gold_rate : ($row->item_gold_rate . '%') }}</td>
                                                     <td>{{ $row->A . ' gr' }}</td>
                                                     <td>{{ $row->CK . ' gr' }}</td>
                                                     <td>{{ $row->C . ' gr' }}</td>
@@ -107,51 +107,52 @@
                         <div class="col-12">
                             <div class="table-responsive">
                                 <div class="card">
-                                    <div class="card-body">
+                                    <div class="card-header">
+                                        <h3 class="card-title">DAILY SALES SUMMARY</h3>
 
-                                        <div class="row mb-3">
-                                            <div class="col-12">
-                                                <button class="btn btn-secondary float-right" type="button"
+                                        <div class="card-tools">
+                                            <!-- <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button> -->
+                                            <button class="btn btn-tool" type="button"
                                                     data-toggle="modal" data-target="#advanceFilter"
                                                     aria-expanded="false" aria-controls="advanceFilter">
-                                                    Filter</button>
-                                            </div>
+                                                    <i class="fas fa-filter"></i></button>
                                         </div>
+                                    </div>
 
-                                        <div class="clearfix">
-                                            <table class="table table-hover table-striped table-head-fixed text-nowrap">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Date</th>
-                                                        <th>Gold Rate</th>
-                                                        <th>Total Weight</th>
-                                                        <th>Total Sales</th>
-                                                        <th>Average</th>
-                                                        <th>Sold Items</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach ($summaryCollection as $summary)
-                                                    <tr>
-                                                        <td>{{ Carbon\Carbon::parse($summary->sales_date)->format('d-M-Y') }}
-                                                        </td>
-                                                        <td>{{ $summary->item_gold_rate . "%" }}</td>
-                                                        <td>{{ $summary->total_weight . " gr" }}</td>
-                                                        <td>{{ $summary->total_sales == null ? "-" : ("Rp " . number_format($summary->total_sales, 2, ',', '.')) }}
-                                                        </td>
-                                                        <td>{{ $summary->average == null ? "-" : ("Rp " . number_format($summary->average, 2, ',', '.')) }}
-                                                        </td>
-                                                        <td>
-                                                            @foreach (array_count_values(explode(',',
-                                                            $summary->item_category_list)) as $soldKey => $soldValue)
-                                                            <b>{{ $soldKey }}</b>({{ $soldValue }})
-                                                            @endforeach
-                                                        </td>
-                                                    </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div> <!-- ./Table Grid -->
+                                    <div class="card-body">
+                                        <table class="table table-hover table-striped text-nowrap">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Gold Rate</th>
+                                                    <th>Total Weight</th>
+                                                    <th>Total Sales</th>
+                                                    <th>Average</th>
+                                                    <th>Sold Items</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($summaryCollection as $summary)
+                                                <tr>
+                                                    <td>{{ Carbon\Carbon::parse($summary->sales_date)->format('d-M-Y') }}
+                                                    </td>
+                                                    <td>{{ $summary->item_gold_rate . "%" }}</td>
+                                                    <td>{{ $summary->total_weight . " gr" }}</td>
+                                                    <td>{{ $summary->total_sales == null ? "-" : ("Rp " . number_format($summary->total_sales, 2, ',', '.')) }}
+                                                    </td>
+                                                    <td>{{ $summary->average == null ? "-" : ("Rp " . number_format($summary->average, 2, ',', '.')) }}
+                                                    </td>
+                                                    <td>
+                                                        @foreach (array_count_values(explode(',', $summary->item_category_list)) as $soldKey => $soldValue)
+                                                            <span class="badge badge-pill badge-primary">{{ $soldKey }}:{{ $soldValue }}</span>
+                                                        @endforeach
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table> <!-- ./Table Grid -->
 
                                     </div>
                                 </div>
