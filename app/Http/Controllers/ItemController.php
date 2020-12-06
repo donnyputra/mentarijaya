@@ -354,12 +354,13 @@ class ItemController extends Controller
                 'created_by' => 'required',
             ]);
 
+            $itemStatusSold = \App\ItemStatus::where('code', '=', 'sold')->first();
+
             $item = Item::findOrFail($id);
             $item->item_no = $request->get("item_no");
             $item->item_name = $request->get("item_name");
             $item->item_weight = $request->get("item_weight");
             $item->item_gold_rate = $request->get("item_gold_rate");
-            $item->item_status_id = $request->get("item_status_id");
             $item->inventory_status_id = $request->get("inventory_status_id");
             $item->category_id = $request->get("category_id");
             $item->allocation_id = $request->get("allocation_id");
@@ -368,6 +369,7 @@ class ItemController extends Controller
             $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
             $item->sales_by = $request->get("sales_by");
             $item->sales_status_id = $request->get("sales_status_id");
+            $item->item_status_id = ($item->sales_status_id != '' || $item->sales_status_id == NULL) ? $itemStatusSold->id : $request->get("item_status_id");
             $item->created_by = $request->get('created_by');
             $item->save();
 
