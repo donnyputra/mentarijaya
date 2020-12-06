@@ -112,19 +112,20 @@ class DashboardController extends Controller
         //                 ->groupBy('category_code');
 
         $instockItem = DB::SELECT("
-                        WITH src AS (
-                            SELECT 
+                        SELECT
+                            GROUP_CONCAT(CONCAT('''', category_code, '''')) AS label,
+                            GROUP_CONCAT(item_count) AS value
+                        FROM
+                            (
+                            SELECT
                                 category.code AS category_code,
                                 COUNT(item.id) AS item_count
-                            FROM category
+                            FROM
+                                category
                             LEFT JOIN item ON category.id = item.category_id AND item.sales_at IS NULL AND item.item_status_id = 2
-                            GROUP BY category_code
-                        )
-                        
-                        SELECT
-                            GROUP_CONCAT(CONCAT('''',category_code,'''')) AS label,
-                            GROUP_CONCAT(item_count) AS value
-                        FROM src
+                            GROUP BY
+                                category_code
+                        ) src
                     ");
         
         return $instockItem;
