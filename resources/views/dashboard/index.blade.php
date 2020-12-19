@@ -68,7 +68,7 @@
                                         class="table table-hover table-responsive table-striped text-nowrap">
                                         <thead>
                                             <tr>
-                                                <th>Gold Rate</th>
+                                                <th>Gold Rate</th>                                                
                                                 <th>A</th>
                                                 <th>CK</th>
                                                 <th>C</th>
@@ -77,12 +77,13 @@
                                                 <th>L</th>
                                                 <th>PT</th>
                                                 <th>W</th>
+                                                <th>TOTAL</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach($totalWeightSummaryCollection as $row)
-                                                <tr @if($row->item_gold_rate == 'TOTAL') class="table-primary" @endif>
-                                                    <td >{{ ($row->item_gold_rate == 'TOTAL') ? $row->item_gold_rate : ($row->item_gold_rate . '%') }}</td>
+                                                <tr>
+                                                    <td><strong>{{ $row->item_gold_rate . '%' }}</strong></td>
                                                     <td>{{ $row->A . ' gr' }}</td>
                                                     <td>{{ $row->CK . ' gr' }}</td>
                                                     <td>{{ $row->C . ' gr' }}</td>
@@ -91,6 +92,7 @@
                                                     <td>{{ $row->L . ' gr' }}</td>
                                                     <td>{{ $row->PT . ' gr' }}</td>
                                                     <td>{{ $row->W . ' gr' }}</td>
+                                                    <td class="table-primary"><strong>{{ $row->TOTAL . ' gr' }}</strong></td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
