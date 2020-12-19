@@ -336,12 +336,12 @@
                                                         <td>{{ $item->category_description }}</td>
                                                         <td>{{ $item->item_no }}</td>
                                                         <td>{{ $item->item_name }}</td>
-                                                        <td>{{ ($item->item_weight) . " gr" }}</td>
-                                                        <td>{{ $item->sales_price == null ? "-" : ("Rp " . number_format($item->sales_price, 2, ',', '.')) }}
+                                                        <td>{{ StringHelper::formatDecimalDisplay($item->item_weight) . " gr" }}</td>
+                                                        <td>{{ $item->sales_price == null ? "-" : ("Rp " . StringHelper::formatDecimalDisplay($item->sales_price)) }}
                                                         </td>
                                                         <td>{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('d-M-Y') }}
                                                         </td>
-                                                        <td>{{ ($item->item_gold_rate) . "%" }}</td>
+                                                        <td>{{ StringHelper::formatDecimalDisplay($item->item_gold_rate) . "%" }}</td>
                                                         <td>{{ $item->inventory_status_description}}</td>
                                                         <td>{{ $item->item_status_description}}</td>
                                                         <td>{{ $item->sales_status_description == null ? "-" : $item->sales_status_description }}

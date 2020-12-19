@@ -83,16 +83,16 @@
                                         <tbody>
                                             @foreach($totalWeightSummaryCollection as $row)
                                                 <tr>
-                                                    <td><strong>{{ $row->item_gold_rate . '%' }}</strong></td>
-                                                    <td>{{ $row->A . ' gr' }}</td>
-                                                    <td>{{ $row->CK . ' gr' }}</td>
-                                                    <td>{{ $row->C . ' gr' }}</td>
-                                                    <td>{{ $row->GL . ' gr' }}</td>
-                                                    <td>{{ $row->K . ' gr' }}</td>
-                                                    <td>{{ $row->L . ' gr' }}</td>
-                                                    <td>{{ $row->PT . ' gr' }}</td>
-                                                    <td>{{ $row->W . ' gr' }}</td>
-                                                    <td class="table-primary"><strong>{{ $row->TOTAL . ' gr' }}</strong></td>
+                                                    <td><strong>{{ StringHelper::formatDecimalDisplay($row->item_gold_rate) . '%' }}</strong></td>
+                                                    <td>{{ StringHelper::formatDecimalDisplay($row->A) . ' gr' }}</td>
+                                                    <td>{{ StringHelper::formatDecimalDisplay($row->CK) . ' gr' }}</td>
+                                                    <td>{{ StringHelper::formatDecimalDisplay($row->C) . ' gr' }}</td>
+                                                    <td>{{ StringHelper::formatDecimalDisplay($row->GL) . ' gr' }}</td>
+                                                    <td>{{ StringHelper::formatDecimalDisplay($row->K) . ' gr' }}</td>
+                                                    <td>{{ StringHelper::formatDecimalDisplay($row->L) . ' gr' }}</td>
+                                                    <td>{{ StringHelper::formatDecimalDisplay($row->PT) . ' gr' }}</td>
+                                                    <td>{{ StringHelper::formatDecimalDisplay($row->W) . ' gr' }}</td>
+                                                    <td class="table-primary"><strong>{{ StringHelper::formatDecimalDisplay($row->TOTAL) . ' gr' }}</strong></td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -140,11 +140,11 @@
                                                 <tr>
                                                     <td>{{ Carbon\Carbon::parse($summary->sales_date)->format('d-M-Y') }}
                                                     </td>
-                                                    <td>{{ $summary->item_gold_rate . "%" }}</td>
-                                                    <td>{{ $summary->total_weight . " gr" }}</td>
-                                                    <td>{{ $summary->total_sales == null ? "-" : ("Rp " . number_format($summary->total_sales, 2, ',', '.')) }}
+                                                    <td>{{ StringHelper::formatDecimalDisplay($summary->item_gold_rate) . "%" }}</td>
+                                                    <td>{{ StringHelper::formatDecimalDisplay($summary->total_weight) . " gr" }}</td>
+                                                    <td>{{ $summary->total_sales == null ? "-" : ("Rp " . StringHelper::formatDecimalDisplay($summary->total_sales)) }}
                                                     </td>
-                                                    <td>{{ $summary->average == null ? "-" : ("Rp " . number_format($summary->average, 2, ',', '.')) }}
+                                                    <td>{{ $summary->average == null ? "-" : ("Rp " . StringHelper::formatDecimalDisplay($summary->average)) }}
                                                     </td>
                                                     <td>
                                                         @foreach (array_count_values(explode(',', $summary->item_category_list)) as $soldKey => $soldValue)
