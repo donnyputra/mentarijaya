@@ -764,14 +764,13 @@ $(function() {
 
 
     //Init Sort Modal
-    var selectedSort = $("input[name=rdgSortDirection]:checked").val()
-    if (!selectedSort) {
-        $("#rdSortDirectionDesc").prop("checked", true);
-    } else {
+    if("{{ Session::has('sort.sort_direction') }}" == "1") {
         if ("{{ Session::get('sort.sort_direction') }}" == "desc")
             $("#rdSortDirectionDesc").prop("checked", true);
         else
             $("#rdSortDirectionAsc").prop("checked", true);
+    } else {
+        $("#rdSortDirectionDesc").prop("checked", true);
     }
 
     $('#sortOption').val("{{ Session::get('sort.sort_by') }}");
