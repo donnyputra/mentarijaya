@@ -11,7 +11,7 @@ class EmployeeItemsTable extends Component
 {
     use WithPagination;	
 
-    const INITIAL_SORT_FIELD = 'created_at';
+    const INITIAL_SORT_FIELD = 'id';
 
     public $perPage = 10;
     public $sortField = self::INITIAL_SORT_FIELD;
