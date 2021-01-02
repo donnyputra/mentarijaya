@@ -96,7 +96,35 @@ class ItemController extends Controller
             $items = $items->where('item.sales_status_id', '=', $request->session()->get('filter.sales_status'));
 
         //Implement sort
-        $items = $items->orderBy('item.id', 'desc');
+        $sortBy = '';
+        switch($request->session()->get('sort.sort_by')) {
+            case 'item_id':
+                $sortBy = 'item.id';
+                break;
+            case 'item_no':
+                $sortBy = 'item.item_no';
+                break;
+            case 'item_name':
+                $sortBy = 'item.item_name';
+                break;
+            case 'item_weight':
+                $sortBy = 'item.item_weight';
+                break;
+            case 'sales_price':
+                $sortBy = 'item.sales_price';
+                break;
+            default:
+                $sortBy = 'item.id';
+        }
+
+        $sortDirection = '';
+        if($request->session()->has('sort.sort_direction')) {
+            $sortDirection = $request->session()->get('sort.sort_direction');
+        } else {
+            $sortDirection = 'desc'; //default direction
+        }
+
+        $items = $items->orderBy($sortBy, $sortDirection);
 
         //Implement pagination
         $itemPerPage = 10; // default
@@ -128,6 +156,14 @@ class ItemController extends Controller
 
     public function clearfilter(Request $request) {
         $request->session()->forget('filter');
+        return redirect()->route('items.index');
+    }
+
+    public function applysort(Request $request) {
+        if(count($request->all()) > 0) {
+            $request->session()->put('sort', $request->all());
+        }
+
         return redirect()->route('items.index');
     }
 
@@ -215,35 +251,34 @@ class ItemController extends Controller
         ]);
     }
 
-    // private function getCurrentCountGroupByCategoryID() {
-    //     $result = DB::table('item')
-    //                 ->select(DB::raw('category_id, count(*) as cnt'))
-    //                 ->groupBy('category_id')
-    //                 ->orderBy('category_id', 'asc')
-    //                 ->get();
+    private function getCurrentCountGroupByCategoryID() {
+        $result = DB::table('item')
+                    ->select(DB::raw('category_id, count(*) as cnt'))
+                    ->groupBy('category_id')
+                    ->orderBy('category_id', 'asc')
+                    ->get();
 
-    //     if($result->count() <= 0)
-    //         return null;
+        if($result->count() <= 0)
+            return null;
 
-    //     return $result->keyBy('category_id')->toArray();
-    // }
+        return $result->keyBy('category_id')->toArray();
+    }
 
     private function generateItemNo($categoryId) {
         // $currentYear = date("Y");
         $category = \App\Category::findOrFail($categoryId);
 
-        // $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
+        $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
 
-        // $nextItemIncrementId = 1;
-        // if($arrCurrentCount != null)
-        //     if(array_key_exists($categoryId, $arrCurrentCount))
-        //         $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
+        $nextItemIncrementId = 1;
+        if($arrCurrentCount != null)
+            if(array_key_exists($categoryId, $arrCurrentCount))
+                $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
 
         $itemCount = \App\Item::count();
-        $nextItemId = $itemCount + 1;
-        $bookNo = ceil($nextItemId / self::MAX_ITEM_NO_IN_BOOK);
+        $bookNo = ceil(($itemCount + 1) / self::MAX_ITEM_NO_IN_BOOK);
 
-        $paddedId = str_pad($nextItemId, 4, "0", STR_PAD_LEFT);
+        $paddedId = str_pad($nextItemIncrementId, 4, "0", STR_PAD_LEFT);
 
         $itemNo = $category->code . self::ITEM_NO_SEPARATOR . $bookNo . self::ITEM_NO_SEPARATOR . $paddedId;
 

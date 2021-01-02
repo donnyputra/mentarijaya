@@ -47,7 +47,8 @@
                                                             <label for="mass_action">Mass Action</label>
                                                         </div>
                                                         <div class="col-auto">
-                                                            <select class="form-control" name="mass_action" id="mass_action">
+                                                            <select class="form-control" name="mass_action"
+                                                                id="mass_action">
                                                                 <option value="approveitems">Approve Items</option>
                                                                 <option value="approvesales">Approve Sales</option>
                                                                 <option value="refunditems">Refund Items</option>
@@ -56,7 +57,8 @@
                                                         </div>
                                                         <div class="col-auto">
                                                             @csrf
-                                                            <input type="text" id="mass_action_data" name="mass_action_data" hidden />
+                                                            <input type="text" id="mass_action_data"
+                                                                name="mass_action_data" hidden />
                                                         </div>
                                                         <div class="col-auto mt-2">
                                                             <button id="btnMassAction" type="submit"
@@ -71,6 +73,11 @@
                                                     data-toggle="modal" data-target="#advanceFilter"
                                                     aria-expanded="false" aria-controls="advanceFilter">Search &
                                                     Filter</button>
+                                                <button class="btn btn-secondary float-right" type="button" data-toggle="modal"
+                                                    data-target="#sortModal" aria-expanded="false"
+                                                    aria-controls="sortModal"><span><i
+                                                    class="fas fa-sort-alpha-down"></i></span></button>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -506,6 +513,71 @@
         </div>
     </div>
 </div> <!-- /.advanceFilter Modal -->
+
+<div class="row mb-3">
+    <div class="col-12">
+        <div id="sortModal" class="modal fade" tabindex="-1"
+            aria-labelledby="Sort" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered"
+                role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="sortModal">
+                            Sort</h5>
+                        <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-4">
+                                Sort By
+                            </div>
+                            <div class="col-4">
+                                <select class="form-control" id="sortOption">
+                                    <option value="item_id">Item ID</option>
+                                    <option value="item_no">Item No</option>
+                                    <option value="item_name">Item Name</option>
+                                    <option value="item_weight">Item Weight
+                                    </option>
+                                    <option value="sales_price">Sales Price
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-4">
+                                Sort Direction
+                            </div>
+                            <div class="col-8">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio"
+                                        name="rdgSortDirection"
+                                        id="rdSortDirectionAsc" value="asc">
+                                    <label class="form-check-label"
+                                        for="rdSortDirectionAsc">Ascending</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio"
+                                        name="rdgSortDirection"
+                                        id="rdSortDirectionDesc" value="desc">
+                                    <label class="form-check-label"
+                                        for="rdSortDirectionDesc">Descending</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnApplySort" class="btn btn-primary">
+                            Apply
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- /.sort Modal -->
 @endsection
 
 @section('custom-script')
@@ -683,12 +755,36 @@ $(function() {
     $("#btnMassAction").click(function() {
         var actionName = $("#mass_action").val();
         var ids = [];
-        $('input[name="select-item"]:checked').each(function (index, item) {
+        $('input[name="select-item"]:checked').each(function(index, item) {
             ids.push(item.value);
         });
 
         $("#mass_action_data").val(ids);
     });
+
+
+    //Init Sort Modal
+    var selectedSort = $("input[name=rdgSortDirection]:checked").val()
+    if (!selectedSort) {
+        $("#rdSortDirectionDesc").prop("checked", true);
+    } else {
+        if ("{{ Session::get('sort.sort_direction') }}" == "desc")
+            $("#rdSortDirectionDesc").prop("checked", true);
+        else
+            $("#rdSortDirectionAsc").prop("checked", true);
+    }
+
+    $('#sortOption').val("{{ Session::get('sort.sort_by') }}");
+
+    $('#btnApplySort').on('click', function(e) {
+        var sortBy = $('#sortOption').val();
+        var sortDirection = $("input[name=rdgSortDirection]:checked").val();
+
+        window.location = "{{ route('items.applysort') }}" +
+            "?sort_by=" + sortBy +
+            "&sort_direction=" + sortDirection;
+    });
+
 });
 </script>
 @endsection
