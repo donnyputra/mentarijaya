@@ -51,6 +51,12 @@
                                                 {{ $item->item_name }}
                                             </div>
                                         </div>
+                                        <div class="form-group row">
+                                            <label class="col-3 col-form-label">Item Weight</label>
+                                            <div class="col-9">
+                                                {{ $item->item_weight }} gr
+                                            </div>
+                                        </div>
 
                                         <div class="form-group row">
                                             <label for="sales_price" class="col-3 col-form-label">Sales Price</label>
