@@ -71,7 +71,18 @@
                                                     data-toggle="modal" data-target="#advanceFilter"
                                                     aria-expanded="false" aria-controls="advanceFilter">Search &
                                                     Filter</button>
-                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-12 float-right">
+                                                @if(Session::get('filter'))
+                                                    @foreach(Session::get('filter') as $key=>$val)
+                                                        @if($val != '' && $key != 'itemperpage')
+                                                        <span class="badge badge-pill badge-light float-right">{{ $key }}</span>
+                                                        @endif
+                                                    @endforeach
+                                                @endif
                                             </div>
                                         </div>
 
@@ -517,19 +528,19 @@
 <script type="text/javascript">
 $(function() {
     //Init Modal Advance Filter
-    $('#filterStore').val("{{ Request::get('store') }}");
-    $('#filterCategory').val("{{ Request::get('category') }}");
-    $('#filterAllocation').val("{{ Request::get('allocation') }}");
-    $('#filterItemStatus').val("{{ Request::get('itemstatus') }}");
-    $('#filterInventoryStatus').val("{{ Request::get('inventorystatus') }}");
-    $('#filterSalesStatus').val("{{ Request::get('salesstatus') }}");
-    $('#txtSearch').val("{{ Request::get('search') }}")
-    $('#txtSearchItemNo').val("{{ Request::get('searchitemno') }}")
+    $('#filterStore').val("{{ Session::get('filter.store') }}");
+    $('#filterCategory').val("{{ Session::get('filter.category') }}");
+    $('#filterAllocation').val("{{ Session::get('filter.allocation') }}");
+    $('#filterItemStatus').val("{{ Session::get('filter.item_status') }}");
+    $('#filterInventoryStatus').val("{{ Session::get('filter.inventory_status') }}");
+    $('#filterSalesStatus').val("{{ Session::get('filter.sales_status') }}");
+    $('#txtSearch').val("{{ Session::get('filter.item_name') }}")
+    $('#txtSearchItemNo').val("{{ Session::get('filter.item_no') }}")
 
-    if ("{{ Request::get('itemperpage') }}" == '')
+    if ("{{ Session::get('filter.itemperpage') }}" == '')
         $('#itemperpage').val("10"); //set minimum items per page
     else
-        $('#itemperpage').val("{{ Request::get('itemperpage') }}");
+        $('#itemperpage').val("{{ Session::get('filter.itemperpage') }}");
 
     $('#dpSalesRangeDate').daterangepicker({
         ranges: {
@@ -594,18 +605,18 @@ $(function() {
         var search = $("#txtSearch").val();
         var searchItemNo = $("#txtSearchItemNo").val();
 
-        window.location = "{{ route('items.index') }}" +
+        window.location = "{{ route('items.applyfilter') }}" +
             "?rangedate=" + rangeDate +
             "&rangesalesdate=" + rangesalesdate +
             "&store=" + filterStore +
             "&category=" + filterCategory +
             "&allocation=" + filterAllocation +
-            "&itemstatus=" + filterItemStatus +
-            "&inventorystatus=" + filterInventoryStatus +
-            "&salesstatus=" + filterSalesStatus +
+            "&item_status=" + filterItemStatus +
+            "&inventory_status=" + filterInventoryStatus +
+            "&sales_status=" + filterSalesStatus +
             "&itemperpage=" + itemPerPage +
-            "&search=" + search +
-            "&searchitemno=" + searchItemNo;
+            "&item_name=" + search +
+            "&item_no=" + searchItemNo;
     });
 
     $('#btnPrint').on('click', function(e) {
@@ -640,8 +651,7 @@ $(function() {
     });
 
     $("#btnClearAllFilter").on('click', function(e) {
-        var arr = window.location.href.split('?');
-        window.location = arr[0];
+        window.location = "{{ route('items.clearfilter') }}";
     });
 
 
