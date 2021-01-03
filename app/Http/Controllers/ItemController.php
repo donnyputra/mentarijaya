@@ -682,8 +682,47 @@ class ItemController extends Controller
         }
     }
 
-    public function employeeItemIndex() {    
-        return view('items.employee.item.index');
+    private function getSummaryItemWeightPerCategoryByEmployee($userId) {
+        $result = DB::SELECT("
+                        SELECT
+                            category.code AS category_code,
+                            category.description AS category_name,
+                            SUM(item.item_weight) AS sum_weight
+                        FROM item
+                        LEFT JOIN category ON item.category_id = category.id
+                        WHERE created_by = ".$userId."
+                        AND item.item_approved_at IS NULL
+                        GROUP BY category.code, category.description
+                    ");
+        
+        return $result;
+    }
+
+    private function getSummaryItemCountPerCategoryByEmployee($userId) {
+        $result = DB::SELECT("
+                        SELECT
+                            category.code AS category_code,
+                            category.description AS category_name,
+                            COUNT(item.id) AS count_item
+                        FROM item
+                        LEFT JOIN category ON item.category_id = category.id
+                        WHERE created_by = ".$userId."
+                        AND item.item_approved_at IS NULL
+                        GROUP BY category.code, category.description
+                    ");
+        
+        return $result;
+    }
+
+    public function employeeItemIndex() {
+        $data = [
+            'summary_total_weight_per_category' => $this->getSummaryItemWeightPerCategoryByEmployee(Auth::user()->id),
+            'summary_total_count_per_category' => $this->getSummaryItemCountPerCategoryByEmployee(Auth::user()->id),
+        ];
+
+        // dd($data);
+
+        return view('items.employee.item.index', $data);
     }
 
     public function employeeItemCreate() {
