@@ -171,6 +171,7 @@ class ItemController extends Controller
         try {
             $itemIds = explode(",", $request->get('mass_action_data'));
             $actionName = strtolower($request->get('mass_action'));
+            $approvedAt = \Carbon\Carbon::now()->toDateTimeString();
 
             switch($actionName) {
                 case 'approveitems':
@@ -180,6 +181,7 @@ class ItemController extends Controller
                         if($item->item_status_id == $instockItemStatus->id) continue;
 
                         $item->item_status_id = $instockItemStatus->id;
+                        $item->item_approved_at = $approvedAt;
                         $item->save();
                     }
                 break;
@@ -197,6 +199,7 @@ class ItemController extends Controller
                         if($item->sales_status_id == $submittedSalesStatus->id) {
                             $item->item_status_id = $soldItemStatus->id;
                             $item->sales_status_id = $completedSalesStatus->id;
+                            $item->sales_approved_at = $approvedAt;
                             $item->save();
                         }
                     }
