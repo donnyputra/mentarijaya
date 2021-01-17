@@ -445,7 +445,7 @@ class ItemController extends Controller
             $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
             $item->sales_by = $request->get("sales_by");
             $item->sales_status_id = $request->get("sales_status_id");
-            $item->item_status_id = ($item->sales_status_id != '' || $item->sales_status_id == NULL) ? $itemStatusSold->id : $request->get("item_status_id");
+            $item->item_status_id = ($request->get("sales_status_id") != NULL) ? $itemStatusSold->id : $request->get("item_status_id");
             $item->created_by = $request->get('created_by');
             $item->save();
 
