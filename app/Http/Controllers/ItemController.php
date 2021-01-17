@@ -786,13 +786,17 @@ class ItemController extends Controller
 
     public function employeeItemFind(Request $request) {
         $itemNo = $request->get('item_no');
+        $completedSalesStatus = \App\SalesStatus::where('code', 'completed')->first();
 
-        $item = \App\Item::where('item_no', $itemNo)->first();
+        $item = \App\Item::where('item_no', $itemNo)
+                ->where('sales_status_id', '<>', $completedSalesStatus->id)
+                ->first();
+
         if($item) {
             return redirect('/employee/sales/form/' . $item->id);
         }
 
-        return redirect()->back()->with('error', __('Item No ' . $itemNo . ' is not found.'));
+        return redirect()->back()->with('error', __('Item No ' . $itemNo . ' is not searchable.'));
     }
 
     public function employeeSalesForm($itemId) {
