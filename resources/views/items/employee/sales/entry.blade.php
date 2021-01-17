@@ -33,6 +33,96 @@
                     </div>
 
                     <div class="row">
+                        <div class="col-6">
+                            <div class="table-responsive">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Total Submitted Item Weight per Category</h3>
+
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <table
+                                            class="table table-hover table-responsive table-striped text-nowrap">
+                                            <thead>
+                                                <tr>
+                                                    <th>Category Code</th>
+                                                    <th>Category Name</th>
+                                                    <th>Total Weight</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php $totalWeight = 0; ?>
+                                                @foreach($summary_total_weight_per_category as $row)
+                                                <tr>
+                                                    <td>{{ $row->category_code }}</td>
+                                                    <td>{{ $row->category_name }}</td>
+                                                    <td>{{ StringHelper::formatDecimalDisplay($row->sum_weight) }} gr</td>
+                                                </tr>
+                                                <?php $totalWeight += $row->sum_weight; ?>
+                                                @endforeach
+
+                                                <tr>
+                                                    <td colspan="2"><strong>TOTAL</strong></td>
+                                                    <td><strong>{{ StringHelper::formatDecimalDisplay($totalWeight) }} gr</strong></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- /.card-body -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="table-responsive">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Total Sales of Submitted Item per Category</h3>
+
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-responsive table-hover table-striped text-nowrap">
+                                            <thead>
+                                                <tr>
+                                                    <th>Category Code</th>
+                                                    <th>Category Name</th>
+                                                    <th>Total Sales</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php $totalSalesPrice = 0; ?>
+                                                @foreach($summary_total_count_per_category as $row)
+                                                <tr>
+                                                    <td>{{ $row->category_code }}</td>
+                                                    <td>{{ $row->category_name }}</td>
+                                                    <td>Rp {{ StringHelper::formatDecimalDisplay($row->total_sales) }}</td>
+                                                </tr>
+                                                <?php $totalSalesPrice += $row->total_sales; ?>
+                                                @endforeach
+                                                
+                                                <tr>
+                                                    <td colspan="2"><strong>TOTAL</strong></td>
+                                                    <td><strong>Rp {{ StringHelper::formatDecimalDisplay($totalSalesPrice) }}</strong></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- /.card-body -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
                         <div class="col-12">
                             <div class="row">
                                 <div class="col-12 mb-3">

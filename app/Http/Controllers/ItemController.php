@@ -780,8 +780,47 @@ class ItemController extends Controller
         return redirect('/employee/items/index')->with('success', __('Item has been created.'));
     }
 
-    public function employeeSalesEntry() {    
-        return view('items.employee.sales.entry');
+    private function getSummarySoldItemWeightPerCategoryByEmployee($userId) {
+        $result = DB::SELECT("
+                        SELECT
+                            category.code AS category_code,
+                            category.description AS category_name,
+                            SUM(item.item_weight) AS sum_weight
+                        FROM item
+                        LEFT JOIN category ON item.category_id = category.id
+                        WHERE sales_by = ".$userId."
+                        AND item.sales_status_id = 1
+                        AND item.sales_approved_at IS NULL
+                        GROUP BY category.code, category.description
+                    ");
+        
+        return $result;
+    }
+
+    private function getSummaryTotalSalesPricePerCategoryByEmployee($userId) {
+        $result = DB::SELECT("
+                        SELECT
+                            category.code AS category_code,
+                            category.description AS category_name,
+                            SUM(item.sales_price) AS total_sales
+                        FROM item
+                        LEFT JOIN category ON item.category_id = category.id
+                        WHERE sales_by = ".$userId."
+                        AND item.sales_status_id = 1
+                        AND item.sales_approved_at IS NULL
+                        GROUP BY category.code, category.description
+                    ");
+        
+        return $result;
+    }
+
+    public function employeeSalesEntry() {
+        $data = [
+            'summary_total_weight_per_category' => $this->getSummarySoldItemWeightPerCategoryByEmployee(Auth::user()->id),
+            'summary_total_count_per_category' => $this->getSummaryTotalSalesPricePerCategoryByEmployee(Auth::user()->id),
+        ];
+        
+        return view('items.employee.sales.entry', $data);
     }
 
     public function employeeItemFind(Request $request) {
@@ -789,7 +828,7 @@ class ItemController extends Controller
         $completedSalesStatus = \App\SalesStatus::where('code', 'completed')->first();
 
         $item = \App\Item::where('item_no', $itemNo)
-                ->where('sales_status_id', '<>', $completedSalesStatus->id)
+                ->whereNull('sales_approved_at')
                 ->first();
 
         if($item) {

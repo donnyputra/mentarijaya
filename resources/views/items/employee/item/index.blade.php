@@ -37,7 +37,7 @@
                             <div class="table-responsive">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h3 class="card-title">TOTAL WEIGHT PER CATEGORY</h3>
+                                        <h3 class="card-title">Total Weight per Category</h3>
 
                                         <div class="card-tools">
                                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -74,7 +74,7 @@
                             <div class="table-responsive">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h3 class="card-title">COUNT ITEM PER CATEGORY</h3>
+                                        <h3 class="card-title">Count Item per Category</h3>
 
                                         <div class="card-tools">
                                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
