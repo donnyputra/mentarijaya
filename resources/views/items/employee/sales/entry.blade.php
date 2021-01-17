@@ -37,7 +37,7 @@
                             <div class="table-responsive">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h3 class="card-title">Total Submitted Item Weight per Category</h3>
+                                        <h3 class="card-title">Total Sold Item Weight per Category</h3>
 
                                         <div class="card-tools">
                                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -81,7 +81,7 @@
                             <div class="table-responsive">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h3 class="card-title">Total Sales of Submitted Item per Category</h3>
+                                        <h3 class="card-title">Total Sales of Sold Item per Category</h3>
 
                                         <div class="card-tools">
                                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
