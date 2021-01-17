@@ -814,10 +814,48 @@ class ItemController extends Controller
         return $result;
     }
 
+    private function getSummaryTotalCountSoldItemPerCategoryByEmployee($userId) {
+        $today = \Carbon\Carbon::now()->format('Y-m-d');
+        $result = DB::SELECT("
+                        SELECT
+                            category.code AS category_code,
+                            category.description AS category_name,
+                            COUNT(item.id) AS item_count
+                        FROM item
+                        LEFT JOIN category ON item.category_id = category.id
+                        WHERE sales_by = ".$userId."
+                        AND item.sales_status_id = 1
+                        AND DATE(sales_at) = '".$today."'
+                        AND item.sales_approved_at IS NULL
+                        GROUP BY category.code, category.description
+                    ");
+        
+        return $result;
+    }
+
+    private function getEmployeeTodaySales($userId) {
+        $today = \Carbon\Carbon::now()->format('Y-m-d');
+        $query = "SELECT
+                    DATE_FORMAT(DATE(sales_at), '%d-%b-%Y') AS sales_at,
+                    item_no,
+                    item_weight,
+                    sales_price
+                FROM item
+                WHERE created_by = ".$userId."
+                    AND DATE(sales_at) = '".$today."'
+                    AND sales_approved_at IS NULL
+                ORDER BY sales_at DESC";
+        $result = DB::SELECT($query);
+        
+        return $result;
+    }
+
     public function employeeSalesEntry() {
         $data = [
-            'summary_total_weight_per_category' => $this->getSummarySoldItemWeightPerCategoryByEmployee(Auth::user()->id),
-            'summary_total_count_per_category' => $this->getSummaryTotalSalesPricePerCategoryByEmployee(Auth::user()->id),
+            // 'summary_total_weight_per_category' => $this->getSummarySoldItemWeightPerCategoryByEmployee(Auth::user()->id),
+            // 'summary_total_count_per_category' => $this->getSummaryTotalSalesPricePerCategoryByEmployee(Auth::user()->id),
+            'total_count_sold_items' => $this->getSummaryTotalCountSoldItemPerCategoryByEmployee(Auth::user()->id),
+            'today_list' => $this->getEmployeeTodaySales(Auth::user()->id),
         ];
         
         return view('items.employee.sales.entry', $data);
