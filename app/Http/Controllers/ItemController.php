@@ -841,7 +841,7 @@ class ItemController extends Controller
                     item_weight,
                     sales_price
                 FROM item
-                WHERE created_by = ".$userId."
+                WHERE sales_by = ".$userId."
                     AND DATE(sales_at) = '".$today."'
                     AND sales_approved_at IS NULL
                 ORDER BY sales_at DESC";
