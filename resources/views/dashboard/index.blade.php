@@ -26,7 +26,7 @@
 
                     <div class="row">
 
-                        <div class="col-4">
+                        <div class="col-12">
                             <div class="table-responsive">
                                 <!-- BAR CHART -->
                                 <div class="card">
@@ -52,7 +52,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-8">
+                        <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
                                     <h3 class="card-title">IN STOCK ITEM BY GOLD RATE</h3>
@@ -63,9 +63,9 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body table-responsive">
                                     <table
-                                        class="table table-hover table-responsive table-striped text-nowrap">
+                                        class="table table-hover table-striped text-nowrap">
                                         <thead>
                                             <tr>
                                                 <th>Gold Rate</th>                                                
