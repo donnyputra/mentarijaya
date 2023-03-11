@@ -100,6 +100,7 @@ Route::post('employee/sales/form/save', 'ItemController@employeeSalesFormSave')-
 
 // Dashboard
 Route::resource('dashboard', 'DashboardController')->only('index');
+Route::get('/dashboard/summary', 'DashboardController@summaryDailyDatatable')->name('summary.datatables');
 
 // Sales for Employee
 

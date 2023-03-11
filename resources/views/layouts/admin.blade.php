@@ -24,6 +24,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker3.min.css" integrity="sha256-FAOaXTpl90/K8cXmSdsskbQN3nKYulhCpPbcFzGTWKI=" crossorigin="anonymous" />
     <!-- Chart Js -->
     <link rel="stylesheet" href="/bower_components/admin-lte/plugins/chart.js/Chart.min.css">
+    <!-- Datatable -->
+    <link rel="stylesheet" href="//cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.4.0/css/responsive.dataTables.min.css">
 
     <livewire:styles>
 </head>
@@ -429,6 +432,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha256-bqVeqGdJ7h/lYPq6xrPv/YGzMEb6dNxlfiTUHSgRCp8=" crossorigin="anonymous"></script>
     <!-- Chart Js -->
     <script src="/bower_components/admin-lte/plugins/chart.js/Chart.bundle.min.js"></script>
+    <!-- Datatable Jquery -->
+    <script src="//cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
 
     @if ($message = Session::get('success'))
     <script type="text/javascript">
