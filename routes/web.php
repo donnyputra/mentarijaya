@@ -105,3 +105,5 @@ Route::get('/dashboard/summary', 'DashboardController@summaryDailyDatatable')->n
 // Sales for Employee
 
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');
+
+Route::get('/pdf/items', 'PdfController@itemsPdf')->name('pdf.items');

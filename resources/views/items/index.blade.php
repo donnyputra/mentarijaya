@@ -58,7 +58,7 @@
                                                             @csrf
                                                             <input type="text" id="mass_action_data" name="mass_action_data" hidden />
                                                         </div>
-                                                        <div class="col-auto">
+                                                        <div class="col-auto mt-2">
                                                             <button id="btnMassAction" type="submit"
                                                                 class="btn btn-primary">{{ __("Submit") }}</button>
                                                         </div>
@@ -221,23 +221,12 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="row mb-3">
-                                                                    <div class="col-4">
+                                                                    <div class="col-lg-6 col-sm-12">
                                                                         <input type="text"
                                                                             class="form-control dateselect"
-                                                                            id="dpStartDate" name="dpStartDate"
-                                                                            placeholder="Start Date"
-                                                                            value="{{ Request::get('startdate') }}" />
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <input type="text"
-                                                                            class="form-control dateselect"
-                                                                            id="dpEndDate" name="dpEndDate"
-                                                                            placeholder="End Date"
-                                                                            value="{{ Request::get('enddate') }}" />
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <button class="btn btn-secondary" id="btnSetToday">Set Today</button>
-                                                                        <button class="btn btn-secondary" id="btnDpClear">Clear</button>
+                                                                            id="dpRangeDate" name="dpRangeDate"
+                                                                            placeholder="Range Date"
+                                                                            value="{{ Request::get('rangedate') }}" />
                                                                     </div>
                                                                 </div>
                                                                 <div class="row mb-3">
@@ -246,23 +235,12 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="row mb-3">
-                                                                    <div class="col-4">
+                                                                    <div class="col-lg-6 col-sm-12">
                                                                         <input type="text"
                                                                             class="form-control dateselect"
-                                                                            id="dpSalesStartDate" name="dpSalesStartDate"
-                                                                            placeholder="Start Date"
-                                                                            value="{{ Request::get('salesstartdate') }}" />
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <input type="text"
-                                                                            class="form-control dateselect"
-                                                                            id="dpSalesEndDate" name="dpSalesEndDate"
-                                                                            placeholder="End Date"
-                                                                            value="{{ Request::get('salesenddate') }}" />
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <button class="btn btn-secondary" id="btnSalesSetToday">Set Today</button>
-                                                                        <button class="btn btn-secondary" id="btnSalesDpClear">Clear</button>
+                                                                            id="dpSalesRangeDate" name="dpSalesRangeDate"
+                                                                            placeholder="Sales Date"
+                                                                            value="{{ Request::get('salesrangedate') }}" />
                                                                     </div>
                                                                 </div>
                                                             </div> <!-- /.modal-body -->
@@ -273,6 +251,114 @@
                                                                 </button>
                                                                 <button id="btnClearAllFilter" class="btn btn-warning">
                                                                     Clear All
+                                                                </button>
+                                                                <button class="btn btn-secondary" data-toggle="modal" data-target="#printModal" aria-expanded="false" aria-controls="printModal">Print</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div> <!-- /.advanceFilter Modal -->
+
+                                                <div id="printModal" class="modal fade" tabindex="-1" role="dialog"
+                                                    aria-labelledby="Print Modal" aria-hidden="true">
+                                                    <div class="modal-dialog modal-md modal-dialog-centered"
+                                                        role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="printModalTitle">
+                                                                    Print</h5>
+                                                                <button type="button" class="close" data-dismiss="modal"
+                                                                    aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="modal-body">
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=0 checked> Category
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=1 checked> Item No 
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=2 checked> Item Name
+                                                                    </label>
+                                                                </div>  
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=3 checked> Item Weight
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=4 checked> Sales Price
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=5 checked> Sales At
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=6 checked> Gold Rate
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=7 checked> Inventory Status
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=8 checked> Item Status
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=9 checked> Sales Status
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=10 checked> Created By
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=11 checked> Sales By
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=12 checked> Created At
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=13 checked> Updated At
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=14 checked> Allocation
+                                                                    </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" name="printed[]" value=15 checked> Store
+                                                                    </label>
+                                                                </div>
+                                                                
+                                                            </div> <!-- /.modal-body -->
+                                                            <div class="modal-footer">
+                                                                <button id="btnPrint"
+                                                                    class="btn btn-primary">
+                                                                    Print
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -388,6 +474,9 @@
 @endsection
 
 @section('custom-script')
+<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <script type="text/javascript">
 $(function() {
     //Init Modal Advance Filter
@@ -405,73 +494,52 @@ $(function() {
     else
         $('#itemperpage').val("{{ Request::get('itemperpage') }}");
 
-    //initialize start date
-    $('#dpStartDate').datepicker({
-            format: 'dd-mm-yyyy'
-        })
-        // .datepicker('setDate', "{{ Request::get('startdate') ? Request::get('startdate') : date('d-m-Y') }}")
-        .datepicker('setDate', "{{ Request::get('startdate') }}")
-        .on('changeDate', function(e) { // TODO:validate start date
-            //start date can't be larger than end date
-            console.log(this.value);
-        });
-
-    $('#dpSalesStartDate').datepicker({
-            format: 'dd-mm-yyyy'
-        })
-        // .datepicker('setDate', "{{ Request::get('startdate') ? Request::get('startdate') : date('d-m-Y') }}")
-        .datepicker('setDate', "{{ Request::get('salesstartdate') }}")
-        .on('changeDate', function(e) { // TODO:validate start date
-            //start date can't be larger than end date
-            console.log(this.value);
-        });
-
-    //initialize end date
-    $('#dpEndDate').datepicker({
-            format: 'dd-mm-yyyy'
-        })
-        // .datepicker('setDate', "{{ Request::get('enddate') ? Request::get('enddate') : date('d-m-Y') }}")
-        .datepicker('setDate', "{{ Request::get('enddate') }}")
-        .on('changeDate', function(e) { // TODO:validate end date
-            console.log(this.value);
-        });
-    
-    $('#dpSalesEndDate').datepicker({
-            format: 'dd-mm-yyyy'
-        })
-        // .datepicker('setDate', "{{ Request::get('enddate') ? Request::get('enddate') : date('d-m-Y') }}")
-        .datepicker('setDate', "{{ Request::get('salesenddate') }}")
-        .on('changeDate', function(e) { // TODO:validate end date
-            console.log(this.value);
-        });
-
-    $('#btnSetToday').on('click', function(e) {
-        var todayDate = "{{ date('d-m-Y') }}";
-        $('#dpStartDate').val(todayDate);
-        $('#dpEndDate').val(todayDate);
+    $('#dpSalesRangeDate').daterangepicker({
+        ranges: {
+           'Today': [moment(), moment()],
+           'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+           'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+           'This Month': [moment().startOf('month'), moment().endOf('month')],
+           'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        drops: 'up',
+        locale: {
+            cancelLabel: 'Clear',
+            format: 'DD-MMM-YYYY',
+        },
     });
 
-    $('#btnSalesSetToday').on('click', function(e) {
-        var todayDate = "{{ date('d-m-Y') }}";
-        $('#dpSalesStartDate').val(todayDate);
-        $('#dpSalesEndDate').val(todayDate);
+    $('#dpRangeDate').daterangepicker({
+        ranges: {
+           'Today': [moment(), moment()],
+           'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+           'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+           'This Month': [moment().startOf('month'), moment().endOf('month')],
+           'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        drops: 'up',
+        locale: {
+            cancelLabel: 'Clear',
+            format: 'DD-MMM-YYYY',
+        },
     });
 
-    $('#btnDpClear').on('click', function(e) {
-        $('#dpStartDate').val("");
-        $('#dpEndDate').val("");
+    $('#dpSalesRangeDate').val('');
+    $('#dpRangeDate').val('');
+
+    $('#dpSalesRangeDate').on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
     });
 
-    $('#btnSalesDpClear').on('click', function(e) {
-        $('#dpSalesStartDate').val("");
-        $('#dpSalesEndDate').val("");
+    $('#dpRangeDate').on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
     });
 
     $('#btnApplyAdvanceFilter').on('click', function(e) {
-        var startDate = $('#dpStartDate').val();
-        var endDate = $('#dpEndDate').val();
-        var startDateSales = $('#dpSalesStartDate').val();
-        var endDateSales = $('#dpSalesEndDate').val();
+        var rangeDate = $('#dpRangeDate').val();
+        var salesRangeDate = $('#dpSalesRangeDate').val();
         var filterStore = $('#filterStore').val();
         var filterCategory = $('#filterCategory').val();
         var filterAllocation = $('#filterAllocation').val();
@@ -483,10 +551,8 @@ $(function() {
         var searchItemNo = $("#txtSearchItemNo").val();
 
         window.location = "{{ route('items.index') }}" +
-            "?startdate=" + startDate +
-            "&enddate=" + endDate +
-            "&salesstartdate=" + startDateSales +
-            "&salesenddate=" + endDateSales +
+            "?rangedate=" + rangeDate +
+            "&rangesalesdate=" + salesRangeDate +
             "&store=" + filterStore +
             "&category=" + filterCategory +
             "&allocation=" + filterAllocation +
@@ -495,6 +561,37 @@ $(function() {
             "&salesstatus=" + filterSalesStatus +
             "&itemperpage=" + itemPerPage +
             "&search=" + search +
+            "&searchitemno=" + searchItemNo;
+    });
+
+    $('#btnPrint').on('click', function(e) {
+        var rangeDate = $('#dpRangeDate').val();
+        var salesRangeDate = $('#dpSalesRangeDate').val();
+        var filterStore = $('#filterStore').val();
+        var filterCategory = $('#filterCategory').val();
+        var filterAllocation = $('#filterAllocation').val();
+        var filterItemStatus = $('#filterItemStatus').val();
+        var filterInventoryStatus = $('#filterInventoryStatus').val();
+        var filterSalesStatus = $('#filterSalesStatus').val();
+        var itemPerPage = $('#itemperpage').val();
+        var search = $("#txtSearch").val();
+        var searchItemNo = $("#txtSearchItemNo").val();
+        var printed = $.map($(':checkbox[name=printed\\[\\]]:checked'), function(n, i){
+            return n.value;
+        }).join(',');
+
+        window.location = "{{ route('pdf.items') }}" +
+            "?rangedate=" + rangeDate +
+            "&rangesalesdate=" + salesRangeDate +
+            "&store=" + filterStore +
+            "&category=" + filterCategory +
+            "&allocation=" + filterAllocation +
+            "&itemstatus=" + filterItemStatus +
+            "&inventorystatus=" + filterInventoryStatus +
+            "&salesstatus=" + filterSalesStatus +
+            "&itemperpage=" + itemPerPage +
+            "&search=" + search +
+            "&printed=" + printed +
             "&searchitemno=" + searchItemNo;
     });
 

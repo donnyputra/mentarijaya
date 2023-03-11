@@ -72,14 +72,16 @@ class ItemController extends Controller
             $items = $items->whereRaw('LOWER(item.item_no) like ?', ['%'.strtolower($request->get('searchitemno')).'%']);
 
         // Implement advanced filters
-        if($request->get('startdate') != '')
-            $items = $items->whereDate('item.created_at', '>=', \Carbon\Carbon::parse($request->get('startdate'))->format('Y-m-d') );
-        if($request->get('enddate') != '')
-            $items = $items->whereDate('item.created_at', '<=', \Carbon\Carbon::parse($request->get('enddate'))->format('Y-m-d') );
-        if($request->get('salesstartdate') != '')
-            $items = $items->whereDate('item.sales_at', '>=', \Carbon\Carbon::parse($request->get('salesstartdate'))->format('Y-m-d') );
-        if($request->get('salesenddate') != '')
-            $items = $items->whereDate('item.sales_at', '<=', \Carbon\Carbon::parse($request->get('salesenddate'))->format('Y-m-d') );
+        if($request->get('rangedate') != ''){
+            $exploded = explode(" - ", $request->get('rangedate'));
+            $items = $items->whereDate('item.created_at', '>=', \Carbon\Carbon::parse($exploded[0])->format('Y-m-d') );
+            $items = $items->whereDate('item.created_at', '<=', \Carbon\Carbon::parse($exploded[1])->format('Y-m-d') );
+        }
+        if($request->get('salesrangedate') != null){
+            $exploded = explode(" - ", $request->get('salesrangedate'));
+            $items = $items->whereDate('item.sales_at', '>=', \Carbon\Carbon::parse($exploded[0])->format('Y-m-d') );
+            $items = $items->whereDate('item.sales_at', '<=', \Carbon\Carbon::parse($exploded[1])->format('Y-m-d') );
+        }
         if($request->get('store') != '')
             $items = $items->where('item.store_id', '=', $request->get('store'));
         if($request->get('category') != '')
