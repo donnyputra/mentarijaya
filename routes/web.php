@@ -82,7 +82,7 @@ Route::post('roles/{role}/update', 'RoleController@update')->name('roles.update'
 Route::post('roles/{role}/delete', 'RoleController@delete')->name('roles.delete');
 
 // Book (Items)
-Route::resource('items', 'ItemController')->only('index', 'create', 'store', 'edit');
+Route::resource('items', 'ItemController')->only('index', 'create', 'store', 'edit', 'show');
 Route::post('item/{item}/update', 'ItemController@update')->name('items.update');
 Route::post('item/{item}/delete', 'ItemController@delete')->name('items.delete');
 Route::get('items/bulkupload', 'ItemController@bulkupload')->name('items.bulkupload');

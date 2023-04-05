@@ -295,7 +295,15 @@ class ItemController extends Controller
      */
     public function show($id)
     {
-        //
+        try {
+            $item = Item::findOrFail($id);
+        } catch (Exception $ex) {
+            return redirect()->route('items.index')->withError($ex->getMessage());
+        }
+
+        return view('items.show', [
+            'item' => $item
+        ]);
     }
 
     /**

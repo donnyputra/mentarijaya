@@ -424,7 +424,7 @@
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($items as $item)
-                                                    <tr>
+                                                    <tr onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">
                                                         <td>
                                                             <input type="checkbox" class="select-item checkbox"
                                                                 name="select-item" value="{{ $item->id }}" />
@@ -516,8 +516,7 @@
     var lastResult, countResults = 0;
 
     function onScanSuccess(decodedText, decodedResult) {
-        searchItemNo = decodedText;
-        window.location = "{{ route('items.index') }}" + "?searchitemno=" + searchItemNo;
+        window.location = "{{ URL('items') }}" + "/" + decodedText;
     }
 
     var html5QrcodeScanner = new Html5QrcodeScanner(

@@ -32,4 +32,36 @@ class Item extends Model
             : static::where('item_no', 'like', '%'.$query.'%')
                 ->orWhere('item_name', 'like', '%'.$query.'%');
     }
+
+    public function itemStatus() {
+        return $this->belongsTo('App\ItemStatus');
+    }
+
+    public function inventoryStatus() {
+        return $this->belongsTo('App\InventoryStatus');
+    }
+    
+    public function category() {
+        return $this->belongsTo('App\Category');
+    }
+
+    public function allocation() {
+        return $this->belongsTo('App\Allocation');
+    }
+
+    public function salesStatus() {
+        return $this->belongsTo('App\SalesStatus', 'sales_status_id');
+    }
+
+    public function store() {
+        return $this->belongsTo('App\Store');
+    }
+
+    public function createdBy() {
+        return $this->belongsTo('App\User', 'created_by');
+    }
+
+    public function salesBy() {
+        return $this->belongsTo('App\User', 'sales_by');
+    }
 }
