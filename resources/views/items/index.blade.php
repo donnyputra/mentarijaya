@@ -366,6 +366,31 @@
                                                     </div>
                                                 </div> <!-- /.advanceFilter Modal -->
 
+                                                <div id="scannerModal" class="modal fade" tabindex="-1" role="dialog"
+                                                    aria-labelledby="Scanner Modal" aria-hidden="true">
+                                                    <div class="modal-dialog modal-md modal-dialog-centered"
+                                                        role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="scannerModalTitle">
+                                                                    Scanner</h5>
+                                                                <button type="button" class="close" data-dismiss="modal"
+                                                                    aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="modal-body">
+                                                                <div id="qr-reader" style="width:100%"></div>
+                                                                <div id="qr-reader-results"></div>
+                                                            </div> <!-- /.modal-body -->
+                                                            <div class="modal-footer">
+                                                                
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div> <!-- /.scanner Modal -->
+
                                             </div>
                                         </div>
 
@@ -462,6 +487,9 @@
                                                 <button class="btn btn-secondary float-right mr-2" 
                                                     data-toggle="modal" data-target="#printModal" 
                                                     aria-expanded="false" aria-controls="printModal">Print</button>
+                                                <button class="btn btn-secondary float-right mr-2" 
+                                                    data-toggle="modal" data-target="#scannerModal" 
+                                                    aria-expanded="false" aria-controls="scannerModal">Scanner</button>
                                             </div>
                                         </div>
 
@@ -483,6 +511,20 @@
 <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script type="text/javascript" src="//cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script type="text/javascript">
+    var lastResult, countResults = 0;
+
+    function onScanSuccess(decodedText, decodedResult) {
+        searchItemNo = decodedText;
+        window.location = "{{ route('items.index') }}" + "?searchitemno=" + searchItemNo;
+    }
+
+    var html5QrcodeScanner = new Html5QrcodeScanner(
+        "qr-reader", { fps: 10, qrbox: 250 });
+    html5QrcodeScanner.render(onScanSuccess);
+
+</script>
 <script type="text/javascript">
 $(function() {
     //Init Modal Advance Filter
@@ -514,6 +556,7 @@ $(function() {
             cancelLabel: 'Clear',
             format: 'DD-MMM-YYYY',
         },
+        autoUpdateInput: false,
     });
 
     $('#dpRangeDate').daterangepicker({
@@ -530,10 +573,19 @@ $(function() {
             cancelLabel: 'Clear',
             format: 'DD-MMM-YYYY',
         },
+        autoUpdateInput: false,
+    });
+
+    $('#dpSalesRangeDate').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
     });
 
     $('#dpSalesRangeDate').on('cancel.daterangepicker', function(ev, picker) {
         $(this).val('');
+    });
+
+    $('#dpRangeDate').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
     });
 
     $('#dpRangeDate').on('cancel.daterangepicker', function(ev, picker) {
