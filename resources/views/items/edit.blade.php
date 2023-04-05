@@ -81,7 +81,7 @@
 																	<div class="input-group">
 																		<input type="text" class="form-control" name="item_weight" required value="{{ $item->item_weight }}" />
 																		<div class="input-group-append">
-																			<div class="input-group-text">mg</div>
+																			<div class="input-group-text">gr</div>
 																		</div>
 																	</div>
 																</div>
@@ -180,7 +180,7 @@
 																		<div class="input-group-prepend">
 																				<div class="input-group-text">Rp</div>
 																		</div>
-																		<input type="text" class="form-control" name="sales_price" value="{{ $item->sales_price }}" />
+																		<input type="text" class="form-control sales_price" name="sales_price" value="{{ $item->sales_price }}" />
 																	</div>
 																</div>
 															</div>
@@ -229,6 +229,7 @@
 @endsection
 
 @section('custom-script')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.13.4/jquery.mask.min.js"></script>
 <script type="text/javascript">
 	$(function() {
         $('#sales_at').datepicker();
@@ -242,5 +243,7 @@
 			document.getElementById("item_gold_rate").value = 37.5;
 		}
 	});
+
+	$('.sales_price').mask("#.##0,00", {reverse: true});
 </script>
 @endsection

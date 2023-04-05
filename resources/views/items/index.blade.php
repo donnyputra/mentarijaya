@@ -50,8 +50,8 @@
                                                             <select class="form-control" name="mass_action" id="mass_action">
                                                                 <option value="approveitems">Approve Items</option>
                                                                 <option value="approvesales">Approve Sales</option>
-                                                                <!-- <option value="rejectitems">Reject Items</option>
-                                                                <option value="rejectsales">Reject Sales</option> -->
+                                                                <option value="refunditems">Refund Items</option>
+                                                                <!-- <option value="rejectsales">Reject Sales</option> -->
                                                             </select>
                                                         </div>
                                                         <div class="col-auto">
@@ -65,17 +65,19 @@
                                                     </div>
                                                 </form>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-6 col-xs-12">
+                                                <div class="col-auto">
                                                 <button class="btn btn-secondary float-right" type="button"
                                                     data-toggle="modal" data-target="#advanceFilter"
                                                     aria-expanded="false" aria-controls="advanceFilter">Search &
                                                     Filter</button>
+                                                </div>
                                             </div>
                                         </div>
 
                                         <div class="row mb-3">
                                             <div class="col-12">
-                                                <div id="advanceFilter" class="modal fade" tabindex="-1" role="dialog"
+                                                <div id="advanceFilter" class="modal fade" tabindex="-2" role="dialog"
                                                     aria-labelledby="Advance Filter" aria-hidden="true">
                                                     <div class="modal-dialog modal-xl modal-dialog-centered"
                                                         role="document">
@@ -240,7 +242,7 @@
                                                                             class="form-control dateselect"
                                                                             id="dpSalesRangeDate" name="dpSalesRangeDate"
                                                                             placeholder="Sales Date"
-                                                                            value="{{ Request::get('salesrangedate') }}" />
+                                                                            value="{{ Request::get('rangesalesdate') }}" />
                                                                     </div>
                                                                 </div>
                                                             </div> <!-- /.modal-body -->
@@ -252,7 +254,6 @@
                                                                 <button id="btnClearAllFilter" class="btn btn-warning">
                                                                     Clear All
                                                                 </button>
-                                                                <button class="btn btn-secondary" data-toggle="modal" data-target="#printModal" aria-expanded="false" aria-controls="printModal">Print</button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -457,6 +458,11 @@
                                                 Showing {{ $items->firstItem() }} to {{ $items->lastItem() }} out of
                                                 {{ $items->total() }} results
                                             </div>
+                                            <div class="col text-right">
+                                                <button class="btn btn-secondary float-right mr-2" 
+                                                    data-toggle="modal" data-target="#printModal" 
+                                                    aria-expanded="false" aria-controls="printModal">Print</button>
+                                            </div>
                                         </div>
 
                                     </div>
@@ -525,9 +531,6 @@ $(function() {
             format: 'DD-MMM-YYYY',
         },
     });
-
-    $('#dpSalesRangeDate').val('');
-    $('#dpRangeDate').val('');
 
     $('#dpSalesRangeDate').on('cancel.daterangepicker', function(ev, picker) {
         $(this).val('');

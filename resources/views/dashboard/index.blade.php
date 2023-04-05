@@ -162,7 +162,7 @@
         $('#summary').DataTable({
             processing: true,
             serverSide: true,
-            responsive: true,
+            scrollX: true,
             ajax: "{{ route('summary.datatables') }}",
             columns: [
                 {data: 'sales_date', name: 'sales_date'},

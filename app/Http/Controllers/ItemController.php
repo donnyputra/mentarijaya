@@ -152,6 +152,21 @@ class ItemController extends Controller
                         }
                     }
                 break;
+                case 'refunditems':
+                    $soldItemStatus = \App\ItemStatus::where('code', '=' , 'sold')->first();
+                    $instockItemStatus = \App\ItemStatus::where('code', '=', 'instock')->first();
+
+                    foreach($itemIds as $itemId) {
+                        $item = \App\Item::findOrFail($itemId);
+                        if($item->item_status_id == $soldItemStatus->id) {
+                            $item->sales_status_id = null;
+                            $item->sales_by = null;
+                            $item->sales_price = null;
+                            $item->sales_at = null;
+                            $item->item_status_id = $instockItemStatus->id;
+                            $item->save();
+                        }
+                    }
                 default:
             }
         } catch (\Exception $ex) {
@@ -349,7 +364,7 @@ class ItemController extends Controller
                 'category_id' => 'numeric|required',
                 'allocation_id' => 'numeric|required',
                 'store_id' => 'numeric|required',
-                'sales_price' => 'numeric|nullable',
+                'sales_price' => 'nullable',
                 'sales_at' => 'date|nullable',
                 'sales_by' => 'nullable',
                 'sales_status_id' => 'nullable',
@@ -367,7 +382,7 @@ class ItemController extends Controller
             $item->category_id = $request->get("category_id");
             $item->allocation_id = $request->get("allocation_id");
             $item->store_id = $request->get("store_id");
-            $item->sales_price = $request->get("sales_price");
+            $item->sales_price = str_replace(",", "", explode(".", $request->get("sales_price"))[0]);
             $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
             $item->sales_by = $request->get("sales_by");
             $item->sales_status_id = $request->get("sales_status_id");
