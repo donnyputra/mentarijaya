@@ -75,191 +75,6 @@
                                             </div>
                                         </div>
 
-                                        <div class="row mb-3">
-                                            <div class="col-12">
-                                                <div id="advanceFilter" class="modal fade" tabindex="-1"
-                                                    aria-labelledby="Advance Filter" aria-hidden="true">
-                                                    <div class="modal-dialog modal-xl modal-dialog-centered">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title" id="advanceFilterTitle">
-                                                                    Search & Filter</h5>
-                                                                <button type="button" class="close" data-dismiss="modal"
-                                                                    aria-label="Close">
-                                                                    <span aria-hidden="true">&times;</span>
-                                                                </button>
-                                                            </div>
-
-                                                            <div class="modal-body">
-
-                                                                <div class="row mb-3">
-                                                                    <div class="col-12">
-                                                                        Search by Item No
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-8">
-                                                                        <input class="form-control" type="text"
-                                                                            id="txtSearchItemNo"
-                                                                            placeholder="Search by Item No...">
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="row mb-3">
-                                                                    <div class="col-12">
-                                                                        Search by Item Name
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-8">
-                                                                        <input class="form-control" type="text"
-                                                                            id="txtSearch"
-                                                                            placeholder="Search by Item Name...">
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="row mb-3">
-                                                                    <div class="col-12">
-                                                                        Show Items
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-4">
-                                                                        <select class="form-control" id="itemperpage">
-                                                                            <option value="10">10</option>
-                                                                            <option value="20">20</option>
-                                                                            <option value="50">50</option>
-                                                                            <option value="100">100</option>
-                                                                            <option value="200">200</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-12">
-                                                                        Filter by Attribute
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-4">
-                                                                        <select class="form-control" id="filterStore">
-                                                                            <option value="">- All Stores -</option>
-                                                                            @foreach ($stores as $store)
-                                                                            <option value="{{ $store->id }}">
-                                                                                {{ $store->name }}
-                                                                            </option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <select class="form-control"
-                                                                            id="filterCategory">
-                                                                            <option value="">- All Categories -
-                                                                            </option>
-                                                                            @foreach ($categories as $category)
-                                                                            <option value="{{ $category->id }}">
-                                                                                {{ $category->description }}
-                                                                            </option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <select class="form-control"
-                                                                            id="filterAllocation">
-                                                                            <option value="">- All Allocations -
-                                                                            </option>
-                                                                            @foreach ($allocations as $allocation)
-                                                                            <option value="{{ $allocation->id }}">
-                                                                                {{ $allocation->description }}
-                                                                            </option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-4">
-                                                                        <select class="form-control"
-                                                                            id="filterItemStatus">
-                                                                            <option value="">- All Item Statuses -
-                                                                            </option>
-                                                                            @foreach ($itemstatuses as $itemstatus)
-                                                                            <option value="{{ $itemstatus->id }}">
-                                                                                {{ $itemstatus->description }}
-                                                                            </option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <select class="form-control"
-                                                                            id="filterInventoryStatus">
-                                                                            <option value="">- All Inventory
-                                                                                Statuses -
-                                                                            </option>
-                                                                            @foreach ($inventorystatuses as
-                                                                            $inventorystatus)
-                                                                            <option value="{{ $inventorystatus->id }}">
-                                                                                {{ $inventorystatus->description }}
-                                                                            </option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <select class="form-control"
-                                                                            id="filterSalesStatus">
-                                                                            <option value="">- All Sales Statuses -
-                                                                            </option>
-                                                                            @foreach ($salesstatuses as
-                                                                            $salesstatus)
-                                                                            <option value="{{ $salesstatus->id }}">
-                                                                                {{ $salesstatus->description }}
-                                                                            </option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-12">
-                                                                        Filter by Item Entry Date
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-lg-6 col-sm-12">
-                                                                        <input type="text"
-                                                                            class="form-control dateselect"
-                                                                            id="dpRangeDate" name="dpRangeDate"
-                                                                            placeholder="Range Date"
-                                                                            value="{{ Request::get('rangedate') }}" />
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-12">
-                                                                        Filter by Sales Entry Date
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-lg-6 col-sm-12">
-                                                                        <input type="text"
-                                                                            class="form-control dateselect"
-                                                                            id="dpSalesRangeDate" name="dpSalesRangeDate"
-                                                                            placeholder="Sales Date"
-                                                                            value="{{ Request::get('rangesalesdate') }}" />
-                                                                    </div>
-                                                                </div>
-                                                            </div> <!-- /.modal-body -->
-                                                            <div class="modal-footer">
-                                                                <button id="btnApplyAdvanceFilter"
-                                                                    class="btn btn-primary">
-                                                                    Apply
-                                                                </button>
-                                                                <button id="btnClearAllFilter" class="btn btn-warning">
-                                                                    Clear All
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div> <!-- /.advanceFilter Modal -->
-                                            </div>
-                                        </div>
-
                                         <div class="clearfix">
                                             <table
                                                 class="table table-responsive table-hover table-striped table-head-fixed text-nowrap">
@@ -371,6 +186,183 @@
         </div>
     </div>
 </div>
+
+<div id="advanceFilter" class="modal fade" tabindex="-1"
+    aria-labelledby="Advance Filter" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="advanceFilterTitle">
+                    Search & Filter</h5>
+                <button type="button" class="close" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        Search by Item No
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-8">
+                        <input class="form-control" type="text"
+                            id="txtSearchItemNo"
+                            placeholder="Search by Item No...">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        Search by Item Name
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-8">
+                        <input class="form-control" type="text"
+                            id="txtSearch"
+                            placeholder="Search by Item Name...">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        Show Items
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <select class="form-control" id="itemperpage">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        Filter by Attribute
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <select class="form-control" id="filterStore">
+                            <option value="">- All Stores -</option>
+                            @foreach ($stores as $store)
+                            <option value="{{ $store->id }}">
+                                {{ $store->name }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <select class="form-control"
+                            id="filterCategory">
+                            <option value="">- All Categories -
+                            </option>
+                            @foreach ($categories as $category)
+                            <option value="{{ $category->id }}">
+                                {{ $category->description }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <select class="form-control"
+                            id="filterAllocation">
+                            <option value="">- All Allocations -
+                            </option>
+                            @foreach ($allocations as $allocation)
+                            <option value="{{ $allocation->id }}">
+                                {{ $allocation->description }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <select class="form-control"
+                            id="filterItemStatus">
+                            <option value="">- All Item Statuses -
+                            </option>
+                            @foreach ($itemstatuses as $itemstatus)
+                            <option value="{{ $itemstatus->id }}">
+                                {{ $itemstatus->description }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <select class="form-control"
+                            id="filterInventoryStatus">
+                            <option value="">- All Inventory
+                                Statuses -
+                            </option>
+                            @foreach ($inventorystatuses as
+                            $inventorystatus)
+                            <option value="{{ $inventorystatus->id }}">
+                                {{ $inventorystatus->description }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <select class="form-control"
+                            id="filterSalesStatus">
+                            <option value="">- All Sales Statuses -
+                            </option>
+                            @foreach ($salesstatuses as
+                            $salesstatus)
+                            <option value="{{ $salesstatus->id }}">
+                                {{ $salesstatus->description }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        Filter by Item Entry Date
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg-6 col-sm-12">
+                        <input type="text"
+                            class="form-control dateselect"
+                            id="dpRangeDate" name="dpRangeDate"
+                            placeholder="Range Date"
+                            value="{{ Request::get('rangedate') }}" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        Filter by Sales Entry Date
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg-6 col-sm-12">
+                        <input type="text"
+                            class="form-control dateselect"
+                            id="dpSalesRangeDate" name="dpSalesRangeDate"
+                            placeholder="Sales Date"
+                            value="{{ Request::get('rangesalesdate') }}" />
+                    </div>
+                </div>
+            </div> <!-- /.modal-body -->
+            <div class="modal-footer">
+                <button id="btnApplyAdvanceFilter"
+                    class="btn btn-primary">
+                    Apply
+                </button>
+                <button id="btnClearAllFilter" class="btn btn-warning">
+                    Clear All
+                </button>
+            </div>
+        </div>
+    </div>
+</div> <!-- /.advanceFilter Modal -->
 
 <div id="scannerModal" class="modal fade" tabindex="-1"
     aria-labelledby="Scanner Modal" aria-hidden="true">
