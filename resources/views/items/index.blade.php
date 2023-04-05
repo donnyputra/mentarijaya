@@ -79,11 +79,10 @@
                                             <div class="col-12">
                                                 <div id="advanceFilter" class="modal fade" tabindex="-1"
                                                     aria-labelledby="Advance Filter" aria-hidden="true">
-                                                    <div class="modal-dialog modal-xl modal-dialog-centered"
-                                                        role="document">
+                                                    <div class="modal-dialog modal-xl modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                                <h5 class="modal-title" id="exampleModalLongTitle">
+                                                                <h5 class="modal-title" id="advanceFilterTitle">
                                                                     Search & Filter</h5>
                                                                 <button type="button" class="close" data-dismiss="modal"
                                                                     aria-label="Close">
@@ -261,8 +260,7 @@
 
                                                 <div id="printModal" class="modal fade" tabindex="-1"
                                                     aria-labelledby="Print Modal" aria-hidden="true">
-                                                    <div class="modal-dialog modal-md modal-dialog-centered"
-                                                        role="document">
+                                                    <div class="modal-dialog modal-md modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title" id="printModalTitle">
@@ -483,8 +481,7 @@
 
 <div id="scannerModal" class="modal fade" tabindex="-1"
     aria-labelledby="Scanner Modal" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-dialog-centered"
-        role="document">
+    <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="scannerModalTitle">

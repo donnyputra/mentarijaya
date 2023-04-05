@@ -48,7 +48,7 @@
 											</div>
 					
 											<div class="row">
-												<div class="col-6 mb-3">
+												<div class="col-md-6 mb-3 col-xs-12">
 													<div class="card">
 														<div class="card-header">
 															<div class="card-title">{{ __("Item Information") }}</div>
@@ -122,7 +122,7 @@
 														</div>
 													</div>
 												</div>
-												<div class="col-6 mb-3">
+												<div class="col-md-6 mb-3 col-xs-12">
 													<div class="card">
 														<div class="card-header">
 															<div class="card-title">{{ __("Sales Information") }}</div>
