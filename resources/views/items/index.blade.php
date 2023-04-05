@@ -257,113 +257,6 @@
                                                         </div>
                                                     </div>
                                                 </div> <!-- /.advanceFilter Modal -->
-
-                                                <div id="printModal" class="modal fade" tabindex="-1"
-                                                    aria-labelledby="Print Modal" aria-hidden="true">
-                                                    <div class="modal-dialog modal-md modal-dialog-centered">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title" id="printModalTitle">
-                                                                    Print</h5>
-                                                                <button type="button" class="close" data-dismiss="modal"
-                                                                    aria-label="Close">
-                                                                    <span aria-hidden="true">&times;</span>
-                                                                </button>
-                                                            </div>
-
-                                                            <div class="modal-body">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=0 checked> Category
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=1 checked> Item No 
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=2 checked> Item Name
-                                                                    </label>
-                                                                </div>  
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=3 checked> Item Weight
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=4 checked> Sales Price
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=5 checked> Sales At
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=6 checked> Gold Rate
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=7 checked> Inventory Status
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=8 checked> Item Status
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=9 checked> Sales Status
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=10 checked> Created By
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=11 checked> Sales By
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=12 checked> Created At
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=13 checked> Updated At
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=14 checked> Allocation
-                                                                    </label>
-                                                                </div>
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" name="printed[]" value=15 checked> Store
-                                                                    </label>
-                                                                </div>
-                                                                
-                                                            </div> <!-- /.modal-body -->
-                                                            <div class="modal-footer">
-                                                                <button id="btnPrint"
-                                                                    class="btn btn-primary">
-                                                                    Print
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div> <!-- /.advanceFilter Modal -->
-
                                             </div>
                                         </div>
 
@@ -501,6 +394,112 @@
         </div>
     </div>
 </div> <!-- /.scanner Modal -->
+
+<div id="printModal" class="modal fade" tabindex="-1"
+    aria-labelledby="Print Modal" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="printModalTitle">
+                    Print</h5>
+                <button type="button" class="close" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=0 checked> Category
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=1 checked> Item No 
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=2 checked> Item Name
+                    </label>
+                </div>  
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=3 checked> Item Weight
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=4 checked> Sales Price
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=5 checked> Sales At
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=6 checked> Gold Rate
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=7 checked> Inventory Status
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=8 checked> Item Status
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=9 checked> Sales Status
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=10 checked> Created By
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=11 checked> Sales By
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=12 checked> Created At
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=13 checked> Updated At
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=14 checked> Allocation
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=15 checked> Store
+                    </label>
+                </div>
+                
+            </div> <!-- /.modal-body -->
+            <div class="modal-footer">
+                <button id="btnPrint"
+                    class="btn btn-primary">
+                    Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div> <!-- /.advanceFilter Modal -->
 @endsection
 
 @section('custom-script')
