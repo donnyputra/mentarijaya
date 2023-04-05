@@ -366,31 +366,6 @@
                                                     </div>
                                                 </div> <!-- /.advanceFilter Modal -->
 
-                                                <div id="scannerModal" class="modal fade" tabindex="-1" role="dialog"
-                                                    aria-labelledby="Scanner Modal" aria-hidden="true">
-                                                    <div class="modal-dialog modal-md modal-dialog-centered"
-                                                        role="document">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title" id="scannerModalTitle">
-                                                                    Scanner</h5>
-                                                                <button type="button" class="close" data-dismiss="modal"
-                                                                    aria-label="Close">
-                                                                    <span aria-hidden="true">&times;</span>
-                                                                </button>
-                                                            </div>
-
-                                                            <div class="modal-body">
-                                                                <div id="qr-reader" style="width:100%"></div>
-                                                                <div id="qr-reader-results"></div>
-                                                            </div> <!-- /.modal-body -->
-                                                            <div class="modal-footer">
-                                                                
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div> <!-- /.scanner Modal -->
-
                                             </div>
                                         </div>
 
@@ -505,6 +480,30 @@
         </div>
     </div>
 </div>
+
+<div id="scannerModal" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="Scanner Modal" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered"
+        role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scannerModalTitle">
+                    Scanner</h5>
+                <button type="button" class="close" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="qr-reader" style="width:100%"></div>
+                <div id="qr-reader-results"></div>
+            </div> <!-- /.modal-body -->
+            <div class="modal-footer">
+                
+            </div>
+        </div>
+    </div>
+</div> <!-- /.scanner Modal -->
 @endsection
 
 @section('custom-script')
