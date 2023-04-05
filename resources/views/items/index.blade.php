@@ -77,7 +77,7 @@
 
                                         <div class="row mb-3">
                                             <div class="col-12">
-                                                <div id="advanceFilter" class="modal fade" tabindex="-2" role="dialog"
+                                                <div id="advanceFilter" class="modal fade" tabindex="-1"
                                                     aria-labelledby="Advance Filter" aria-hidden="true">
                                                     <div class="modal-dialog modal-xl modal-dialog-centered"
                                                         role="document">
@@ -259,7 +259,7 @@
                                                     </div>
                                                 </div> <!-- /.advanceFilter Modal -->
 
-                                                <div id="printModal" class="modal fade" tabindex="-1" role="dialog"
+                                                <div id="printModal" class="modal fade" tabindex="-1"
                                                     aria-labelledby="Print Modal" aria-hidden="true">
                                                     <div class="modal-dialog modal-md modal-dialog-centered"
                                                         role="document">
@@ -481,7 +481,7 @@
     </div>
 </div>
 
-<div id="scannerModal" class="modal fade" tabindex="-1" role="dialog"
+<div id="scannerModal" class="modal fade" tabindex="-1"
     aria-labelledby="Scanner Modal" aria-hidden="true">
     <div class="modal-dialog modal-md modal-dialog-centered"
         role="document">
