@@ -33,7 +33,7 @@ class PdfController extends Controller
                         'store.code as store_code',
                         'store.name as store_name',
                         'category.description as category_description',
-                        'allocation.description as allocation_description',
+                        'allocation.code as allocation_code',
                         'item_status.description as item_status_description',
                         'inventory_status.description as inventory_status_description',
                         'sales_status.code as sales_status_code',
@@ -57,8 +57,8 @@ class PdfController extends Controller
             $items = $items->whereDate('item.created_at', '>=', \Carbon\Carbon::parse($exploded[0])->format('Y-m-d') );
             $items = $items->whereDate('item.created_at', '<=', \Carbon\Carbon::parse($exploded[1])->format('Y-m-d') );
         }
-        if($request->get('salesrangedate') != null){
-            $exploded = explode(" - ", $request->get('salesrangedate'));
+        if($request->get('rangesalesdate') != null){
+            $exploded = explode(" - ", $request->get('rangesalesdate'));
             $items = $items->whereDate('item.sales_at', '>=', \Carbon\Carbon::parse($exploded[0])->format('Y-m-d') );
             $items = $items->whereDate('item.sales_at', '<=', \Carbon\Carbon::parse($exploded[1])->format('Y-m-d') );
         }
@@ -80,11 +80,20 @@ class PdfController extends Controller
 
         $printed = explode(",", $request->get('printed'));
 
+        //Implement pagination
+        $itemPerPage = 10; // default
+        if($request->get('itemperpage') != '')
+            $itemPerPage = $request->get('itemperpage');
+        $items = $items->paginate($itemPerPage);
+
         $pdf = PDF::loadView('pdf.items', [
-            'items' => $items->limit(10)->get(),
+            'items' => $items,
             'printed' => $printed,
         ]);
 
-        return $pdf->setPaper('a4', 'landscape')->stream();
+        if(count($printed)>10) {
+            return $pdf->setPaper('a4', 'landscape')->stream();
+        }
+        return $pdf->setPaper('a4', 'portrait')->stream();
     }
 }

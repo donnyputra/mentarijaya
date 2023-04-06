@@ -403,7 +403,7 @@
             <div class="modal-body">
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="printed[]" value=0 checked> Category
+                        <input type="checkbox" name="printed[]" value=0> Category
                     </label>
                 </div>
                 <div class="checkbox">
@@ -428,7 +428,7 @@
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="printed[]" value=5 checked> Sales At
+                        <input type="checkbox" name="printed[]" value=5> Sales At
                     </label>
                 </div>
                 <div class="checkbox">
@@ -443,32 +443,32 @@
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="printed[]" value=8 checked> Item Status
+                        <input type="checkbox" name="printed[]" value=8> Item Status
                     </label>
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="printed[]" value=9 checked> Sales Status
+                        <input type="checkbox" name="printed[]" value=9> Sales Status
                     </label>
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="printed[]" value=10 checked> Created By
+                        <input type="checkbox" name="printed[]" value=10> Created By
                     </label>
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="printed[]" value=11 checked> Sales By
+                        <input type="checkbox" name="printed[]" value=11> Sales By
                     </label>
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="printed[]" value=12 checked> Created At
+                        <input type="checkbox" name="printed[]" value=12> Created At
                     </label>
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="printed[]" value=13 checked> Updated At
+                        <input type="checkbox" name="printed[]" value=13> Updated At
                     </label>
                 </div>
                 <div class="checkbox">
@@ -478,7 +478,7 @@
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="printed[]" value=15 checked> Store
+                        <input type="checkbox" name="printed[]" value=15> Store
                     </label>
                 </div>
                 
