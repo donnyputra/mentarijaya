@@ -105,7 +105,7 @@
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($items as $item)
-                                                    <tr onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">
+                                                    <tr>
                                                         <td>
                                                             <input type="checkbox" class="select-item checkbox"
                                                                 name="select-item" value="{{ $item->id }}" />
@@ -126,13 +126,13 @@
                                                                     value="{{ $item->id }}" hidden />
                                                             </form>
                                                         </td>
-                                                        <td>{{ $item->category_description }}</td>
-                                                        <td>{{ $item->item_no }}</td>
-                                                        <td>{{ $item->item_name }}</td>
-                                                        <td>{{ StringHelper::formatDecimalDisplay($item->item_weight) . " gr" }}</td>
-                                                        <td>{{ $item->sales_price == null ? "-" : ("Rp " . StringHelper::formatDecimalDisplay($item->sales_price)) }}
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->category_description }}</td>
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->item_no }}</td>
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->item_name }}</td>
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ StringHelper::formatDecimalDisplay($item->item_weight) . " gr" }}</td>
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->sales_price == null ? "-" : ("Rp " . StringHelper::formatDecimalDisplay($item->sales_price)) }}
                                                         </td>
-                                                        <td>{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('d-M-Y') }}
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('d-M-Y') }}
                                                         </td>
                                                         <td>{{ StringHelper::formatDecimalDisplay($item->item_gold_rate) . "%" }}</td>
                                                         <td>{{ $item->inventory_status_description}}</td>
