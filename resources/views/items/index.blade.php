@@ -134,21 +134,21 @@
                                                         </td>
                                                         <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('d-M-Y') }}
                                                         </td>
-                                                        <td>{{ StringHelper::formatDecimalDisplay($item->item_gold_rate) . "%" }}</td>
-                                                        <td>{{ $item->inventory_status_description}}</td>
-                                                        <td>{{ $item->item_status_description}}</td>
-                                                        <td>{{ $item->sales_status_description == null ? "-" : $item->sales_status_description }}
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ StringHelper::formatDecimalDisplay($item->item_gold_rate) . "%" }}</td>
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->inventory_status_description}}</td>
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->item_status_description}}</td>
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->sales_status_description == null ? "-" : $item->sales_status_description }}
                                                         </td>
-                                                        <td>{{ $item->created_by == null ? "-" : $item->created_by_name }}
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->created_by == null ? "-" : $item->created_by_name }}
                                                         </td>
-                                                        <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->sales_by == null ? "-" : $item->sales_by_name }}
                                                         </td>
-                                                        <td>{{ Carbon\Carbon::parse($item->created_at)->format('d-M-Y') }}
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ Carbon\Carbon::parse($item->created_at)->format('d-M-Y') }}
                                                         </td>
-                                                        <td>{{ Carbon\Carbon::parse($item->updated_at)->format('d-M-Y') }}
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ Carbon\Carbon::parse($item->updated_at)->format('d-M-Y') }}
                                                         </td>
-                                                        <td>{{ $item->allocation_description }}</td>
-                                                        <td>{{ $item->store_name }}</td>
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->allocation_description }}</td>
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->store_name }}</td>
                                                     </tr>
                                                     @endforeach
                                                 </tbody>
