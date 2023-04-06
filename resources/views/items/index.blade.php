@@ -156,21 +156,24 @@
                                         </div> <!-- ./Table Grid -->
 
                                         <div class="row">
-                                            <div class="col">
+                                            <div class="col-xs-12 col-md-6">
                                                 {{ $items->appends(request()->input())->links() }}
                                             </div>
 
-                                            <div class="col text-right text-muted">
+                                            <div class="col-xs-12 col-md-6 text-right text-muted">
                                                 Showing {{ $items->firstItem() }} to {{ $items->lastItem() }} out of
                                                 {{ $items->total() }} results
                                             </div>
-                                            <div class="col text-right">
-                                                <button class="btn btn-secondary float-right mr-2" 
+                                        </div>
+
+                                        <div class="row float-right mt-4">
+                                            <div class="col-xs-12">
+                                                <button class="btn btn-lg btn-secondary mr-2" 
                                                     data-toggle="modal" data-target="#printModal" 
-                                                    aria-expanded="false" aria-controls="printModal">Print</button>
-                                                <button class="btn btn-secondary float-right mr-2" 
+                                                    aria-expanded="false" aria-controls="printModal"><i class="fa fa-print"></i></button>
+                                                <button class="btn btn-lg btn-secondary mr-2" 
                                                     data-toggle="modal" data-target="#scannerModal" 
-                                                    aria-expanded="false" aria-controls="scannerModal">Scanner</button>
+                                                    aria-expanded="false" aria-controls="scannerModal"><i class="fa fa-qrcode"></i></button>
                                             </div>
                                         </div>
 
