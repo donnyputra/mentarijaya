@@ -68,12 +68,12 @@
                                                 </form>
                                             </div>
                                             <div class="col-6 col-xs-12">
-                                                <div class="col-auto">
-                                                <button class="btn btn-secondary float-right" type="button"
+                                                <div class="col-auto float-right">
+                                                <button class="btn btn-secondary" type="button"
                                                     data-toggle="modal" data-target="#advanceFilter"
                                                     aria-expanded="false" aria-controls="advanceFilter">Search &
                                                     Filter</button>
-                                                <button class="btn btn-secondary float-right" type="button" data-toggle="modal"
+                                                <button class="btn btn-secondary mt-3 mt-md-0" type="button" data-toggle="modal"
                                                     data-target="#sortModal" aria-expanded="false"
                                                     aria-controls="sortModal"><span><i
                                                     class="fas fa-sort-alpha-down"></i></span></button>

@@ -44,39 +44,67 @@ class PdfController extends Controller
                     ->where('item.deleted_at', '=', null);
         
         // Implement search by item name
-        if($request->get('search') != '')
-            $items = $items->whereRaw('LOWER(item.item_name) like ?', ['%'.strtolower($request->get('search')).'%']);
+        if($request->session()->get('filter.item_name') != '')
+            $items = $items->whereRaw('LOWER(item.item_name) like ?', ['%'.strtolower($request->session()->get('filter.item_name')).'%']);
         
         // Implement search by item no
-        if($request->get('searchitemno') != '')
-            $items = $items->whereRaw('LOWER(item.item_no) like ?', ['%'.strtolower($request->get('searchitemno')).'%']);
+        if($request->session()->get('filter.item_no') != '')
+            $items = $items->whereRaw('LOWER(item.item_no) like ?', ['%'.strtolower($request->session()->get('filter.item_no')).'%']);
 
         // Implement advanced filters
-        if($request->get('rangedate') != ''){
-            $exploded = explode(" - ", $request->get('rangedate'));
+        if($request->session()->get('filter.rangedate') != ''){
+            $exploded = explode(" - ", $request->session()->get('filter.rangedate'));
             $items = $items->whereDate('item.created_at', '>=', \Carbon\Carbon::parse($exploded[0])->format('Y-m-d') );
             $items = $items->whereDate('item.created_at', '<=', \Carbon\Carbon::parse($exploded[1])->format('Y-m-d') );
         }
-        if($request->get('rangesalesdate') != null){
-            $exploded = explode(" - ", $request->get('rangesalesdate'));
+        if($request->session()->get('filter.rangesalesdate') != null){
+            $exploded = explode(" - ", $request->session()->get('filter.rangesalesdate'));
             $items = $items->whereDate('item.sales_at', '>=', \Carbon\Carbon::parse($exploded[0])->format('Y-m-d') );
             $items = $items->whereDate('item.sales_at', '<=', \Carbon\Carbon::parse($exploded[1])->format('Y-m-d') );
         }
-        if($request->get('store') != '')
-            $items = $items->where('item.store_id', '=', $request->get('store'));
-        if($request->get('category') != '')
-            $items = $items->where('item.category_id', '=', $request->get('category'));
-        if($request->get('allocation') != '')
-            $items = $items->where('item.allocation_id', '=', $request->get('allocation'));
-        if($request->get('itemstatus') != '')
-            $items = $items->where('item.item_status_id', '=', $request->get('itemstatus'));
-        if($request->get('inventorystatus') != '')
-            $items = $items->where('item.inventory_status_id', '=', $request->get('inventorystatus'));
-        if($request->get('salesstatus') != '')
-            $items = $items->where('item.sales_status_id', '=', $request->get('salesstatus'));
+        if($request->session()->get('filter.store') != '')
+            $items = $items->where('item.store_id', '=', $request->session()->get('filter.store'));
+        if($request->session()->get('filter.category') != '')
+            $items = $items->where('item.category_id', '=', $request->session()->get('filter.category'));
+        if($request->session()->get('filter.allocation') != '')
+            $items = $items->where('item.allocation_id', '=', $request->session()->get('filter.allocation'));
+        if($request->session()->get('filter.item_status') != '')
+            $items = $items->where('item.item_status_id', '=', $request->session()->get('filter.item_status'));
+        if($request->session()->get('filter.inventory_status') != '')
+            $items = $items->where('item.inventory_status_id', '=', $request->session()->get('filter.inventory_status'));
+        if($request->session()->get('filter.sales_status') != '')
+            $items = $items->where('item.sales_status_id', '=', $request->session()->get('filter.sales_status'));
 
         //Implement sort
-        $items = $items->orderBy('item.id', 'desc');
+        $sortBy = '';
+        switch($request->session()->get('sort.sort_by')) {
+            case 'item_id':
+                $sortBy = 'item.id';
+                break;
+            case 'item_no':
+                $sortBy = 'item.item_no';
+                break;
+            case 'item_name':
+                $sortBy = 'item.item_name';
+                break;
+            case 'item_weight':
+                $sortBy = 'item.item_weight';
+                break;
+            case 'sales_price':
+                $sortBy = 'item.sales_price';
+                break;
+            default:
+                $sortBy = 'item.id';
+        }
+
+        $sortDirection = '';
+        if($request->session()->has('sort.sort_direction')) {
+            $sortDirection = $request->session()->get('sort.sort_direction');
+        } else {
+            $sortDirection = 'desc'; //default direction
+        }
+
+        $items = $items->orderBy($sortBy, $sortDirection);
 
         $printed = explode(",", $request->get('printed'));
 
