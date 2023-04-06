@@ -580,7 +580,7 @@ $(function() {
 
     $('#btnApplyAdvanceFilter').on('click', function(e) {
         var rangeDate = $('#dpRangeDate').val();
-        var salesRangeDate = $('#dpSalesRangeDate').val();
+        var rangesalesdate = $('#dpSalesRangeDate').val();
         var filterStore = $('#filterStore').val();
         var filterCategory = $('#filterCategory').val();
         var filterAllocation = $('#filterAllocation').val();
@@ -593,7 +593,7 @@ $(function() {
 
         window.location = "{{ route('items.index') }}" +
             "?rangedate=" + rangeDate +
-            "&rangesalesdate=" + salesRangeDate +
+            "&rangesalesdate=" + rangesalesdate +
             "&store=" + filterStore +
             "&category=" + filterCategory +
             "&allocation=" + filterAllocation +
@@ -607,7 +607,7 @@ $(function() {
 
     $('#btnPrint').on('click', function(e) {
         var rangeDate = $('#dpRangeDate').val();
-        var salesRangeDate = $('#dpSalesRangeDate').val();
+        var rangesalesdate = $('#dpSalesRangeDate').val();
         var filterStore = $('#filterStore').val();
         var filterCategory = $('#filterCategory').val();
         var filterAllocation = $('#filterAllocation').val();
@@ -623,7 +623,7 @@ $(function() {
 
         window.location = "{{ route('pdf.items') }}" +
             "?rangedate=" + rangeDate +
-            "&rangesalesdate=" + salesRangeDate +
+            "&rangesalesdate=" + rangesalesdate +
             "&store=" + filterStore +
             "&category=" + filterCategory +
             "&allocation=" + filterAllocation +

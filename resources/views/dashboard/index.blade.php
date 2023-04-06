@@ -82,7 +82,6 @@
                                                 <th>GL</th>
                                                 <th>K</th>
                                                 <th>L</th>
-                                                <th>PT</th>
                                                 <th>W</th>
                                                 <th>TOTAL</th>
                                             </tr>
@@ -97,7 +96,6 @@
                                                     <td>{{ StringHelper::formatDecimalDisplay($row->GL) . ' gr' }}</td>
                                                     <td>{{ StringHelper::formatDecimalDisplay($row->K) . ' gr' }}</td>
                                                     <td>{{ StringHelper::formatDecimalDisplay($row->L) . ' gr' }}</td>
-                                                    <td>{{ StringHelper::formatDecimalDisplay($row->PT) . ' gr' }}</td>
                                                     <td>{{ StringHelper::formatDecimalDisplay($row->W) . ' gr' }}</td>
                                                     <td class="table-primary"><strong>{{ StringHelper::formatDecimalDisplay($row->TOTAL) . ' gr' }}</strong></td>
                                                 </tr>
@@ -118,13 +116,7 @@
                                         <h3 class="card-title">DAILY SALES SUMMARY</h3>
 
                                         <div class="card-tools">
-                                            <!-- <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                                <i class="fas fa-minus"></i>
-                                            </button> -->
-                                            <button class="btn btn-tool" type="button"
-                                                    data-toggle="modal" data-target="#advanceFilter"
-                                                    aria-expanded="false" aria-controls="advanceFilter">
-                                                    <i class="fas fa-filter"></i></button>
+
                                         </div>
                                     </div>
 
@@ -159,11 +151,14 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
-        $('#summary').DataTable({
+    var table = $('#summary').DataTable({
             processing: true,
             serverSide: true,
             scrollX: true,
-            ajax: "{{ route('summary.datatables') }}",
+            dom: 'ltipr',
+            ajax: {
+                "url": "{{ route('summary.datatables') }}",
+            },
             columns: [
                 {data: 'sales_date', name: 'sales_date'},
                 {data: 'gold_rate', name: 'gold_rate'},
@@ -176,7 +171,7 @@
             columnDefs: [
                 { type: 'natural', targets: [2,3,4] },
                 { render: DataTable.render.datetime('DD-MMM-YYYY'), targets: 0}
-            ],
+            ]
         });
     });
 </script>

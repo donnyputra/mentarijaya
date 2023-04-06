@@ -78,7 +78,7 @@ class ItemController extends Controller
             $items = $items->whereDate('item.created_at', '<=', \Carbon\Carbon::parse($exploded[1])->format('Y-m-d') );
         }
         if($request->get('rangesalesdate') != null){
-            $exploded = explode(" - ", $request->get('salesrangedate'));
+            $exploded = explode(" - ", $request->get('rangesalesdate'));
             $items = $items->whereDate('item.sales_at', '>=', \Carbon\Carbon::parse($exploded[0])->format('Y-m-d') );
             $items = $items->whereDate('item.sales_at', '<=', \Carbon\Carbon::parse($exploded[1])->format('Y-m-d') );
         }

@@ -166,7 +166,6 @@ class DashboardController extends Controller
                             SUM(CASE WHEN category.code = 'GL' THEN item.item_weight ELSE 0 END) AS GL,
                             SUM(CASE WHEN category.code = 'K' THEN item.item_weight ELSE 0 END) AS K,
                             SUM(CASE WHEN category.code = 'L' THEN item.item_weight ELSE 0 END) AS L,
-                            SUM(CASE WHEN category.code = 'PT' THEN item.item_weight ELSE 0 END) AS PT,
                             SUM(CASE WHEN category.code = 'W' THEN item.item_weight ELSE 0 END) AS W,
                             SUM(item.item_weight) AS TOTAL
                         FROM item
