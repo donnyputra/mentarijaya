@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DataTables;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -33,10 +35,9 @@ class DashboardController extends Controller
         $totalWeightSummaryCollection = $this->getInStockTotalItemWeightByCategory();
 
         return view('dashboard.index', [
-            'summaryCollection' => $summaryCollection->get(),
-            'itemCountBarChartLabel' => $categorySummaryCollection[0]->label,
-            'itemCountBarChartValue' => $categorySummaryCollection[0]->value,
-            'totalWeightSummaryCollection' => $totalWeightSummaryCollection
+            'summaryCollection' => $summaryCollection,
+            'totalWeightSummaryCollection' => $totalWeightSummaryCollection,
+            'itemsCount' => $categorySummaryCollection
         ]);
         
         
@@ -72,11 +73,17 @@ class DashboardController extends Controller
 
     }
 
+    public function summaryDailyDatatable(Request $request) {
+        if ($request->ajax()) {
+            return $this->getSummaryCollection();
+        }
+    }
+
     private function getSummaryCollection() {
         $summaryCollection = DB::table('item')
                             ->select(DB::raw("
                                 DATE(item.sales_at) AS 'sales_date', 
-                                item.item_gold_rate,
+                                item.item_gold_rate as item_gold_rate,
                                 SUM(item.item_weight) AS total_weight,
                                 SUM(item.sales_price) AS total_sales,
                                 ROUND(SUM(item.sales_price) / SUM(item.item_weight)) AS average,
@@ -87,16 +94,39 @@ class DashboardController extends Controller
                             ->whereNotNull('item.sales_at')
                             ->groupBy('sales_date', 'item_gold_rate');
 
-        //Implement sort
-        $summaryCollection->orderBy('sales_date', 'desc');
-
-        // dd($items->toSql());
-
-        //Implement pagination
-        $itemPerPage = 10; // default
-        // $summaryCollection = $summaryCollection->paginate($itemPerPage);
-
-        return $summaryCollection;
+        return Datatables::of($summaryCollection->get())
+            ->addColumn('date_sales', function($row){
+                return Carbon::parse($row->sales_date)->format('d-M-Y');
+            })
+            ->addColumn('gold_rate', function($row){
+                return number_format($row->item_gold_rate, 2, ',', '.') . "%";
+            })
+            ->addColumn('weight', function($row){
+                return number_format($row->total_weight, 2, ',', '.') . " gr";
+            })
+            ->addColumn('sales', function($row){
+                if ($row->total_sales == null) {
+                    return "-";
+                } else {
+                    return "Rp. " . number_format($row->total_sales, 2, ',', '.');
+                }
+            })
+            ->addColumn('avg', function($row){
+                if ($row->average == null) {
+                    return "-";
+                } else {
+                    return "Rp. " . number_format($row->average, 2, ',', '.');
+                }
+            })
+            ->addColumn('item_count', function($row){
+                $temp = '';
+                foreach (array_count_values(explode(',', $row->item_category_list)) as $soldKey => $soldValue){
+                    $temp .= '<span class="badge badge-pill badge-primary">'.$soldKey.':'.$soldValue.'</span>';
+                }
+                return $temp;
+            })
+            ->rawColumns(['item_count'])
+            ->make(true);
     }
 
     private function getInstockItemCountByCategory() {
@@ -112,20 +142,15 @@ class DashboardController extends Controller
         //                 ->groupBy('category_code');
 
         $instockItem = DB::SELECT("
-                        SELECT
-                            GROUP_CONCAT(CONCAT('''', category_code, '''')) AS label,
-                            GROUP_CONCAT(item_count) AS value
-                        FROM
-                            (
-                            SELECT
-                                category.code AS category_code,
-                                COUNT(item.id) AS item_count
-                            FROM
-                                category
-                            LEFT JOIN item ON category.id = item.category_id AND item.sales_at IS NULL AND item.item_status_id = 2
-                            GROUP BY
-                                category_code
-                        ) src
+                SELECT
+                category.code AS category_code,
+                COUNT(item.id) AS item_count
+            FROM
+                category
+            LEFT JOIN item ON category.id = item.category_id AND item.sales_at IS NULL AND item.item_status_id = 2
+            WHERE category.deleted_at is null
+            GROUP BY
+                category_code
                     ");
         
         return $instockItem;
@@ -141,7 +166,6 @@ class DashboardController extends Controller
                             SUM(CASE WHEN category.code = 'GL' THEN item.item_weight ELSE 0 END) AS GL,
                             SUM(CASE WHEN category.code = 'K' THEN item.item_weight ELSE 0 END) AS K,
                             SUM(CASE WHEN category.code = 'L' THEN item.item_weight ELSE 0 END) AS L,
-                            SUM(CASE WHEN category.code = 'PT' THEN item.item_weight ELSE 0 END) AS PT,
                             SUM(CASE WHEN category.code = 'W' THEN item.item_weight ELSE 0 END) AS W,
                             SUM(item.item_weight) AS TOTAL
                         FROM item

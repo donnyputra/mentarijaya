@@ -11,7 +11,7 @@ class EmployeeItemsTable extends Component
 {
     use WithPagination;	
 
-    const INITIAL_SORT_FIELD = 'created_at';
+    const INITIAL_SORT_FIELD = 'id';
 
     public $perPage = 10;
     public $sortField = self::INITIAL_SORT_FIELD;
@@ -67,7 +67,7 @@ class EmployeeItemsTable extends Component
                 ->where('item.created_by', '=', Auth::user()->id)                
                 ->where(function($query) {
                     $query->whereNull('item.item_approved_at');
-                    $query->whereNull('item.sales_approved_at');
+                    // $query->whereNull('item.sales_approved_at');
                 })
 
                 // apply advanced filter

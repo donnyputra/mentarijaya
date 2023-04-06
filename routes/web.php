@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
 	if(Auth::check()) {
-		return redirect('home');
+		return redirect('dashboard');
 	} else {
 		return view('welcome');
 	}
@@ -82,7 +82,10 @@ Route::post('roles/{role}/update', 'RoleController@update')->name('roles.update'
 Route::post('roles/{role}/delete', 'RoleController@delete')->name('roles.delete');
 
 // Book (Items)
-Route::resource('items', 'ItemController')->only('index', 'create', 'store', 'edit');
+Route::get('items/applyfilter', 'ItemController@applyfilter')->name('items.applyfilter');
+Route::get('items/clearfilter', 'ItemController@clearfilter')->name('items.clearfilter');
+Route::get('items/applysort', 'ItemController@applysort')->name('items.applysort');
+Route::resource('items', 'ItemController')->only('index', 'create', 'store', 'edit', 'show');
 Route::post('item/{item}/update', 'ItemController@update')->name('items.update');
 Route::post('item/{item}/delete', 'ItemController@delete')->name('items.delete');
 Route::get('items/bulkupload', 'ItemController@bulkupload')->name('items.bulkupload');
@@ -100,7 +103,10 @@ Route::post('employee/sales/form/save', 'ItemController@employeeSalesFormSave')-
 
 // Dashboard
 Route::resource('dashboard', 'DashboardController')->only('index');
+Route::get('/dashboard/summary', 'DashboardController@summaryDailyDatatable')->name('summary.datatables');
 
 // Sales for Employee
 
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');
+
+Route::get('/pdf/items', 'PdfController@itemsPdf')->name('pdf.items');

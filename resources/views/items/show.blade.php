@@ -9,13 +9,13 @@
 				<div class="container-fluid">
 					<div class="row mb-2">
 						<div class="col-sm-6">
-							<h1 class="m-0 text-dark">{{ __("Edit Item Book") }}</h1>
+							<h1 class="m-0 text-dark">{{ __("Item Detail") }}</h1>
 						</div><!-- /.col -->
 						<div class="col-sm-6">
 							<ol class="breadcrumb float-sm-right">
 								<li class="breadcrumb-item"><a href="/">{{ __("Home") }}</a></li>
 								<li class="breadcrumb-item"><a href="{{ route("items.index") }}">{{ __("Item Book") }}</a></li>
-								<li class="breadcrumb-item active">{{ __("Edit Item Book") }}</li>
+								<li class="breadcrumb-item active">{{ __("Item Detail") }}</li>
 							</ol>
 						</div><!-- /.col -->
 					</div><!-- /.row -->
@@ -29,9 +29,6 @@
 							<div class="table-responsive">
 								<div class="card">
 									<div class="card-body">
-										
-										<form method="POST" action="{{ route('items.update', $item->id) }}">
-
 											<div class="row">
 												<div class="col-12 mb-3">
 													<div class="card">
@@ -42,11 +39,7 @@
 															<div class="form-group row">
 																<label for="store_id" class="col-2 col-form-label">Store Name <span style="color: red">*</span></label>
 																<div class="col-10">
-																	<select class="form-control" name="store_id">
-																		@foreach ($stores as $store)
-																		<option value="{{ $store->id }}" {{ $store->id == $item->store_id ? 'selected' : '' }}>{{ $store->name }} ({{ $store->code }})</option>
-																		@endforeach
-																	</select>
+																	<input class="form-control" name="store_id" readonly value= "{{$item->store->name}} {{$item->store->code}}">
 																</div>
 															</div>
 														</div>
@@ -62,7 +55,6 @@
 														</div>
 														<div class="card-body">
 															<div class="form-group row">
-																@csrf
 																<label for="item_no" class="col-3 col-form-label">Item No <span style="color: red">*</span></label>
 																<div class="col-9">
 																	<input type="text" class="form-control" name="item_no" value="{{ $item->item_no }}" required readonly />
@@ -72,14 +64,14 @@
 															<div class="form-group row">
 																<label for="item_name" class="col-3 col-form-label">Item Name <span style="color: red">*</span></label>
 																<div class="col-9">
-																	<input type="text" class="form-control" name="item_name" required value="{{ $item->item_name }}" />
+																	<input type="text" class="form-control" name="item_name" readonly value="{{ $item->item_name }}" />
 																</div>
 															</div>
 															<div class="form-group row">
 																<label for="item_weight" class="col-3 col-form-label">Item Weight <span style="color: red">*</span></label>
 																<div class="col-9">
 																	<div class="input-group">
-																		<input type="text" class="form-control" name="item_weight" required value="{{ $item->item_weight }}" />
+																		<input type="text" class="form-control" name="item_weight" readonly value="{{ $item->item_weight }}" />
 																		<div class="input-group-append">
 																			<div class="input-group-text">gr</div>
 																		</div>
@@ -89,22 +81,14 @@
 															<div class="form-group row">
 																<label for="category_id" class="col-3 col-form-label">Category <span style="color: red">*</span></label>
 																<div class="col-9">
-																	<!-- <select class="form-control" name="category_id"> -->
-																		@foreach ($categories as $category)
-																			@if ($category->id == $item->category_id)
-																				<input type="text" class="form-control" name="category_id" hidden value="{{ $item->category_id }}" />
-																				<input type="text" class="form-control" name="category" readonly value="{{ $category->description }}" />
-																				@break
-																			@endif
-																		@endforeach
-																	<!-- </select> -->
+																	<input type="text" class="form-control" name="category" readonly value="{{ $item->category->description }}" />
 																</div>
 															</div>
 															<div class="form-group row">
 																<label for="item_gold_rate" class="col-3 col-form-label">Gold Rate <span style="color: red">*</span></label>
 																<div class="col-9">
 																	<div class="input-group">
-																		<input type="text" class="form-control" name="item_gold_rate" required value="{{ $item->item_gold_rate }}" />
+																		<input type="text" class="form-control" name="item_gold_rate" readonly value="{{ $item->item_gold_rate }}" />
 																		<div class="input-group-append">
 																			<div class="input-group-text">%</div>
 																		</div>
@@ -114,43 +98,25 @@
 															<div class="form-group row">
 																<label for="allocation_id" class="col-3 col-form-label">Allocation <span style="color: red">*</span></label>
 																<div class="col-9">
-																	<select class="form-control" name="allocation_id">
-																		@foreach ($allocations as $allocation)
-																			<option value="{{ $allocation->id }}" {{ $allocation->id == $item->allocation_id ? 'selected' : '' }}>{{ $allocation->description }}</option>
-																		@endforeach
-																	</select>
+																	<input type="text" class="form-control" name="allocation" readonly value="{{ $item->allocation->description }}" />
 																</div>
 															</div>
 															<div class="form-group row">
 																<label for="item_status_id" class="col-3 col-form-label">Item Status <span style="color: red">*</span></label>
 																<div class="col-9">
-																	<select class="form-control" name="item_status_id">
-																		@foreach ($itemstatuses as $itemstatus)
-																			<option value="{{ $itemstatus->id }}" {{ $itemstatus->id == $item->item_status_id ? 'selected' : '' }}>{{ $itemstatus->description }}</option>
-																		@endforeach
-																	</select>
+																	<input type="text" class="form-control" name="item_status" readonly value="{{ $item->itemStatus->description }}" />
 																</div>
 															</div>
 															<div class="form-group row">
 																<label for="inventory_status_id" class="col-3 col-form-label">Inventory Status <span style="color: red">*</span></label>
 																<div class="col-9">
-																	<select class="form-control" name="inventory_status_id">
-																		@foreach ($inventorystatuses as $inventorystatus)
-																			<option value="{{ $inventorystatus->id }}" {{ $inventorystatus->id == $item->inventory_status_id ? 'selected' : '' }}>{{ $inventorystatus->description }}</option>
-																		@endforeach
-																	</select>
+																	<input type="text" class="form-control" name="inventory_status" readonly value="{{ $item->inventoryStatus->description }}" />
 																</div>
 															</div>
 															<div class="form-group row">
 																<label for="created_by" class="col-3 col-form-label">Created By</label>
 																<div class="col-9">
-																	@foreach ($users as $user)
-																		@if($user->id == $item->created_by)
-																			<input type="text" class="form-control" name="created_by" value="{{ $user->id }}" hidden />
-																			<input type="text" class="form-control" name="created_by_name" value="{{ $user->name }}" readonly />
-																			@break
-																		@endif
-																	@endforeach
+																	<input type="text" class="form-control" name="created_by" readonly value="{{ $item->createdBy->name }}" />
 																</div>
 															</div>
 														</div>
@@ -161,16 +127,24 @@
 														<div class="card-header">
 															<div class="card-title">{{ __("Sales Information") }}</div>
 														</div>
+														@php
+															if($item->sales_status_id != null){
+																$salesStatus = $item->salesStatus->description;
+															} else {
+																$salesStatus = '';
+															}
+
+															if($item->sales_by != null) {
+																$salesBy = $item->salesBy->name;
+															} else {
+																$salesBy = '';
+															}
+														@endphp
 														<div class="card-body">
 															<div class="form-group row">
 																<label for="sales_status_id" class="col-3 col-form-label">Sales Status</label>
 																<div class="col-9">
-																	<select class="form-control" name="sales_status_id">
-																		<option selected></option>
-																		@foreach ($salesstatuses as $salesstatus)
-																			<option value="{{ $salesstatus->id }}" {{ $salesstatus->id == $item->sales_status_id ? 'selected' : '' }}>{{ $salesstatus->code }}</option>
-																		@endforeach
-																	</select>
+																	<input type="text" class="form-control" name="sales_status" readonly value=" {{ $salesStatus }}" />
 																</div>
 															</div>
 															<div class="form-group row">
@@ -180,7 +154,7 @@
 																		<div class="input-group-prepend">
 																				<div class="input-group-text">Rp</div>
 																		</div>
-																		<input type="text" class="form-control sales_price" name="sales_price" value="{{ $item->sales_price }}" />
+																		<input type="text" class="form-control sales_price" readonly name="sales_price" value="{{ $item->sales_price }}" />
 																	</div>
 																</div>
 															</div>
@@ -188,19 +162,14 @@
 																<label for="sales_at" class="col-3 col-form-label">Sales At</label>
 																<div class="col-9">
 																	<div class="input-group">
-																		<input type="text" class="form-control dateselect" id="sales_at" name="sales_at" placeholder="select date" value="{{ $item->sales_at != null ? Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $item->sales_at)->format('m/d/Y') : '' }}" />
+																		<input type="text" class="form-control" name="sales_at" readonly placeholder="" value="{{ $item->sales_at != null ? Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $item->sales_at)->format('m/d/Y') : '' }}" />
 																	</div>
 																</div>
 															</div>
 															<div class="form-group row">
 																<label for="sales_by" class="col-3 col-form-label">Sales By</label>
 																<div class="col-9">
-																	<select class="form-control" name="sales_by">
-																		<option></option>
-																		@foreach ($users as $user)
-																			<option value="{{ $user->id }}" {{ $user->id == $item->sales_by ? 'selected' : '' }}>{{ $user->name }}</option>
-																		@endforeach
-																	</select>
+																	<input type="text" class="form-control" name="sales_by" readonly value="{{ $salesBy }}" />
 																</div>
 															</div>
 														</div>
@@ -210,10 +179,7 @@
 					
 											<div class="float-right">
 												<a class="btn btn-secondary" href="{{ url()->previous() }}" role="button">{{ __("Back") }}</a>
-												<button type="submit" class="btn btn-primary">{{ __("Save") }}</button>
 											</div>
-										</form>
-
 									</div>
 								</div>
 							</div>

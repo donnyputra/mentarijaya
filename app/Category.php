@@ -32,4 +32,8 @@ class Category extends Model
             : static::where('code', 'like', '%'.$query.'%')
                 ->orWhere('description', 'like', '%'.$query.'%');
     }
+
+    public function item() {
+        return $this->belongsTo('App\Item');
+    }
 }

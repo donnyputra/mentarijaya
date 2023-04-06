@@ -64,42 +64,72 @@ class ItemController extends Controller
                     ->where('item.deleted_at', '=', null);
         
         // Implement search by item name
-        if($request->get('search') != '')
-            $items = $items->whereRaw('LOWER(item.item_name) like ?', ['%'.strtolower($request->get('search')).'%']);
+        if($request->session()->get('filter.item_name') != '')
+            $items = $items->whereRaw('LOWER(item.item_name) like ?', ['%'.strtolower($request->session()->get('filter.item_name')).'%']);
         
         // Implement search by item no
-        if($request->get('searchitemno') != '')
-            $items = $items->whereRaw('LOWER(item.item_no) like ?', ['%'.strtolower($request->get('searchitemno')).'%']);
+        if($request->session()->get('filter.item_no') != '')
+            $items = $items->whereRaw('LOWER(item.item_no) like ?', ['%'.strtolower($request->session()->get('filter.item_no')).'%']);
 
         // Implement advanced filters
-        if($request->get('startdate') != '')
-            $items = $items->whereDate('item.created_at', '>=', \Carbon\Carbon::parse($request->get('startdate'))->format('Y-m-d') );
-        if($request->get('enddate') != '')
-            $items = $items->whereDate('item.created_at', '<=', \Carbon\Carbon::parse($request->get('enddate'))->format('Y-m-d') );
-        if($request->get('salesstartdate') != '')
-            $items = $items->whereDate('item.sales_at', '>=', \Carbon\Carbon::parse($request->get('salesstartdate'))->format('Y-m-d') );
-        if($request->get('salesenddate') != '')
-            $items = $items->whereDate('item.sales_at', '<=', \Carbon\Carbon::parse($request->get('salesenddate'))->format('Y-m-d') );
-        if($request->get('store') != '')
-            $items = $items->where('item.store_id', '=', $request->get('store'));
-        if($request->get('category') != '')
-            $items = $items->where('item.category_id', '=', $request->get('category'));
-        if($request->get('allocation') != '')
-            $items = $items->where('item.allocation_id', '=', $request->get('allocation'));
-        if($request->get('itemstatus') != '')
-            $items = $items->where('item.item_status_id', '=', $request->get('itemstatus'));
-        if($request->get('inventorystatus') != '')
-            $items = $items->where('item.inventory_status_id', '=', $request->get('inventorystatus'));
-        if($request->get('salesstatus') != '')
-            $items = $items->where('item.sales_status_id', '=', $request->get('salesstatus'));
+        if($request->session()->get('filter.rangedate') != ''){
+            $exploded = explode(" - ", $request->session()->get('filter.rangedate'));
+            $items = $items->whereDate('item.created_at', '>=', \Carbon\Carbon::parse($exploded[0])->format('Y-m-d') );
+            $items = $items->whereDate('item.created_at', '<=', \Carbon\Carbon::parse($exploded[1])->format('Y-m-d') );
+        }
+        if($request->session()->get('filter.rangesalesdate') != null){
+            $exploded = explode(" - ", $request->session()->get('filter.rangesalesdate'));
+            $items = $items->whereDate('item.sales_at', '>=', \Carbon\Carbon::parse($exploded[0])->format('Y-m-d') );
+            $items = $items->whereDate('item.sales_at', '<=', \Carbon\Carbon::parse($exploded[1])->format('Y-m-d') );
+        }
+        if($request->session()->get('filter.store') != '')
+            $items = $items->where('item.store_id', '=', $request->session()->get('filter.store'));
+        if($request->session()->get('filter.category') != '')
+            $items = $items->where('item.category_id', '=', $request->session()->get('filter.category'));
+        if($request->session()->get('filter.allocation') != '')
+            $items = $items->where('item.allocation_id', '=', $request->session()->get('filter.allocation'));
+        if($request->session()->get('filter.item_status') != '')
+            $items = $items->where('item.item_status_id', '=', $request->session()->get('filter.item_status'));
+        if($request->session()->get('filter.inventory_status') != '')
+            $items = $items->where('item.inventory_status_id', '=', $request->session()->get('filter.inventory_status'));
+        if($request->session()->get('filter.sales_status') != '')
+            $items = $items->where('item.sales_status_id', '=', $request->session()->get('filter.sales_status'));
 
         //Implement sort
-        $items = $items->orderBy('item.id', 'desc');
+        $sortBy = '';
+        switch($request->session()->get('sort.sort_by')) {
+            case 'item_id':
+                $sortBy = 'item.id';
+                break;
+            case 'item_no':
+                $sortBy = 'item.item_no';
+                break;
+            case 'item_name':
+                $sortBy = 'item.item_name';
+                break;
+            case 'item_weight':
+                $sortBy = 'item.item_weight';
+                break;
+            case 'sales_price':
+                $sortBy = 'item.sales_price';
+                break;
+            default:
+                $sortBy = 'item.id';
+        }
+
+        $sortDirection = '';
+        if($request->session()->has('sort.sort_direction')) {
+            $sortDirection = $request->session()->get('sort.sort_direction');
+        } else {
+            $sortDirection = 'desc'; //default direction
+        }
+
+        $items = $items->orderBy($sortBy, $sortDirection);
 
         //Implement pagination
         $itemPerPage = 10; // default
-        if($request->get('itemperpage') != '')
-            $itemPerPage = $request->get('itemperpage');
+        if($request->session()->get('filter.itemperpage') != '')
+            $itemPerPage = $request->session()->get('filter.itemperpage');
         $items = $items->paginate($itemPerPage);
 
         // dd($items->toSql());
@@ -116,10 +146,32 @@ class ItemController extends Controller
         ]);
     }
 
+    public function applyfilter(Request $request) {
+        if(count($request->all()) > 0) {
+            $request->session()->put('filter', $request->all());
+        }
+
+        return redirect()->route('items.index');
+    }
+
+    public function clearfilter(Request $request) {
+        $request->session()->forget('filter');
+        return redirect()->route('items.index');
+    }
+
+    public function applysort(Request $request) {
+        if(count($request->all()) > 0) {
+            $request->session()->put('sort', $request->all());
+        }
+
+        return redirect()->route('items.index');
+    }
+
     public function massaction(Request $request) {
         try {
             $itemIds = explode(",", $request->get('mass_action_data'));
             $actionName = strtolower($request->get('mass_action'));
+            $approvedAt = \Carbon\Carbon::now()->toDateTimeString();
 
             switch($actionName) {
                 case 'approveitems':
@@ -129,6 +181,7 @@ class ItemController extends Controller
                         if($item->item_status_id == $instockItemStatus->id) continue;
 
                         $item->item_status_id = $instockItemStatus->id;
+                        $item->item_approved_at = $approvedAt;
                         $item->save();
                     }
                 break;
@@ -146,10 +199,26 @@ class ItemController extends Controller
                         if($item->sales_status_id == $submittedSalesStatus->id) {
                             $item->item_status_id = $soldItemStatus->id;
                             $item->sales_status_id = $completedSalesStatus->id;
+                            $item->sales_approved_at = $approvedAt;
                             $item->save();
                         }
                     }
                 break;
+                case 'refunditems':
+                    $soldItemStatus = \App\ItemStatus::where('code', '=' , 'sold')->first();
+                    $instockItemStatus = \App\ItemStatus::where('code', '=', 'instock')->first();
+
+                    foreach($itemIds as $itemId) {
+                        $item = \App\Item::findOrFail($itemId);
+                        if($item->item_status_id == $soldItemStatus->id) {
+                            $item->sales_status_id = null;
+                            $item->sales_by = null;
+                            $item->sales_price = null;
+                            $item->sales_at = null;
+                            $item->item_status_id = $instockItemStatus->id;
+                            $item->save();
+                        }
+                    }
                 default:
             }
         } catch (\Exception $ex) {
@@ -185,35 +254,34 @@ class ItemController extends Controller
         ]);
     }
 
-    // private function getCurrentCountGroupByCategoryID() {
-    //     $result = DB::table('item')
-    //                 ->select(DB::raw('category_id, count(*) as cnt'))
-    //                 ->groupBy('category_id')
-    //                 ->orderBy('category_id', 'asc')
-    //                 ->get();
+    private function getCurrentCountGroupByCategoryID() {
+        $result = DB::table('item')
+                    ->select(DB::raw('category_id, count(*) as cnt'))
+                    ->groupBy('category_id')
+                    ->orderBy('category_id', 'asc')
+                    ->get();
 
-    //     if($result->count() <= 0)
-    //         return null;
+        if($result->count() <= 0)
+            return null;
 
-    //     return $result->keyBy('category_id')->toArray();
-    // }
+        return $result->keyBy('category_id')->toArray();
+    }
 
     private function generateItemNo($categoryId) {
         // $currentYear = date("Y");
         $category = \App\Category::findOrFail($categoryId);
 
-        // $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
+        $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
 
-        // $nextItemIncrementId = 1;
-        // if($arrCurrentCount != null)
-        //     if(array_key_exists($categoryId, $arrCurrentCount))
-        //         $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
+        $nextItemIncrementId = 1;
+        if($arrCurrentCount != null)
+            if(array_key_exists($categoryId, $arrCurrentCount))
+                $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
 
         $itemCount = \App\Item::count();
-        $nextItemId = $itemCount + 1;
-        $bookNo = ceil($nextItemId / self::MAX_ITEM_NO_IN_BOOK);
+        $bookNo = ceil(($itemCount + 1) / self::MAX_ITEM_NO_IN_BOOK);
 
-        $paddedId = str_pad($nextItemId, 4, "0", STR_PAD_LEFT);
+        $paddedId = str_pad($nextItemIncrementId, 4, "0", STR_PAD_LEFT);
 
         $itemNo = $category->code . self::ITEM_NO_SEPARATOR . $bookNo . self::ITEM_NO_SEPARATOR . $paddedId;
 
@@ -278,7 +346,15 @@ class ItemController extends Controller
      */
     public function show($id)
     {
-        //
+        try {
+            $item = Item::findOrFail($id);
+        } catch (Exception $ex) {
+            return redirect()->route('items.index')->withError($ex->getMessage());
+        }
+
+        return view('items.show', [
+            'item' => $item
+        ]);
     }
 
     /**
@@ -347,7 +423,7 @@ class ItemController extends Controller
                 'category_id' => 'numeric|required',
                 'allocation_id' => 'numeric|required',
                 'store_id' => 'numeric|required',
-                'sales_price' => 'numeric|nullable',
+                'sales_price' => 'nullable',
                 'sales_at' => 'date|nullable',
                 'sales_by' => 'nullable',
                 'sales_status_id' => 'nullable',
@@ -365,11 +441,11 @@ class ItemController extends Controller
             $item->category_id = $request->get("category_id");
             $item->allocation_id = $request->get("allocation_id");
             $item->store_id = $request->get("store_id");
-            $item->sales_price = $request->get("sales_price");
+            $item->sales_price = str_replace(",", "", explode(".", $request->get("sales_price"))[0]);
             $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
             $item->sales_by = $request->get("sales_by");
             $item->sales_status_id = $request->get("sales_status_id");
-            $item->item_status_id = ($item->sales_status_id != '' || $item->sales_status_id == NULL) ? $itemStatusSold->id : $request->get("item_status_id");
+            $item->item_status_id = ($request->get("sales_status_id") != NULL) ? $itemStatusSold->id : $request->get("item_status_id");
             $item->created_by = $request->get('created_by');
             $item->save();
 
@@ -609,8 +685,47 @@ class ItemController extends Controller
         }
     }
 
-    public function employeeItemIndex() {    
-        return view('items.employee.item.index');
+    private function getSummaryItemWeightPerCategoryByEmployee($userId) {
+        $result = DB::SELECT("
+                        SELECT
+                            category.code AS category_code,
+                            category.description AS category_name,
+                            SUM(item.item_weight) AS sum_weight
+                        FROM item
+                        LEFT JOIN category ON item.category_id = category.id
+                        WHERE created_by = ".$userId."
+                        AND item.item_approved_at IS NULL
+                        GROUP BY category.code, category.description
+                    ");
+        
+        return $result;
+    }
+
+    private function getSummaryItemCountPerCategoryByEmployee($userId) {
+        $result = DB::SELECT("
+                        SELECT
+                            category.code AS category_code,
+                            category.description AS category_name,
+                            COUNT(item.id) AS count_item
+                        FROM item
+                        LEFT JOIN category ON item.category_id = category.id
+                        WHERE created_by = ".$userId."
+                        AND item.item_approved_at IS NULL
+                        GROUP BY category.code, category.description
+                    ");
+        
+        return $result;
+    }
+
+    public function employeeItemIndex() {
+        $data = [
+            'summary_total_weight_per_category' => $this->getSummaryItemWeightPerCategoryByEmployee(Auth::user()->id),
+            'summary_total_count_per_category' => $this->getSummaryItemCountPerCategoryByEmployee(Auth::user()->id),
+        ];
+
+        // dd($data);
+
+        return view('items.employee.item.index', $data);
     }
 
     public function employeeItemCreate() {
@@ -665,19 +780,100 @@ class ItemController extends Controller
         return redirect('/employee/items/index')->with('success', __('Item has been created.'));
     }
 
-    public function employeeSalesEntry() {    
-        return view('items.employee.sales.entry');
+    private function getSummarySoldItemWeightPerCategoryByEmployee($userId) {
+        $result = DB::SELECT("
+                        SELECT
+                            category.code AS category_code,
+                            category.description AS category_name,
+                            SUM(item.item_weight) AS sum_weight
+                        FROM item
+                        LEFT JOIN category ON item.category_id = category.id
+                        WHERE sales_by = ".$userId."
+                        AND item.sales_status_id = 1
+                        AND item.sales_approved_at IS NULL
+                        GROUP BY category.code, category.description
+                    ");
+        
+        return $result;
+    }
+
+    private function getSummaryTotalSalesPricePerCategoryByEmployee($userId) {
+        $result = DB::SELECT("
+                        SELECT
+                            category.code AS category_code,
+                            category.description AS category_name,
+                            SUM(item.sales_price) AS total_sales
+                        FROM item
+                        LEFT JOIN category ON item.category_id = category.id
+                        WHERE sales_by = ".$userId."
+                        AND item.sales_status_id = 1
+                        AND item.sales_approved_at IS NULL
+                        GROUP BY category.code, category.description
+                    ");
+        
+        return $result;
+    }
+
+    private function getSummaryTotalCountSoldItemPerCategoryByEmployee($userId) {
+        $today = \Carbon\Carbon::now()->format('Y-m-d');
+        $result = DB::SELECT("
+                        SELECT
+                            category.code AS category_code,
+                            category.description AS category_name,
+                            COUNT(item.id) AS item_count
+                        FROM item
+                        LEFT JOIN category ON item.category_id = category.id
+                        WHERE sales_by = ".$userId."
+                        AND item.sales_status_id = 1
+                        AND DATE(sales_at) = '".$today."'
+                        AND item.sales_approved_at IS NULL
+                        GROUP BY category.code, category.description
+                    ");
+        
+        return $result;
+    }
+
+    private function getEmployeeTodaySales($userId) {
+        $today = \Carbon\Carbon::now()->format('Y-m-d');
+        $query = "SELECT
+                    DATE_FORMAT(DATE(sales_at), '%d-%b-%Y') AS sales_at,
+                    item_no,
+                    item_weight,
+                    sales_price
+                FROM item
+                WHERE sales_by = ".$userId."
+                    AND DATE(sales_at) = '".$today."'
+                    AND sales_approved_at IS NULL
+                ORDER BY sales_at DESC";
+        $result = DB::SELECT($query);
+        
+        return $result;
+    }
+
+    public function employeeSalesEntry() {
+        $data = [
+            // 'summary_total_weight_per_category' => $this->getSummarySoldItemWeightPerCategoryByEmployee(Auth::user()->id),
+            // 'summary_total_count_per_category' => $this->getSummaryTotalSalesPricePerCategoryByEmployee(Auth::user()->id),
+            'total_count_sold_items' => $this->getSummaryTotalCountSoldItemPerCategoryByEmployee(Auth::user()->id),
+            'today_list' => $this->getEmployeeTodaySales(Auth::user()->id),
+        ];
+        
+        return view('items.employee.sales.entry', $data);
     }
 
     public function employeeItemFind(Request $request) {
         $itemNo = $request->get('item_no');
+        $completedSalesStatus = \App\SalesStatus::where('code', 'completed')->first();
 
-        $item = \App\Item::where('item_no', $itemNo)->first();
+        $item = \App\Item::where('item_no', $itemNo)
+                ->whereNull('sales_approved_at')
+                ->first();
+
         if($item) {
             return redirect('/employee/sales/form/' . $item->id);
         }
 
-        return redirect()->back()->with('error', __('Item No ' . $itemNo . ' is not found.'));
+        return redirect()->back()->with('error', __('Item No ' . $itemNo . ' is not searchable.'));
     }
 
     public function employeeSalesForm($itemId) {
