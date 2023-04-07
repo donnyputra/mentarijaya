@@ -30,47 +30,19 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        $summaryCollection = $this->getSummaryCollection();
-        $categorySummaryCollection = $this->getInstockItemCountByCategory();
-        $totalWeightSummaryCollection = $this->getInStockTotalItemWeightByCategory();
-
-        return view('dashboard.index', [
-            'summaryCollection' => $summaryCollection,
-            'totalWeightSummaryCollection' => $totalWeightSummaryCollection,
-            'itemsCount' => $categorySummaryCollection
-        ]);
-        
-        
-        // // Implement search by item name
-        // if($request->get('search') != '')
-        //     $items = $items->whereRaw('LOWER(item.item_name) like ?', ['%'.strtolower($request->get('search')).'%']);
-        
-        // // Implement search by item no
-        // if($request->get('searchitemno') != '')
-        //     $items = $items->whereRaw('LOWER(item.item_no) like ?', ['%'.strtolower($request->get('searchitemno')).'%']);
-
-        // // Implement advanced filters
-        // if($request->get('startdate') != '')
-        //     $items = $items->whereDate('item.created_at', '>=', \Carbon\Carbon::parse($request->get('startdate'))->format('Y-m-d') );
-        // if($request->get('enddate') != '')
-        //     $items = $items->whereDate('item.created_at', '<=', \Carbon\Carbon::parse($request->get('enddate'))->format('Y-m-d') );
-        // if($request->get('salesstartdate') != '')
-        //     $items = $items->whereDate('item.sales_at', '>=', \Carbon\Carbon::parse($request->get('salesstartdate'))->format('Y-m-d') );
-        // if($request->get('salesenddate') != '')
-        //     $items = $items->whereDate('item.sales_at', '<=', \Carbon\Carbon::parse($request->get('salesenddate'))->format('Y-m-d') );
-        // if($request->get('store') != '')
-        //     $items = $items->where('item.store_id', '=', $request->get('store'));
-        // if($request->get('category') != '')
-        //     $items = $items->where('item.category_id', '=', $request->get('category'));
-        // if($request->get('allocation') != '')
-        //     $items = $items->where('item.allocation_id', '=', $request->get('allocation'));
-        // if($request->get('itemstatus') != '')
-        //     $items = $items->where('item.item_status_id', '=', $request->get('itemstatus'));
-        // if($request->get('inventorystatus') != '')
-        //     $items = $items->where('item.inventory_status_id', '=', $request->get('inventorystatus'));
-        // if($request->get('salesstatus') != '')
-        //     $items = $items->where('item.sales_status_id', '=', $request->get('salesstatus'));
-
+        if(Auth::id() == 1) {
+            $summaryCollection = $this->getSummaryCollection();
+            $categorySummaryCollection = $this->getInstockItemCountByCategory();
+            $totalWeightSummaryCollection = $this->getInStockTotalItemWeightByCategory();
+    
+            return view('dashboard.index', [
+                'summaryCollection' => $summaryCollection,
+                'totalWeightSummaryCollection' => $totalWeightSummaryCollection,
+                'itemsCount' => $categorySummaryCollection
+            ]);
+        }else{
+            return view('home');
+        }
     }
 
     public function summaryDailyDatatable(Request $request) {

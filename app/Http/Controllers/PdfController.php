@@ -114,9 +114,26 @@ class PdfController extends Controller
             $itemPerPage = $request->get('itemperpage');
         $items = $items->paginate($itemPerPage);
 
+        $total_weight = 0;
+        $total_price = 0;
+        $item_count = 0;
+        $storage_item_count = 0;
+        foreach($items as $item) {
+            $total_weight = $total_weight + $item->item_weight;
+            $total_price = $total_price + $item->sales_price;
+            if($item->allocation_id == 2) {
+                $storage_item_count++;
+            }
+            $item_count++;
+        }
+
         $pdf = PDF::loadView('pdf.items', [
             'items' => $items,
             'printed' => $printed,
+            'total_weight' => $total_weight,
+            'total_price' => $total_price,
+            'item_count' => $item_count,
+            'storage_item_count' => $storage_item_count
         ]);
 
         if(count($printed)>10) {

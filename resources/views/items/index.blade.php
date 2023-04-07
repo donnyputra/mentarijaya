@@ -719,7 +719,8 @@ $(function() {
             "&itemperpage=" + itemPerPage +
             "&search=" + search +
             "&printed=" + printed +
-            "&searchitemno=" + searchItemNo;
+            "&searchitemno=" + searchItemNo +
+            "&page={{Request::get('page')}}";
     });
 
     $("#btnClearAllFilter").on('click', function(e) {

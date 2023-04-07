@@ -149,5 +149,26 @@ scratch. This page gets rid of all links and provides the needed markup only.
             @endforeach
         </tbody>
     </table>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th class="text-center">Weight Total</th>
+                <th class="text-center">Price Total</th>
+                <th class="text-center">Item Count</th>
+                <th class="text-center">From Storage</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>TOTAL</td>
+                <td class="text-center">{{$total_weight}} gr</td>
+                <td class="text-center">{{"Rp " . StringHelper::formatDecimalDisplay($total_price)}}</td>
+                <td class="text-center">{{$item_count}} pcs</td>
+                <td class="text-center">{{$storage_item_count}} pcs</td>
+            </tr>
+        </tbody>
+    </table>
 </body>
 </html>
