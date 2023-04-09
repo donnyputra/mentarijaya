@@ -244,6 +244,6 @@
 		}
 	});
 
-	$('.sales_price').mask("#.##0,00", {reverse: true});
+	$('.sales_price').mask("#.##0", {reverse: true});
 </script>
 @endsection
