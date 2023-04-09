@@ -442,7 +442,7 @@ class ItemController extends Controller
             $item->category_id = $request->get("category_id");
             $item->allocation_id = $request->get("allocation_id");
             $item->store_id = $request->get("store_id");
-            $item->sales_price = ($request->get('sales_price') != null) ? str_replace(".", "", explode(",", $request->get("sales_price"))[0]) : null;
+            $item->sales_price = ($request->get('sales_price') != null) ? str_replace(".", "", $request->get("sales_price")) : null;
             $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
             $item->sales_by = $request->get("sales_by");
             $item->sales_status_id = $request->get("sales_status_id");
