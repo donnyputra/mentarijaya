@@ -174,11 +174,52 @@
 															</div>
 														</div>
 													</div>
+													<div class="card">
+														<div class="card-header">
+															<div class="card-title">{{ __("Photos") }}</div>
+														</div>
+														<div class="card-body">
+															<div id="carouselPhotos" class="carousel slide" data-ride="carousel">
+																<div class="carousel-inner">
+																	@php
+																		$i = 0;
+																	@endphp
+																	@foreach($photos as $photo)
+																		@if($i == 0) 
+																		<div class="carousel-item active">
+																			<img class="d-block w-100" src="{{asset('img/'.$photo->img_url)}}">
+																		</div>
+																		@else
+																		<div class="carousel-item">
+																			<img class="d-block w-100" src="{{asset('img/'.$photo->img_url)}}">
+																		</div>
+																		@endif
+																		@php
+																			$i++;
+																		@endphp
+																	@endforeach
+																</div>
+																<a class="carousel-control-prev" href="#carouselPhotos" role="button" data-slide="prev">
+																	<span class="carousel-control-custom-icon" aria-hidden="true">
+																		<i class="fas fa-chevron-left"></i>
+																	</span>
+																	<span class="sr-only">Previous</span>
+																</a>
+																<a class="carousel-control-next" href="#carouselPhotos" role="button" data-slide="next">
+																	<span class="carousel-control-custom-icon" aria-hidden="true">
+																		<i class="fas fa-chevron-right"></i>
+																	</span>
+																	<span class="sr-only">Next</span>
+																</a>
+															</div>
+														</div>
+													</div>
 												</div>
 											</div>
 					
 											<div class="float-right">
-												<a class="btn btn-secondary" href="{{ url()->previous() }}" role="button">{{ __("Back") }}</a>
+												<a class="btn btn-secondary" href="{{ route('items.index') }}" role="button">{{ __("Back") }}</a>
+												<a class="btn btn-primary" href="{{ route('items.edit', $item->id) }}" role="button">{{ __("Edit") }}</a>
 											</div>
 									</div>
 								</div>

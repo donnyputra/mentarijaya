@@ -110,3 +110,6 @@ Route::get('/dashboard/summary', 'DashboardController@summaryDailyDatatable')->n
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');
 
 Route::get('/pdf/items', 'PdfController@itemsPdf')->name('pdf.items');
+
+Route::resource('photos', 'PhotosController')->only('store');
+Route::delete('photos', 'PhotosController@destroy')->name('photos.destroy');

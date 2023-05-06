@@ -29,6 +29,13 @@
 							<div class="table-responsive">
 								<div class="card">
 									<div class="card-body">
+
+										<form id="addPhotos" action="{{route('photos.store')}}" method="POST" enctype="multipart/form-data"></form>
+
+										<form id="deletePhotos" action="{{route('photos.destroy')}}" method="POST">
+											@method('DELETE')
+											@csrf
+										</form>
 										
 										<form method="POST" action="{{ route('items.update', $item->id) }}">
 
@@ -203,6 +210,33 @@
 																	</select>
 																</div>
 															</div>
+														</div>
+													</div>
+													<div class="card">
+														<div class="card-header">
+															<div class="card-title">{{ __("Photos") }}</div>
+															<label class="btn-sm btn-primary float-right">
+																<span><i class="nav-icon fas fa-plus"></i></span> <input type="file" name="images[]" multiple hidden onChange="$('#addPhotos').submit();" form="addPhotos">
+																<input type="text" hidden name="itemid" value="{{$item->id}}" form="addPhotos">
+																<input name="_token" value="{{ csrf_token() }}" type="hidden" form="addPhotos">
+															</label>
+														</div>
+														<div class="card-body">
+															@foreach ($photos as $photo)
+																<div class="form-group row">
+																	<div class="col-9">
+																		<img src="{{asset('img/'.$photo->img_url)}}" width=100 height=100>
+																	</div>
+																	<div class="col-3 my-auto text-center">
+																		<input hidden type="text" value="{{$photo->id}}" name="photoid" form="deletePhotos">
+																		<button type="submit" form="deletePhotos">
+																			<span>
+																				<i class="fa fa-trash" style="color:red"></i>
+																			</span>
+																		</button>
+																	</div>
+																</div>
+															@endforeach
 														</div>
 													</div>
 												</div>
