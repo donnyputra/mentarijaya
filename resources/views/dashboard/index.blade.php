@@ -121,7 +121,7 @@
                                     </div>
 
                                     <div class="card-body">
-                                        <table id="summary" class="table table-hover table-striped text-nowrap" style="width:100%">
+                                        <table id="summary" class="table table-hover table-striped text-nowrap" style="width:100%;font-size:11px;">
                                             <thead>
                                                 <tr>
                                                     <th>Date</th>

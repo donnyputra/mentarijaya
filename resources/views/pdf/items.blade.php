@@ -28,6 +28,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
     table tbody tr td {
         padding: 3px !important
     }
+
+    body {
+        font-size: 6px;
+    }
     </style>
 
     <livewire:styles>
@@ -94,7 +98,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <td>{{ $item->category_description }}</td>
                 @endif
                 @if (in_array(1, $printed))
-                <td>{{ $item->item_no }}</td>
+                <td style="width:30">{{ $item->item_no }}</td>
                 @endif
                 @if (in_array(2, $printed))
                 <td>{{ $item->item_name }}</td>
@@ -155,6 +159,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <tr>
                 <th></th>
                 <th class="text-center">Weight Total</th>
+                <th class="text-center">Weight Storage 37,50%</th>
+                <th class="text-center">Weight Storage 42,00%</th>
                 <th class="text-center">Price Total</th>
                 <th class="text-center">Item Count</th>
                 <th class="text-center">From Storage</th>
@@ -164,6 +170,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <tr>
                 <td>TOTAL</td>
                 <td class="text-center">{{$total_weight}} gr</td>
+                <th class="text-center">{{StringHelper::formatDecimalDisplay($weight37)}} gr</th>
+                <th class="text-center">{{StringHelper::formatDecimalDisplay($weight42)}} gr</th>
                 <td class="text-center">{{"Rp " . StringHelper::formatDecimalDisplay($total_price)}}</td>
                 <td class="text-center">{{$item_count}} pcs</td>
                 <td class="text-center">{{$storage_item_count}} pcs</td>
