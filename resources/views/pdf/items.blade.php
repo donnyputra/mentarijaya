@@ -30,7 +30,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
     }
 
     body {
-        font-size: 6px;
+        font-size: 8px;
+    }
+
+    #harga {
+        position: relative;
+    }
+
+    .rupiah {
+        position: absolute; left: 0;
+    }
+
+    .nominal {
+        position: absolute; right: 0;
     }
     </style>
 
@@ -40,54 +52,54 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <body>
 	<table class="table table-bordered">
         <thead>
-            <tr>
+            <tr class="text-center">
                 @if (in_array(0, $printed))
-                <th>Category</th>
+                <th class="text-center">Category</th>
                 @endif
                 @if (in_array(1, $printed))
-                <th>Item No</th>
+                <th class="text-center">Item No</th>
                 @endif
                 @if (in_array(2, $printed))
-                <th>Item Name</th>
+                <th class="text-center">Item Name</th>
                 @endif
                 @if (in_array(3, $printed))
-                <th>Item Weight</th>
+                <th class="text-center">Item Weight</th>
                 @endif
                 @if (in_array(4, $printed))
-                <th>Sales Price</th>
+                <th class="text-center">Sales Price</th>
                 @endif
                 @if (in_array(5, $printed))
-                <th>Sales At</th>
+                <th class="text-center">Sales At</th>
                 @endif
                 @if (in_array(6, $printed))
-                <th>Gold Rate</th>
+                <th class="text-center">Gold Rate</th>
                 @endif
                 @if (in_array(7, $printed))
-                <th>Inventory Status</th>
+                <th class="text-center">Inventory Status</th>
                 @endif
                 @if (in_array(8, $printed))
-                <th>Item Status</th>
+                <th class="text-center">Item Status</th>
                 @endif
                 @if (in_array(9, $printed))
-                <th>Sales Status</th>
+                <th class="text-center">Sales Status</th>
                 @endif
                 @if (in_array(10, $printed))
-                <th>Created By</th>
+                <th class="text-center">Created By</th>
                 @endif
                 @if (in_array(11, $printed))
-                <th>Sales By</th>
+                <th class="text-center">Sales By</th>
                 @endif
                 @if (in_array(12, $printed))
-                <th>Created At</th>
+                <th class="text-center">Created At</th>
                 @endif
                 @if (in_array(13, $printed))
-                <th>Updated At</th>
+                <th class="text-center">Updated At</th>
                 @endif
                 @if (in_array(14, $printed))
-                <th>Allocation</th>
+                <th class="text-center">Allocation</th>
                 @endif
                 @if (in_array(15, $printed))
-                <th>Store</th>
+                <th class="text-center">Store</th>
                 @endif
             </tr>
         </thead>
@@ -98,20 +110,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <td>{{ $item->category_description }}</td>
                 @endif
                 @if (in_array(1, $printed))
-                <td style="width:30">{{ $item->item_no }}</td>
+                <td class="text-center" style="width:30; ">{{ $item->item_no }}</td>
                 @endif
                 @if (in_array(2, $printed))
                 <td>{{ $item->item_name }}</td>
                 @endif
                 @if (in_array(3, $printed))
-                <td style="width:0">{{ StringHelper::formatDecimalDisplay($item->item_weight) . " gr" }}</td>
+                <td class="text-right" style="width:0">{{ StringHelper::formatDecimalDisplay($item->item_weight) . " gr" }}</td>
                 @endif
                 @if (in_array(4, $printed))
-                <td>{{ $item->sales_price == null ? "-" : ("Rp " . StringHelper::formatDecimalDisplay($item->sales_price)) }}
+                <td>{!! $item->sales_price == null ? "-" : ("<div id='harga'><p class='rupiah'>Rp</p><p class='nominal'>" . number_format($item->sales_price, 0, ",", ".") . "</p></div>") !!}
                 </td>
                 @endif
                 @if (in_array(5, $printed))
-                <td>{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('d-M-Y') }}
+                <td class="text-center">{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('d-M-Y') }}
                 </td>
                 @endif
                 @if (in_array(6, $printed))
@@ -168,13 +180,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </thead>
         <tbody>
             <tr>
-                <td>TOTAL</td>
-                <td class="text-center">{{$total_weight}} gr</td>
+                <td style="vertical-align:middle">TOTAL</td>
+                <td class="text-center" style="vertical-align:middle">{{$total_weight}} gr</td>
                 <th class="text-center">{{StringHelper::formatDecimalDisplay($weight37)}} gr</th>
                 <th class="text-center">{{StringHelper::formatDecimalDisplay($weight42)}} gr</th>
-                <td class="text-center">{{"Rp " . StringHelper::formatDecimalDisplay($total_price)}}</td>
-                <td class="text-center">{{$item_count}} pcs</td>
-                <td class="text-center">{{$storage_item_count}} pcs</td>
+                <td class="text-center" style="vertical-align:middle">{{"Rp " . StringHelper::formatDecimalDisplay($total_price)}}</td>
+                <td class="text-center" style="vertical-align:middle">{{$item_count}} pcs</td>
+                <td class="text-center" style="vertical-align:middle">{{$storage_item_count}} pcs</td>
             </tr>
         </tbody>
     </table>

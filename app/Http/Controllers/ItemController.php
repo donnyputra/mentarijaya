@@ -475,6 +475,9 @@ class ItemController extends Controller
     {
         try {
             $item = Item::findOrFail($id);
+            $itemStatusSold = \App\ItemStatus::where('code', '=', 'sold')->first();
+            $item->item_status_id = $itemStatusSold->id;
+            $item->save();
             $item->delete();
         } catch (Exception $ex) {
             return redirect('/items')->with('error', $ex->getMessage());

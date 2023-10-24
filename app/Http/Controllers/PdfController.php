@@ -122,9 +122,9 @@ class PdfController extends Controller
         $weight42 = 0;
         foreach($items as $item) {
             $total_weight = $total_weight + $item->item_weight;
-            if($item->item_gold_rate == 37.5) {
+            if($item->item_gold_rate == 37.5 && $item->allocation_id == 2) {
                 $weight37 = $weight37 + $item->item_weight;
-            } else if ($item->item_gold_rate == 42.0) {
+            } else if ($item->item_gold_rate == 42.0 && $item->allocation_id == 2) {
                 $weight42 = $weight42 + $item->item_weight;
             }
             $total_price = $total_price + $item->sales_price;

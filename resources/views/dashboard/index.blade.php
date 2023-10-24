@@ -125,11 +125,11 @@
                                             <thead>
                                                 <tr>
                                                     <th>Date</th>
-                                                    <th>Gold Rate</th>
-                                                    <th>Total Weight</th>
-                                                    <th>Total Sales</th>
-                                                    <th>Average</th>
-                                                    <th>Sold Items</th>
+                                                    <th>Rate</th>
+                                                    <th>W</th>
+                                                    <th>Sales</th>
+                                                    <th>Avg</th>
+                                                    <th>Sold</th>
                                                 </tr>
                                             </thead>
                                         </table> <!-- ./Table Grid -->
@@ -170,7 +170,8 @@
             order: [[0, 'desc']],
             columnDefs: [
                 { type: 'natural', targets: [2,3,4] },
-                { render: DataTable.render.datetime('DD-MMM-YYYY'), targets: 0}
+                { render: DataTable.render.datetime('DD-MMM-YYYY'), targets: 0},
+                { "targets": [3,4], className: 'dt-right'},
             ]
         });
     });
