@@ -68,13 +68,10 @@ class DashboardController extends Controller
 
         return Datatables::of($summaryCollection->get())
             ->addColumn('date_sales', function($row){
-                return Carbon::parse($row->sales_date)->format('d-M-Y');
-            })
-            ->addColumn('gold_rate', function($row){
-                return number_format($row->item_gold_rate, 2, ',', '.') . "%";
+                return Carbon::parse($row->sales_date)->format('dMY') . "|" . number_format($row->item_gold_rate, 1, ',', '.');
             })
             ->addColumn('weight', function($row){
-                return number_format($row->total_weight, 2, ',', '.') . " gr";
+                return number_format($row->total_weight, 2, ',', '.') . " g";
             })
             ->addColumn('sales', function($row){
                 if ($row->total_sales == null) {

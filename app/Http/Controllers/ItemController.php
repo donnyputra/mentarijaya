@@ -332,6 +332,8 @@ class ItemController extends Controller
         ]);
         $item->save();
 
+        
+
         if(Auth::user()->authRole()->name == 'employee') {
             return redirect('/employee/items/index')->with('success', __('Item has been created.'));
         }
