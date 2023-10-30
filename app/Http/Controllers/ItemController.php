@@ -332,6 +332,8 @@ class ItemController extends Controller
         ]);
         $item->save();
 
+        
+
         if(Auth::user()->authRole()->name == 'employee') {
             return redirect('/employee/items/index')->with('success', __('Item has been created.'));
         }
@@ -349,12 +351,14 @@ class ItemController extends Controller
     {
         try {
             $item = Item::findOrFail($id);
+            $photos = \App\Photos::where('item_id', $id)->get();
         } catch (Exception $ex) {
             return redirect()->route('items.index')->withError($ex->getMessage());
         }
 
         return view('items.show', [
-            'item' => $item
+            'item' => $item,
+            'photos' => $photos
         ]);
     }
 
@@ -377,6 +381,7 @@ class ItemController extends Controller
         $allocations = \App\Allocation::all();
         $itemstatuses = \App\ItemStatus::all();
         $inventorystatuses = \App\InventoryStatus::all();
+        $photos = \App\Photos::where('item_id', $id)->get();
         
         $salesstatuses = null;
         if(Auth::user()->authRole()->name == 'admin') {
@@ -401,6 +406,7 @@ class ItemController extends Controller
             'salesstatuses' => $salesstatuses,
             'users' => $users,
             'item' => $item,
+            'photos' => $photos,
         ]);
     }
 
@@ -471,6 +477,9 @@ class ItemController extends Controller
     {
         try {
             $item = Item::findOrFail($id);
+            $itemStatusSold = \App\ItemStatus::where('code', '=', 'sold')->first();
+            $item->item_status_id = $itemStatusSold->id;
+            $item->save();
             $item->delete();
         } catch (Exception $ex) {
             return redirect('/items')->with('error', $ex->getMessage());
@@ -864,7 +873,6 @@ class ItemController extends Controller
 
     public function employeeItemFind(Request $request) {
         $itemNo = $request->get('item_no');
-        $completedSalesStatus = \App\SalesStatus::where('code', 'completed')->first();
 
         $item = \App\Item::where('item_no', $itemNo)
                 ->whereNull('sales_approved_at')

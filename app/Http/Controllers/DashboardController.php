@@ -68,26 +68,23 @@ class DashboardController extends Controller
 
         return Datatables::of($summaryCollection->get())
             ->addColumn('date_sales', function($row){
-                return Carbon::parse($row->sales_date)->format('d-M-Y');
-            })
-            ->addColumn('gold_rate', function($row){
-                return number_format($row->item_gold_rate, 2, ',', '.') . "%";
+                return Carbon::parse($row->sales_date)->format('dMY') . "|" . number_format($row->item_gold_rate, 1, ',', '.');
             })
             ->addColumn('weight', function($row){
-                return number_format($row->total_weight, 2, ',', '.') . " gr";
+                return number_format($row->total_weight, 2, ',', '.') . " g";
             })
             ->addColumn('sales', function($row){
                 if ($row->total_sales == null) {
                     return "-";
                 } else {
-                    return "Rp. " . number_format($row->total_sales, 2, ',', '.');
+                    return "Rp. " . number_format($row->total_sales, 0, ',', '.');
                 }
             })
             ->addColumn('avg', function($row){
                 if ($row->average == null) {
                     return "-";
                 } else {
-                    return "Rp. " . number_format($row->average, 2, ',', '.');
+                    return "Rp. " . number_format($row->average, 0, ',', '.');
                 }
             })
             ->addColumn('item_count', function($row){
@@ -123,6 +120,16 @@ class DashboardController extends Controller
             WHERE category.deleted_at is null
             GROUP BY
                 category_code
+            ORDER BY case
+            	when category_code = 'A' then 1
+            	when category_code = 'CK' then 2
+            	when category_code = 'C' then 3
+            	when category_code = 'W' then 4
+            	when category_code = 'L' then 5
+            	when category_code = 'GL' then 6
+            	when category_code = 'K' then 7
+            	else 8
+            	end asc
                     ");
         
         return $instockItem;
@@ -145,6 +152,7 @@ class DashboardController extends Controller
                         JOIN item_status ON item.item_status_id = item_status.id
                         WHERE item.sales_at IS NULL
                             AND LOWER(item_status.CODE) = 'instock'
+                            AND item.deleted_at IS NULL
                         GROUP BY item_gold_rate
                     ");
 

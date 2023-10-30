@@ -118,8 +118,15 @@ class PdfController extends Controller
         $total_price = 0;
         $item_count = 0;
         $storage_item_count = 0;
+        $weight37 = 0;
+        $weight42 = 0;
         foreach($items as $item) {
             $total_weight = $total_weight + $item->item_weight;
+            if($item->item_gold_rate == 37.5 && $item->allocation_id == 2) {
+                $weight37 = $weight37 + $item->item_weight;
+            } else if ($item->item_gold_rate == 42.0 && $item->allocation_id == 2) {
+                $weight42 = $weight42 + $item->item_weight;
+            }
             $total_price = $total_price + $item->sales_price;
             if($item->allocation_id == 2) {
                 $storage_item_count++;
@@ -131,6 +138,8 @@ class PdfController extends Controller
             'items' => $items,
             'printed' => $printed,
             'total_weight' => $total_weight,
+            'weight37' => $weight37,
+            'weight42' => $weight42,
             'total_price' => $total_price,
             'item_count' => $item_count,
             'storage_item_count' => $storage_item_count

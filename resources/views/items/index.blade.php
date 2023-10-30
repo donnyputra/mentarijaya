@@ -449,7 +449,7 @@
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="printed[]" value=5> Sales At
+                        <input type="checkbox" name="printed[]" value=5 checked> Sales At
                     </label>
                 </div>
                 <div class="checkbox">
