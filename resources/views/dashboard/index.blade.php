@@ -125,6 +125,7 @@
                                             <thead>
                                                 <tr>
                                                     <th>Date</th>
+                                                    <th>Rate</th>
                                                     <th>W</th>
                                                     <th>Sales</th>
                                                     <th>Avg</th>
@@ -159,7 +160,8 @@
                 "url": "{{ route('summary.datatables') }}",
             },
             columns: [
-                {data: 'date_sales', name: 'date_sales'},
+                {data: 'sales_date', name: 'sales_date'},
+                {data: 'gold_rate', name: 'gold_rate'},
                 {data: 'weight', name: 'weight'},
                 {data: 'sales', name: 'sales'},
                 {data: 'avg', name: 'avg'},
@@ -169,8 +171,8 @@
             columnDefs: [
                 { width:0, targets: [0,1,2,3]},
                 { type: 'natural', targets: [2,3,4] },
-                // { render: DataTable.render.datetime('DD-MMM-YYYY'), targets: 0},
-                { "targets": [2,3], className: 'dt-right'},
+                { render: DataTable.render.datetime('DD-MMM-YYYY'), targets: 0},
+                { "targets": [3,4], className: 'dt-right'},
             ]
         });
     });
