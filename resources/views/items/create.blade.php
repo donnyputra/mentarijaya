@@ -210,8 +210,29 @@
 														<div class="card-header">
 															<div class="card-title">{{ __("Photos") }}</div>
 															<label class="btn-sm btn-primary float-right">
-																<span><i class="nav-icon fas fa-plus"></i></span> <input type="file" name="images[]" multiple hidden>
+																<span><i class="nav-icon fas fa-plus"></i></span> <input type="file" id="photos" name="images[]" multiple style="display:none;">
 															</label>
+															<div class="card-body">
+																<div class="form-group row">
+																	<div id="carouselPhotos" class="carousel slide" data-ride="carousel" style="display:none">
+																		<div class="carousel-inner">
+																			
+																		</div>
+																		<a class="carousel-control-prev" href="#carouselPhotos" role="button" data-slide="prev">
+																			<span class="carousel-control-custom-icon" aria-hidden="true">
+																				<i class="fas fa-chevron-left"></i>
+																			</span>
+																			<span class="sr-only">Previous</span>
+																		</a>
+																		<a class="carousel-control-next" href="#carouselPhotos" role="button" data-slide="next">
+																			<span class="carousel-control-custom-icon" aria-hidden="true">
+																				<i class="fas fa-chevron-right"></i>
+																			</span>
+																			<span class="sr-only">Next</span>
+																		</a>
+																	</div>
+																</div>
+															</div>
 														</div>
 													</div>
 												</div>
@@ -242,6 +263,10 @@
         $('#sales_at').datepicker();
     });
 
+	$("#carouselPhotos").hide();
+
+	document.getElementById('photos').addEventListener('change', readImage, false);
+
 	document.getElementById("item_gold_rate").value = 37.5;
 	$('#category_id').on('change', function(e) {
 		var categoryText = (this.options[this.selectedIndex].text).toLowerCase();
@@ -251,5 +276,40 @@
 			document.getElementById("item_gold_rate").value = 37.5;
 		}
 	});
+
+	function readImage() {
+	   if (window.File && window.FileList && window.FileReader) {
+	       var files = event.target.files; //FileList object
+	       var output = $(".carousel-inner");
+			$("#carouselPhotos").show();
+			output.empty();
+		
+	       for (let i = 0; i < files.length; i++) {
+	           var file = files[i];
+	           if (!file.type.match('image')) continue;
+	           
+	           var picReader = new FileReader();
+	           
+	           picReader.addEventListener('load', function (event) {
+	               var picFile = event.target;
+					if (i == 0) {
+						var html =  '<div class="carousel-item active">' + 
+									'<img class="d-block w-100" src="'+picFile.result+'">' +
+									'</div>'
+					} else {
+						var html =  '<div class="carousel-item">' + 
+									'<img class="d-block w-100" src="'+picFile.result+'">' +
+									'</div>'
+					}
+				
+	               output.append(html);
+	           });
+			
+	           picReader.readAsDataURL(file);
+	       }
+	   } else {
+	       console.log('Browser not support');
+	   }
+	}
 </script>
 @endsection
