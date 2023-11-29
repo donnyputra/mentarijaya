@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -332,6 +333,21 @@ class ItemController extends Controller
         ]);
         $item->save();
 
+        if ($request->images){
+            $last_item_id = $item->id;
+            foreach($request->images as $key => $image)
+            {
+                $imageName = Str::uuid().'.'.$image->extension();  
+                $image->move(public_path('img'), $imageName);
+            
+                $images[]['img_url'] = $imageName;
+            }
+
+            foreach ($images as $key => $image) {
+                $image['item_id'] = $last_item_id;
+                \App\Photos::create($image);
+            }
+        }
         
 
         if(Auth::user()->authRole()->name == 'employee') {
@@ -782,6 +798,22 @@ class ItemController extends Controller
             'created_by' => $request->get('created_by'),
         ]);
         $item->save();
+
+        if ($request->images){
+            $last_item_id = $item->id;
+            foreach($request->images as $key => $image)
+            {
+                $imageName = Str::uuid().'.'.$image->extension();  
+                $image->move(public_path('img'), $imageName);
+            
+                $images[]['img_url'] = $imageName;
+            }
+
+            foreach ($images as $key => $image) {
+                $image['item_id'] = $last_item_id;
+                \App\Photos::create($image);
+            }
+        }
 
         if($request->get('action') == 'save entry sales') {
             return redirect('/employee/sales/form/' . $item->id)->with('success', __('Item has been created.'));

@@ -29,7 +29,7 @@
 							<div class="table-responsive">
 								<div class="card">
 									<div class="card-body">
-										<form method="POST" action="{{ route('items.store') }}">
+										<form method="POST" action="{{ route('items.store') }}" enctype="multipart/form-data">
 
 											<div class="row">
 												<div class="col-12 mb-3">
@@ -204,6 +204,14 @@
 																	</select>
 																</div>
 															</div>
+														</div>
+													</div>
+													<div class="card">
+														<div class="card-header">
+															<div class="card-title">{{ __("Photos") }}</div>
+															<label class="btn-sm btn-primary float-right">
+																<span><i class="nav-icon fas fa-plus"></i></span> <input type="file" name="images[]" multiple hidden>
+															</label>
 														</div>
 													</div>
 												</div>

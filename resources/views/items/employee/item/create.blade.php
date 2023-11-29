@@ -29,7 +29,7 @@
 							<div class="table-responsive">
 								<div class="card">
 									<div class="card-body">
-										<form method="POST" action="{{ route('items.employee.store') }}">
+										<form method="POST" action="{{ route('items.employee.store') }}" enctype="multipart/form-data">
 
 											<div class="row">
 												<div class="col-12 mb-3">
@@ -154,6 +154,13 @@
 																	</select>
 																</div>
 															</div>
+															<div class="form-group row">
+																<label for="created_by" class="col-3 col-form-label">Photos</label>
+																<div class="col-9">
+																	<input type="file" id="photos" name="images[]" multiple style="display:none;">
+																	<button class="add-photos btn btn-light">Add Photos</button>
+																</div>
+															</div>
 														</div>
 													</div>
 												</div>
@@ -184,6 +191,8 @@
 	// $(function() {
     //     $('#sales_at').datepicker();
     // });
+
+	$('.add-photos').on('click', function() { $('#photos').click();return false;});
 
     document.getElementById("item_gold_rate").value = 37.5;
 	$('#category_id').on('change', function(e) {
