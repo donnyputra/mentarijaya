@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Item;
+use App\ItemNumber;
 
 class ItemController extends Controller
 {
@@ -286,6 +287,19 @@ class ItemController extends Controller
         $paddedId = str_pad($nextItemIncrementId, 4, "0", STR_PAD_LEFT);
 
         $itemNo = $category->code . self::ITEM_NO_SEPARATOR . $bookNo . self::ITEM_NO_SEPARATOR . $paddedId;
+
+        // if(date('Y') == '2024') {
+            $itemNumber = ItemNumber::firstOrCreate(
+                ['category_id' => $categoryId],
+                ['category_code' => $category->code, 'number' => 0]
+            );
+            $number = $itemNumber->number+1;
+
+            $itemNo = $category->code . ' ' . $number;
+
+            $itemNumber->number = $number;
+            $itemNumber->save();
+        // }
 
         return $itemNo;
     }
