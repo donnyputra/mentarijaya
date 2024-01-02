@@ -271,36 +271,17 @@ class ItemController extends Controller
     }
 
     private function generateItemNo($categoryId) {
-        // $currentYear = date("Y");
         $category = \App\Category::findOrFail($categoryId);
 
-        $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
+        $itemNumber = ItemNumber::firstOrCreate(
+            ['category_id' => $categoryId],
+            ['category_code' => $category->code, 'number' => 0]
+        );
+        $number = $itemNumber->number+1;
 
-        $nextItemIncrementId = 1;
-        if($arrCurrentCount != null)
-            if(array_key_exists($categoryId, $arrCurrentCount))
-                $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
-
-        $itemCount = \App\Item::count();
-        $bookNo = ceil(($itemCount + 1) / self::MAX_ITEM_NO_IN_BOOK);
-
-        $paddedId = str_pad($nextItemIncrementId, 4, "0", STR_PAD_LEFT);
-
-        $itemNo = $category->code . self::ITEM_NO_SEPARATOR . $bookNo . self::ITEM_NO_SEPARATOR . $paddedId;
-
-        // if(date('Y') == '2024') {
-            $itemNumber = ItemNumber::firstOrCreate(
-                ['category_id' => $categoryId],
-                ['category_code' => $category->code, 'number' => 0]
-            );
-            $number = $itemNumber->number+1;
-
-            $itemNo = $category->code . ' ' . $number;
-
-            $itemNumber->number = $number;
-            $itemNumber->save();
-        // }
-
+        $itemNo = $category->code . ' ' . $number;
+        $itemNumber->number = $number;
+        $itemNumber->save();
         return $itemNo;
     }
 
