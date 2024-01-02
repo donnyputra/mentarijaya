@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Item;
+use App\ItemNumber;
 
 class ItemController extends Controller
 {
@@ -269,23 +271,17 @@ class ItemController extends Controller
     }
 
     private function generateItemNo($categoryId) {
-        // $currentYear = date("Y");
         $category = \App\Category::findOrFail($categoryId);
 
-        $arrCurrentCount = $this->getCurrentCountGroupByCategoryID($categoryId);
+        $itemNumber = ItemNumber::firstOrCreate(
+            ['category_id' => $categoryId],
+            ['category_code' => $category->code, 'number' => 0]
+        );
+        $number = $itemNumber->number+1;
 
-        $nextItemIncrementId = 1;
-        if($arrCurrentCount != null)
-            if(array_key_exists($categoryId, $arrCurrentCount))
-                $nextItemIncrementId = (int)$arrCurrentCount[$categoryId]->cnt + 1;
-
-        $itemCount = \App\Item::count();
-        $bookNo = ceil(($itemCount + 1) / self::MAX_ITEM_NO_IN_BOOK);
-
-        $paddedId = str_pad($nextItemIncrementId, 4, "0", STR_PAD_LEFT);
-
-        $itemNo = $category->code . self::ITEM_NO_SEPARATOR . $bookNo . self::ITEM_NO_SEPARATOR . $paddedId;
-
+        $itemNo = $category->code . ' ' . $number;
+        $itemNumber->number = $number;
+        $itemNumber->save();
         return $itemNo;
     }
 
@@ -332,6 +328,21 @@ class ItemController extends Controller
         ]);
         $item->save();
 
+        if ($request->images){
+            $last_item_id = $item->id;
+            foreach($request->images as $key => $image)
+            {
+                $imageName = Str::uuid().'.'.$image->extension();  
+                $image->move(public_path('img'), $imageName);
+            
+                $images[]['img_url'] = $imageName;
+            }
+
+            foreach ($images as $key => $image) {
+                $image['item_id'] = $last_item_id;
+                \App\Photos::create($image);
+            }
+        }
         
 
         if(Auth::user()->authRole()->name == 'employee') {
@@ -782,6 +793,22 @@ class ItemController extends Controller
             'created_by' => $request->get('created_by'),
         ]);
         $item->save();
+
+        if ($request->images){
+            $last_item_id = $item->id;
+            foreach($request->images as $key => $image)
+            {
+                $imageName = Str::uuid().'.'.$image->extension();  
+                $image->move(public_path('img'), $imageName);
+            
+                $images[]['img_url'] = $imageName;
+            }
+
+            foreach ($images as $key => $image) {
+                $image['item_id'] = $last_item_id;
+                \App\Photos::create($image);
+            }
+        }
 
         if($request->get('action') == 'save entry sales') {
             return redirect('/employee/sales/form/' . $item->id)->with('success', __('Item has been created.'));
