@@ -279,7 +279,7 @@ class ItemController extends Controller
         );
         $number = $itemNumber->number+1;
 
-        $itemNo = $category->code . ' ' . $number;
+        $itemNo = $category->code . $number;
         $itemNumber->number = $number;
         $itemNumber->save();
         return $itemNo;
