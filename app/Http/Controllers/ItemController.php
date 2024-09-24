@@ -178,11 +178,14 @@ class ItemController extends Controller
             switch($actionName) {
                 case 'approveitems':
                     $instockItemStatus = \App\ItemStatus::where('code', '=', 'instock')->first();
+                    $soldItemStatus = \App\ItemStatus::where('code', '=', 'sold')->first();
                     foreach($itemIds as $itemId) {
                         $item = \App\Item::findOrFail($itemId);
                         if($item->item_status_id == $instockItemStatus->id) continue;
 
-                        
+                        if($item->item_status_id != $soldItemStatus->id){
+                            $item->item_status_id = $instockItemStatus->id;
+                        }
                         $item->item_approved_at = $approvedAt;
                         $item->save();
                     }
