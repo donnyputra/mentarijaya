@@ -104,7 +104,7 @@ class ItemController extends Controller
                 $sortBy = 'item.id';
                 break;
             case 'item_no':
-                $sortBy = 'SUBSTRING(item.item_no,2,10)*1';
+                $sortBy = "CASE WHEN LOCATE('-', item.item_no) > 0 THEN 0 ELSE 1 END, CAST(REGEXP_SUBSTR(item.item_no, '[0-9]+') AS UNSIGNED), CASE WHEN LOCATE('-', item.item_no) > 0 THEN CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(item.item_no, '-', -1), '-', 1) AS UNSIGNED) ELSE NULL END";
                 break;
             case 'item_name':
                 $sortBy = 'item.item_name';
