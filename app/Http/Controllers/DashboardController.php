@@ -41,7 +41,7 @@ class DashboardController extends Controller
                 'summaryCollection' => $summaryCollection,
                 'totalWeightSummaryCollection' => $totalWeightSummaryCollection,
                 'itemsCount' => $categorySummaryCollection,
-                'todayBaseGoldPrice' => $this->getTodayBaseGoldPrice(),
+                'todayBaseGoldPriceList' => $this->getTodayBaseGoldPriceList(),
             ]);
         }else{
             return view('home');
@@ -165,11 +165,20 @@ class DashboardController extends Controller
         return $instockItem;
     }
 
-    private function getTodayBaseGoldPrice()
+    private function getTodayBaseGoldPriceList()
     {
         $today = Carbon::today()->format('Y-m-d');
+        $hasGoldRateColumn = Schema::hasColumn('gold_prices', 'gold_rate');
+        $hasInventoryStatusColumn = Schema::hasColumn('gold_prices', 'inventory_status_id');
+        $inventoryStatusMap = [];
 
         $goldPriceQuery = GoldPrice::query();
+        if ($hasInventoryStatusColumn) {
+            $goldPriceQuery = $goldPriceQuery->with('inventoryStatus');
+            $inventoryStatusMap = \App\InventoryStatus::withTrashed()
+                ->pluck('description', 'id')
+                ->toArray();
+        }
         if (Schema::hasColumn('gold_prices', 'price_date')) {
             $goldPriceQuery = $goldPriceQuery
                 ->whereDate('price_date', '<=', $today)
@@ -180,24 +189,42 @@ class DashboardController extends Controller
                 ->orderBy('created_at', 'desc');
         }
 
-        $goldPrice = $goldPriceQuery->orderBy('id', 'desc')->first();
-        if (!$goldPrice) {
-            return null;
+        $goldPrices = $goldPriceQuery
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $result = [];
+        foreach ($goldPrices as $goldPrice) {
+            $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
+            if ($displayBasePrice === null) {
+                continue;
+            }
+
+            $displayGoldRate = $hasGoldRateColumn ? $goldPrice->gold_rate : null;
+            $displayInventoryStatus = null;
+            if ($hasInventoryStatusColumn) {
+                $displayInventoryStatus = optional($goldPrice->inventoryStatus)->description;
+                if ($displayInventoryStatus === null && $goldPrice->inventory_status_id !== null) {
+                    $displayInventoryStatus = $inventoryStatusMap[$goldPrice->inventory_status_id] ?? null;
+                }
+            }
+
+            if ($hasGoldRateColumn && $displayGoldRate === null) {
+                continue;
+            }
+            if ($hasInventoryStatusColumn && $displayInventoryStatus === null) {
+                continue;
+            }
+
+            $result[] = [
+                'base_price' => $displayBasePrice,
+                'service_fee' => $goldPrice->service_fee ?? 0,
+                'gold_rate' => $displayGoldRate,
+                'inventory_status' => $displayInventoryStatus,
+            ];
         }
 
-        if (Schema::hasColumn('gold_prices', 'base_price') && $goldPrice->base_price !== null) {
-            return $goldPrice->base_price;
-        }
-
-        if (Schema::hasColumn('gold_prices', 'max_price') && $goldPrice->max_price !== null) {
-            return $goldPrice->max_price;
-        }
-
-        if (Schema::hasColumn('gold_prices', 'min_price') && $goldPrice->min_price !== null) {
-            return $goldPrice->min_price;
-        }
-
-        return null;
+        return $result;
     }
 
 }

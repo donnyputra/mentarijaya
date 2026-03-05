@@ -64,6 +64,12 @@
                                             </div>
                                         </div>
                                         <div class="form-group row">
+                                            <label class="col-3 col-form-label">Today's Service Fee</label>
+                                            <div class="col-9">
+                                                {{ $todayServiceFee !== null ? ('Rp ' . number_format($todayServiceFee, 2, ',', '.')) : '-' }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
                                             <label class="col-3 col-form-label">Recommended Sales Price</label>
                                             <div class="col-9">
                                                 {{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 2, ',', '.')) : '-' }}
@@ -106,8 +112,8 @@
                                             <label for="sales_by" class="col-3 col-form-label">Sales By</label>
                                             <div class="col-9">
                                                 <div class="input-group">
-                                                    <input type="text" class="form-control dateselect" id="sales_by_id" name="sales_by_id" value="{{ Auth::user()->id }}" hidden />
-                                                    <input type="text" class="form-control dateselect" id="sales_by_text" name="sales_by_text" value="{{ Auth::user()->name }}" disabled />
+                                                    <input type="text" class="form-control dateselect" id="sales_by_id" name="sales_by_id" value="{{ old('sales_by_id', $salesById) }}" hidden />
+                                                    <input type="text" class="form-control dateselect" id="sales_by_text" name="sales_by_text" value="{{ old('sales_by_text', $salesByName) }}" disabled />
                                                 </div>
                                             </div>
                                         </div>
