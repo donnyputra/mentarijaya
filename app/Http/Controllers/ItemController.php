@@ -475,6 +475,21 @@ class ItemController extends Controller
             $item->sales_by = $request->get("sales_by");
             $item->sales_status_id = $request->get("sales_status_id");
             $item->item_status_id = ($request->get("sales_status_id") != NULL) ? $itemStatusSold->id : $request->get("item_status_id");
+            if ($request->get("sales_status_id") != null) {
+                $todayGoldPriceSetting = $this->getTodayGoldPriceSetting($item->item_gold_rate, $item->inventory_status_id);
+                $item->base_gold_price = $todayGoldPriceSetting['base_price'] ?? null;
+                if (Schema::hasColumn('item', 'base_service_fee')) {
+                    $item->base_service_fee = $todayGoldPriceSetting['service_fee'] ?? null;
+                }
+            } else {
+                $item->base_gold_price = null;
+                if (Schema::hasColumn('item', 'base_service_fee')) {
+                    $item->base_service_fee = null;
+                }
+                if (Schema::hasColumn('item', 'service_fee')) {
+                    $item->service_fee = null;
+                }
+            }
             $item->created_by = $request->get('created_by');
             $item->save();
 

@@ -123,10 +123,15 @@
 													</div>
 												</div>
 												<div class="col-md-6 mb-3 col-xs-12">
-													<div class="card">
-														<div class="card-header">
-															<div class="card-title">{{ __("Sales Information") }}</div>
-														</div>
+														<div class="card">
+															<div class="card-header">
+																<div class="card-title">{{ __("Sales Information") }}</div>
+																<div class="card-tools text-muted" style="font-size: 0.9rem;">
+																	Base Gold Price: {{ $item->base_gold_price !== null ? ('Rp ' . number_format($item->base_gold_price, 2, ',', '.')) : '-' }}
+																	|
+																	Base Service Fee: {{ $item->base_service_fee !== null ? ('Rp ' . number_format($item->base_service_fee, 2, ',', '.')) : '-' }}
+																</div>
+															</div>
 														@php
 															if($item->sales_status_id != null){
 																$salesStatus = $item->salesStatus->description;
@@ -155,28 +160,6 @@
 																					<div class="input-group-text">Rp</div>
 																			</div>
 																			<input type="text" class="form-control sales_price" readonly name="sales_price" value="{{ $item->sales_price }}" />
-																		</div>
-																	</div>
-																</div>
-																<div class="form-group row">
-																	<label for="base_gold_price" class="col-3 col-form-label">Base Gold Price</label>
-																	<div class="col-9">
-																		<div class="input-group">
-																			<div class="input-group-prepend">
-																					<div class="input-group-text">Rp</div>
-																			</div>
-																			<input type="text" class="form-control" readonly name="base_gold_price" value="{{ $item->base_gold_price !== null ? number_format($item->base_gold_price, 2, ',', '.') : '' }}" />
-																		</div>
-																	</div>
-																</div>
-																<div class="form-group row">
-																	<label for="base_service_fee" class="col-3 col-form-label">Base Service Fee</label>
-																	<div class="col-9">
-																		<div class="input-group">
-																			<div class="input-group-prepend">
-																					<div class="input-group-text">Rp</div>
-																			</div>
-																			<input type="text" class="form-control" readonly name="base_service_fee" value="{{ $item->base_service_fee !== null ? number_format($item->base_service_fee, 2, ',', '.') : '' }}" />
 																		</div>
 																	</div>
 																</div>
