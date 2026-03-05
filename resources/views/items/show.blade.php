@@ -167,7 +167,6 @@
 																			</div>
 																			<input type="text" class="form-control" readonly name="base_gold_price" value="{{ $item->base_gold_price !== null ? number_format($item->base_gold_price, 2, ',', '.') : '' }}" />
 																		</div>
-																		<small class="form-text text-muted">Snapshot per gram at time of sale.</small>
 																	</div>
 																</div>
 																<div class="form-group row">
@@ -179,7 +178,6 @@
 																			</div>
 																			<input type="text" class="form-control" readonly name="base_service_fee" value="{{ $item->base_service_fee !== null ? number_format($item->base_service_fee, 2, ',', '.') : '' }}" />
 																		</div>
-																		<small class="form-text text-muted">Snapshot per gram at time of sale.</small>
 																	</div>
 																</div>
 																<div class="form-group row">
@@ -191,7 +189,6 @@
 																			</div>
 																			<input type="text" class="form-control" readonly name="service_fee" value="{{ $item->service_fee !== null ? number_format($item->service_fee, 2, ',', '.') : '' }}" />
 																		</div>
-																		<small class="form-text text-muted">Applied fee used in this sale.</small>
 																	</div>
 																</div>
 																<div class="form-group row">
