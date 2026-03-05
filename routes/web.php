@@ -69,6 +69,11 @@ Route::resource('buybackstatuses', 'BuybackStatusController')->only('index', 'cr
 Route::post('buybackstatus/{buybackstatus}/update', 'BuybackStatusController@update')->name('buybackstatuses.update');
 Route::post('buybackstatus/{buybackstatus}/delete', 'BuybackStatusController@delete')->name('buybackstatuses.delete');
 
+Route::resource('gold-price', 'GoldPriceController')->only('index', 'create', 'store');
+
+Route::resource('receipts', 'ReceiptsController')->only('index', 'create', 'show');
+Route::get('receipts/{receipt}/pdf', 'ReceiptsController@pdf')->name('receipts.pdf');
+
 // System Configuration > Users
 Route::resource('users', 'UserController')->only('index', 'create', 'store', 'edit');
 Route::get('users/{user}/changepassword', 'UserController@changepassword')->name('users.changepassword');
@@ -113,3 +118,8 @@ Route::get('/pdf/items', 'PdfController@itemsPdf')->name('pdf.items');
 
 Route::resource('photos', 'PhotosController')->only('store');
 Route::delete('photos', 'PhotosController@destroy')->name('photos.destroy');
+
+// Checkout
+Route::get('employee/checkout/entry', 'ItemController@checkoutEntry')->name('checkout.employee.entry');
+Route::get('item/simplelist', 'ItemController@getItemsPagination')->name('item.simplelist');
+Route::post('employee/checkout/submit', 'ItemController@checkoutSubmit')->name('checkout.employee.submit');

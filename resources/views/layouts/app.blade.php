@@ -59,6 +59,7 @@
                                     <a class="dropdown-item" href="{{ route('inventorystatuses.index') }}">{{ __("Inventory Status") }}</a>
                                     <a class="dropdown-item" href="{{ route('buybackstatuses.index') }}">{{ __("Buyback Status") }}</a>
                                     <a class="dropdown-item" href="{{ route('salesstatuses.index') }}">{{ __("Sales Status") }}</a>
+                                    <a class="dropdown-item" href="{{ route('salesstatuses.index') }}">{{ __("Gold Price") }}</a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">

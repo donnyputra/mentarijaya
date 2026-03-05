@@ -159,6 +159,17 @@
 																</div>
 															</div>
 															<div class="form-group row">
+																<label for="service_fee" class="col-3 col-form-label">Service Fee</label>
+																<div class="col-9">
+																	<div class="input-group">
+																		<div class="input-group-prepend">
+																				<div class="input-group-text">Rp</div>
+																		</div>
+																		<input type="text" class="form-control sales_price" readonly name="service_fee" value="{{ $item->service_fee }}" />
+																	</div>
+																</div>
+															</div>
+															<div class="form-group row">
 																<label for="sales_at" class="col-3 col-form-label">Sales At</label>
 																<div class="col-9">
 																	<div class="input-group">
@@ -219,6 +230,10 @@
 					
 											<div class="float-right">
 												<a class="btn btn-secondary" href="{{ route('items.index') }}" role="button">{{ __("Back") }}</a>
+												@if($receiptDetail && $receiptDetail->receipt)
+												<a class="btn btn-info" href="{{ route('receipts.show', $receiptDetail->receipt->id) }}" role="button">{{ __("Receipt") }}</a>
+												<a class="btn btn-dark" href="{{ route('receipts.pdf', $receiptDetail->receipt->id) }}" target="_blank" role="button">{{ __("Print Receipt") }}</a>
+												@endif
 												<a class="btn btn-primary" href="{{ route('items.edit', $item->id) }}" role="button">{{ __("Edit") }}</a>
 											</div>
 									</div>

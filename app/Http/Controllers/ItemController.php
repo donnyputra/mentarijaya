@@ -6,11 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Item;
 use App\ItemNumber;
+use App\ReceiptDetails;
+use App\Receipts;
 
 class ItemController extends Controller
 {
@@ -366,13 +369,15 @@ class ItemController extends Controller
         try {
             $item = Item::findOrFail($id);
             $photos = \App\Photos::where('item_id', $id)->get();
-        } catch (Exception $ex) {
+            $receiptDetail = $this->findReceiptDetailForItem($id);
+        } catch (\Exception $ex) {
             return redirect()->route('items.index')->withError($ex->getMessage());
         }
 
         return view('items.show', [
             'item' => $item,
-            'photos' => $photos
+            'photos' => $photos,
+            'receiptDetail' => $receiptDetail,
         ]);
     }
 
@@ -386,7 +391,7 @@ class ItemController extends Controller
     {
         try {
             $item = Item::findOrFail($id);
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             return redirect()->route('items.index')->withError($ex->getMessage());
         }
 
@@ -470,7 +475,7 @@ class ItemController extends Controller
             $item->created_by = $request->get('created_by');
             $item->save();
 
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             return redirect('/items')->with('error', $ex->getMessage());
         }
 
@@ -495,7 +500,7 @@ class ItemController extends Controller
             $item->item_status_id = $itemStatusSold->id;
             $item->save();
             $item->delete();
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             return redirect('/items')->with('error', $ex->getMessage());
         }
 
@@ -580,7 +585,7 @@ class ItemController extends Controller
                 fclose($file);
             };
         
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             return redirect('/items')->with('error', $ex->getMessage());
         }
 
@@ -905,6 +910,7 @@ class ItemController extends Controller
         $itemNo = $request->get('item_no');
 
         $item = \App\Item::where('item_no', $itemNo)
+                ->whereNull('sales_status_id')
                 ->whereNull('sales_approved_at')
                 ->first();
 
@@ -926,40 +932,343 @@ class ItemController extends Controller
         ]);
     }
 
-    public function employeeSalesFormSave(Request $request) {
-        $itemId = $request->get('item_id');
+    public function checkoutEntry()
+    {
+        return view('items.employee.checkout.entry');
+    }
+
+    public function getItemsPagination(Request $request)
+    {
+        $term = trim((string) $request->get('term', ''));
+        $page = max((int) $request->get('page', 1), 1);
+        $perPage = 20;
+
+        $query = \App\Item::query()
+            ->whereNull('sales_status_id')
+            ->whereNull('sales_approved_at')
+            ->whereNull('deleted_at');
+
+        if ($term !== '') {
+            $query->where(function ($builder) use ($term) {
+                $builder->where('item_no', 'like', '%' . $term . '%')
+                    ->orWhere('item_name', 'like', '%' . $term . '%');
+            });
+        }
+
+        $paginator = $query->orderBy('item_no')
+            ->paginate($perPage, ['id', 'item_no', 'item_name', 'item_weight', 'item_gold_rate', 'store_id'], 'page', $page);
+
+        $results = $paginator->getCollection()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'text' => $item->item_no . ' - ' . $item->item_name,
+                'item_no' => $item->item_no,
+                'item_name' => $item->item_name,
+                'item_weight' => $item->item_weight,
+                'item_gold_rate' => $item->item_gold_rate,
+                'store_id' => $item->store_id,
+            ];
+        })->values();
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => [
+                'more' => $paginator->hasMorePages(),
+            ],
+        ]);
+    }
+
+    public function checkoutSubmit(Request $request)
+    {
+        $this->assertReceiptSnapshotSchema();
+
+        $request->validate([
+            'item_ids' => 'required|array|min:1',
+            'item_ids.*' => 'required|integer',
+            'sales_prices' => 'required|array|min:1',
+            'sales_prices.*' => 'required|numeric|min:0',
+            'service_fees' => 'nullable|array',
+            'service_fees.*' => 'nullable|numeric|min:0',
+            'sales_at' => 'required|date',
+            'customer_name' => 'nullable|string|max:255',
+            'customer_address' => 'nullable|string|max:255',
+        ]);
+
+        $itemIds = array_values(array_filter($request->get('item_ids', []), function ($id) {
+            return $id !== null && $id !== '';
+        }));
+        $salesPrices = array_values($request->get('sales_prices', []));
+        $serviceFees = array_values($request->get('service_fees', []));
+
+        if (count($itemIds) !== count($salesPrices)) {
+            return redirect()->back()->withInput()->with('error', __('Checkout data is not aligned.'));
+        }
+
+        if (count(array_unique($itemIds)) !== count($itemIds)) {
+            return redirect()->back()->withInput()->with('error', __('Duplicate item detected in cart.'));
+        }
 
         try {
+            $receipt = DB::transaction(function () use ($itemIds, $salesPrices, $serviceFees, $request) {
+                $submittedSalesStatus = \App\SalesStatus::where('code', 'submitted')->firstOrFail();
+                $soldItemStatus = \App\ItemStatus::where('code', 'sold')->firstOrFail();
+                $salesAt = \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s');
+
+                $items = \App\Item::whereIn('id', $itemIds)
+                    ->whereNull('sales_status_id')
+                    ->whereNull('sales_approved_at')
+                    ->whereNull('deleted_at')
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
+
+                if ($items->count() !== count($itemIds)) {
+                    throw new \RuntimeException(__('One or more items are no longer available for checkout.'));
+                }
+
+                $payload = [];
+
+                foreach ($itemIds as $index => $itemId) {
+                    $item = $items->get((int) $itemId);
+
+                    if (!$item) {
+                        throw new \RuntimeException(__('Item data mismatch during checkout.'));
+                    }
+
+                    $salesPrice = (float) $salesPrices[$index];
+                    $serviceFee = (float) ($serviceFees[$index] ?? 0);
+
+                    $item->sales_price = $salesPrice;
+                    $item->sales_at = $salesAt;
+                    $item->sales_by = Auth::id();
+                    $item->sales_status_id = $submittedSalesStatus->id;
+                    $item->service_fee = $serviceFee;
+                    $item->item_status_id = $soldItemStatus->id;
+                    $item->save();
+
+                    $payload[] = [
+                        'item' => $item,
+                        'sales_price' => $salesPrice,
+                        'service_fee' => $serviceFee,
+                    ];
+                }
+
+                return $this->createReceiptForItems(
+                    $payload,
+                    $salesAt,
+                    $request->get('customer_name'),
+                    $request->get('customer_address')
+                );
+            });
+        } catch (\Exception $ex) {
+            return redirect()->back()->withInput()->with('error', $ex->getMessage());
+        }
+
+        return redirect()->route('receipts.show', $receipt->id);
+    }
+
+    public function employeeSalesFormSave(Request $request) {
+        $itemId = $request->get('item_id');
+        $receipt = null;
+
+        try {
+            $this->assertReceiptSnapshotSchema();
+
             $request->validate([
                 'sales_price' => 'numeric|required',
                 'sales_at' => 'date|required',
                 'sales_by_id' => 'required',
                 'sales_status_id' => 'required',
+                'service_fee' => 'nullable|numeric|min:0',
+                'customer_name' => 'nullable|string|max:255',
+                'customer_address' => 'nullable|string|max:255',
             ]);
 
-            //retrieve item status
-            $soldItemStatus = \App\ItemStatus::where('code', '=', 'sold')->first();
+            $receipt = DB::transaction(function () use ($itemId, $request) {
+                $soldItemStatus = \App\ItemStatus::where('code', '=', 'sold')->first();
 
-            $item = \App\Item::where('id', $itemId)->first();
-            $item->sales_price = $request->get("sales_price");
-            $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
-            $item->sales_by = $request->get("sales_by_id");
-            $item->sales_status_id = $request->get("sales_status_id");
-            $item->item_status_id = $soldItemStatus->id;
-            $item->save();
+                $item = \App\Item::where('id', $itemId)->firstOrFail();
+                $item->sales_price = $request->get('sales_price');
+                $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
+                $item->sales_by = $request->get('sales_by_id');
+                $item->sales_status_id = $request->get('sales_status_id');
+                $item->service_fee = $request->get('service_fee') ?: 0;
+                $item->item_status_id = $soldItemStatus->id;
+                $item->save();
 
-        } catch (Exception $ex) {
+                return $this->upsertReceiptForItem($item, $request);
+            });
+
+        } catch (\Exception $ex) {
             if(Auth::user()->authRole()->name == 'employee') {
-                return redirect('/employee/items/index')->with('success', __('Item has been updated.'));
+                return redirect('/employee/items/index')->with('error', $ex->getMessage());
             }
 
             return redirect('/items')->with('error', $ex->getMessage());
         }
 
-        if(Auth::user()->authRole()->name == 'employee') {
-            return redirect('/employee/items/index')->with('success', __('Item has been updated.'));
+        if ($receipt) {
+            return redirect()->route('receipts.show', $receipt->id);
         }
 
         return redirect('/items')->with('success', __('Item has been updated.'));
+    }
+
+    private function upsertReceiptForItem(Item $item, Request $request)
+    {
+        $receiptDetail = $this->findReceiptDetailForItem($item->id);
+        $receipt = $receiptDetail ? $receiptDetail->receipt : new Receipts();
+
+        $serviceFee = (float) ($item->service_fee ?: 0);
+        $salesPrice = (float) $item->sales_price;
+        $lineTotal = $salesPrice + $serviceFee;
+
+        $receipt->receipt_date = $item->sales_at;
+        if (Schema::hasColumn('receipts', 'store_id')) {
+            $receipt->store_id = $item->store_id;
+        }
+
+        if (Schema::hasColumn('receipts', 'sales_by')) {
+            $receipt->sales_by = $item->sales_by;
+        }
+
+        $receipt->customer_name = $request->get('customer_name');
+        $receipt->customer_address = $request->get('customer_address');
+        $receipt->receipt_total = $lineTotal;
+        $receipt->receipt_total_string = 'Rp ' . number_format($lineTotal, 2, ',', '.');
+        $receipt->save();
+
+        if (!$receiptDetail) {
+            $receiptDetail = new ReceiptDetails();
+        }
+
+        $receiptDetail->receipt_date = $item->sales_at;
+        $receiptDetail->receipt_id = $receipt->id;
+        $receiptDetail->item_name = $item->item_name;
+        $receiptDetail->item_gold_rate = $item->item_gold_rate;
+        $receiptDetail->item_weight = $item->item_weight;
+        $receiptDetail->service_fee = $serviceFee;
+
+        if (Schema::hasColumn('receipt_details', 'item_id')) {
+            $receiptDetail->item_id = $item->id;
+        }
+
+        if (Schema::hasColumn('receipt_details', 'item_no')) {
+            $receiptDetail->item_no = $item->item_no;
+        }
+
+        if (Schema::hasColumn('receipt_details', 'sales_price')) {
+            $receiptDetail->sales_price = $salesPrice;
+        }
+
+        if (Schema::hasColumn('receipt_details', 'line_total')) {
+            $receiptDetail->line_total = $lineTotal;
+        }
+
+        $receiptDetail->save();
+
+        return $receipt;
+    }
+
+    private function createReceiptForItems(array $payload, $salesAt, $customerName = null, $customerAddress = null)
+    {
+        if (count($payload) <= 0) {
+            throw new \RuntimeException(__('Cannot create an empty receipt.'));
+        }
+
+        $receipt = new Receipts();
+        $receipt->receipt_date = $salesAt;
+
+        $storeIds = array_values(array_unique(array_map(function ($row) {
+            return $row['item']->store_id;
+        }, $payload)));
+
+        if (Schema::hasColumn('receipts', 'store_id')) {
+            $receipt->store_id = count($storeIds) === 1 ? $storeIds[0] : null;
+        }
+
+        if (Schema::hasColumn('receipts', 'sales_by')) {
+            $receipt->sales_by = Auth::id();
+        }
+
+        $receipt->customer_name = $customerName;
+        $receipt->customer_address = $customerAddress;
+
+        $receiptTotal = 0;
+        foreach ($payload as $row) {
+            $receiptTotal += ((float) $row['sales_price']) + ((float) $row['service_fee']);
+        }
+
+        $receipt->receipt_total = $receiptTotal;
+        $receipt->receipt_total_string = 'Rp ' . number_format($receiptTotal, 2, ',', '.');
+        $receipt->save();
+
+        foreach ($payload as $row) {
+            $item = $row['item'];
+            $salesPrice = (float) $row['sales_price'];
+            $serviceFee = (float) $row['service_fee'];
+            $lineTotal = $salesPrice + $serviceFee;
+
+            $receiptDetail = new ReceiptDetails();
+            $receiptDetail->receipt_date = $salesAt;
+            $receiptDetail->receipt_id = $receipt->id;
+            $receiptDetail->item_name = $item->item_name;
+            $receiptDetail->item_gold_rate = $item->item_gold_rate;
+            $receiptDetail->item_weight = $item->item_weight;
+            $receiptDetail->service_fee = $serviceFee;
+
+            if (Schema::hasColumn('receipt_details', 'item_id')) {
+                $receiptDetail->item_id = $item->id;
+            }
+
+            if (Schema::hasColumn('receipt_details', 'item_no')) {
+                $receiptDetail->item_no = $item->item_no;
+            }
+
+            if (Schema::hasColumn('receipt_details', 'sales_price')) {
+                $receiptDetail->sales_price = $salesPrice;
+            }
+
+            if (Schema::hasColumn('receipt_details', 'line_total')) {
+                $receiptDetail->line_total = $lineTotal;
+            }
+
+            $receiptDetail->save();
+        }
+
+        return $receipt;
+    }
+
+    private function assertReceiptSnapshotSchema()
+    {
+        $missingColumns = [];
+
+        $required = [
+            'receipts' => ['store_id', 'sales_by'],
+            'receipt_details' => ['item_id', 'item_no', 'sales_price', 'line_total'],
+        ];
+
+        foreach ($required as $table => $columns) {
+            foreach ($columns as $column) {
+                if (!Schema::hasColumn($table, $column)) {
+                    $missingColumns[] = $table . '.' . $column;
+                }
+            }
+        }
+
+        if (count($missingColumns) > 0) {
+            throw new \RuntimeException(
+                'Receipt schema is incomplete. Run migration 2026_03_04_180000_alter_receipts_for_printable_item_receipts.php first.'
+            );
+        }
+    }
+
+    private function findReceiptDetailForItem($itemId)
+    {
+        if (!Schema::hasColumn('receipt_details', 'item_id')) {
+            return null;
+        }
+
+        return ReceiptDetails::with('receipt')->where('item_id', $itemId)->latest('id')->first();
     }
 }

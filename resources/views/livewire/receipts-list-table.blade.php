@@ -33,12 +33,12 @@
                 @foreach ($receipts as $receipt)
                     <tr>
                         <td class="text-center">{{ $receipt->uuid }}</td>
-                        <td class="text-center">{{ $receipt->receipt_date }}</td>
-                        <td class="text-center">{{ $receipt->customer_name }}</td>
+                        <td class="text-center">{{ optional($receipt->receipt_date)->format('d-M-Y H:i') }}</td>
+                        <td class="text-center">{{ $receipt->customer_name ?: '-' }}</td>
                         <td class="text-right">Rp. {{ number_format($receipt->receipt_total, 2, ',', '.') }}</td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-light"><span><i class="fa fa-beat fa-stream"></i></span></button>
-                            <button type="button" class="btn btn-sm btn-light"><span><i class="fa fa-beat fa-print"></i></span></button>
+                            <a href="{{ route('receipts.show', $receipt->id) }}" class="btn btn-sm btn-light"><span><i class="fa fa-eye"></i></span></a>
+                            <a href="{{ route('receipts.pdf', $receipt->id) }}" target="_blank" class="btn btn-sm btn-light"><span><i class="fa fa-print"></i></span></a>
                         </td>
                     </tr>
                 @endforeach

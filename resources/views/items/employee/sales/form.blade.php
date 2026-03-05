@@ -65,7 +65,18 @@
                                                     <div class="input-group-prepend">
                                                             <div class="input-group-text">Rp</div>
                                                     </div>
-                                                    <input type="text" class="form-control" name="sales_price" value="{{ old('sales_price') }}" />
+                                                    <input type="number" step="0.01" min="0" class="form-control" name="sales_price" value="{{ old('sales_price') }}" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="service_fee" class="col-3 col-form-label">Service Fee</label>
+                                            <div class="col-9">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                            <div class="input-group-text">Rp</div>
+                                                    </div>
+                                                    <input type="number" step="0.01" min="0" class="form-control" name="service_fee" value="{{ old('service_fee', $item->service_fee) }}" />
                                                 </div>
                                             </div>
                                         </div>
@@ -93,10 +104,22 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-group row">
+                                            <label for="customer_name" class="col-3 col-form-label">Customer Name</label>
+                                            <div class="col-9">
+                                                <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ old('customer_name') }}" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="customer_address" class="col-3 col-form-label">Customer Address</label>
+                                            <div class="col-9">
+                                                <textarea class="form-control" id="customer_address" name="customer_address" rows="2">{{ old('customer_address') }}</textarea>
+                                            </div>
+                                        </div>
                 
                                         <div class="float-right">
                                             <a class="btn btn-secondary" href="{{ url()->previous() }}" role="button">{{ __("Back") }}</a>
-                                            <button type="submit" class="btn btn-primary">{{ __("Save") }}</button>
+                                            <button type="submit" class="btn btn-primary">{{ __("Save & Print Receipt") }}</button>
                                         </div>
                                     </form>
                                 </div>

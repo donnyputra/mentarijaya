@@ -64,4 +64,9 @@ class Item extends Model
     public function salesBy() {
         return $this->belongsTo('App\User', 'sales_by');
     }
+
+    public function receiptDetails()
+    {
+        return $this->hasMany(ReceiptDetails::class, 'item_id');
+    }
 }

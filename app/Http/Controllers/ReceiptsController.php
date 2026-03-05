@@ -4,9 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Receipts;
 use Illuminate\Http\Request;
+use PDF;
 
 class ReceiptsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -45,9 +51,15 @@ class ReceiptsController extends Controller
      * @param  \App\Receipts  $receipts
      * @return \Illuminate\Http\Response
      */
-    public function show(Receipts $receipts)
+    public function show(Request $request, $id)
     {
-        //
+        $receipt = $this->findReceipt($id);
+        $showServiceFee = $request->boolean('show_service_fee', true);
+
+        return view('receipts.show', [
+            'receipt' => $receipt,
+            'showServiceFee' => $showServiceFee,
+        ]);
     }
 
     /**
@@ -82,5 +94,27 @@ class ReceiptsController extends Controller
     public function destroy(Receipts $receipts)
     {
         //
+    }
+
+    public function pdf(Request $request, $id)
+    {
+        $receipt = $this->findReceipt($id);
+        $showServiceFee = $request->boolean('show_service_fee', true);
+
+        $pdf = PDF::loadView('pdf.receipt', [
+            'receipt' => $receipt,
+            'showServiceFee' => $showServiceFee,
+        ]);
+
+        return $pdf->setPaper([0, 0, 226.77, 600], 'portrait')->stream('receipt-' . $receipt->uuid . '.pdf');
+    }
+
+    private function findReceipt($id)
+    {
+        return Receipts::with([
+            'details.item.store',
+            'store',
+            'salesUser',
+        ])->findOrFail($id);
     }
 }
