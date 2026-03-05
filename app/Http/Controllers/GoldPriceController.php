@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\GoldPrice;
+use App\InventoryStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -19,21 +20,31 @@ class GoldPriceController extends Controller
         $this->assertAdminRole();
 
         $goldPrices = GoldPrice::query();
+        if (Schema::hasColumn('gold_prices', 'inventory_status_id')) {
+            $goldPrices = $goldPrices->with('inventoryStatus');
+        }
         if (Schema::hasColumn('gold_prices', 'price_date')) {
             $goldPrices = $goldPrices->orderBy('price_date', 'desc');
         } else {
             $goldPrices = $goldPrices->orderBy('created_at', 'desc');
+        }
+        if (Schema::hasColumn('gold_prices', 'gold_rate')) {
+            $goldPrices = $goldPrices->orderBy('gold_rate', 'asc');
+        }
+        if (Schema::hasColumn('gold_prices', 'inventory_status_id')) {
+            $goldPrices = $goldPrices->orderBy('inventory_status_id', 'asc');
         }
 
         $goldPrices = $goldPrices
             ->orderBy('id', 'desc')
             ->paginate(20);
 
-        $todayBasePrice = $this->getTodayBasePrice();
+        $todayBasePriceList = $this->getTodayBasePriceList();
 
         return view('gold-prices.index', [
             'goldPrices' => $goldPrices,
-            'todayBasePrice' => $todayBasePrice,
+            'todayBasePriceList' => $todayBasePriceList,
+            'inventoryStatuses' => InventoryStatus::orderBy('description', 'asc')->get(),
         ]);
     }
 
@@ -41,9 +52,30 @@ class GoldPriceController extends Controller
     {
         $this->assertAdminRole();
 
+        $requiredColumns = ['gold_rate', 'inventory_status_id', 'base_price', 'service_fee'];
+        $missingColumns = [];
+        foreach ($requiredColumns as $column) {
+            if (!Schema::hasColumn('gold_prices', $column)) {
+                $missingColumns[] = $column;
+            }
+        }
+        if (count($missingColumns) > 0) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'schema' => __('Gold price table is missing columns: :columns. Please run migration first.', [
+                        'columns' => implode(', ', $missingColumns),
+                    ]),
+                ]);
+        }
+
         $request->validate([
             'price_date' => 'required|date',
+            'gold_rate' => 'required|numeric|min:0',
+            'inventory_status_id' => 'required|integer|exists:inventory_status,id',
             'base_price' => 'required',
+            'service_fee' => 'required',
             'notes' => 'nullable|string|max:1000',
         ]);
 
@@ -57,14 +89,36 @@ class GoldPriceController extends Controller
                 ]);
         }
 
+        $normalizedServiceFee = $this->normalizeLocalizedPrice($request->get('service_fee'));
+        if ($normalizedServiceFee === null || !is_numeric($normalizedServiceFee) || (float) $normalizedServiceFee < 0) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'service_fee' => __('Service fee format is invalid. Use format like 2.500,00'),
+                ]);
+        }
+
         $basePrice = round((float) $normalizedBasePrice, 2);
+        $serviceFee = round((float) $normalizedServiceFee, 2);
+        $goldRate = round((float) $request->get('gold_rate'), 2);
+        $inventoryStatusId = (int) $request->get('inventory_status_id');
 
         $goldPrice = new GoldPrice();
         if (Schema::hasColumn('gold_prices', 'price_date')) {
             $goldPrice->price_date = $request->get('price_date');
         }
+        if (Schema::hasColumn('gold_prices', 'gold_rate')) {
+            $goldPrice->gold_rate = $goldRate;
+        }
+        if (Schema::hasColumn('gold_prices', 'inventory_status_id')) {
+            $goldPrice->inventory_status_id = $inventoryStatusId;
+        }
         if (Schema::hasColumn('gold_prices', 'base_price')) {
             $goldPrice->base_price = $basePrice;
+        }
+        if (Schema::hasColumn('gold_prices', 'service_fee')) {
+            $goldPrice->service_fee = $serviceFee;
         }
         if (Schema::hasColumn('gold_prices', 'min_price')) {
             $goldPrice->min_price = $basePrice;
@@ -108,11 +162,20 @@ class GoldPriceController extends Controller
         return $value;
     }
 
-    private function getTodayBasePrice()
+    private function getTodayBasePriceList()
     {
         $today = now()->toDateString();
+        $hasGoldRateColumn = Schema::hasColumn('gold_prices', 'gold_rate');
+        $hasInventoryStatusColumn = Schema::hasColumn('gold_prices', 'inventory_status_id');
+        $inventoryStatusMap = [];
 
         $goldPriceQuery = GoldPrice::query();
+        if ($hasInventoryStatusColumn) {
+            $goldPriceQuery = $goldPriceQuery->with('inventoryStatus');
+            $inventoryStatusMap = InventoryStatus::withTrashed()
+                ->pluck('description', 'id')
+                ->toArray();
+        }
         if (Schema::hasColumn('gold_prices', 'price_date')) {
             $goldPriceQuery = $goldPriceQuery
                 ->whereDate('price_date', '<=', $today)
@@ -122,26 +185,42 @@ class GoldPriceController extends Controller
                 ->whereDate('created_at', '<=', $today)
                 ->orderBy('created_at', 'desc');
         }
+        $goldPrices = $goldPriceQuery
+            ->orderBy('id', 'desc')
+            ->get();
 
-        $goldPrice = $goldPriceQuery->orderBy('id', 'desc')->first();
+        $result = [];
+        foreach ($goldPrices as $goldPrice) {
+            $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
+            if ($displayBasePrice === null) {
+                continue;
+            }
 
-        if (!$goldPrice) {
-            return null;
+            $displayGoldRate = $hasGoldRateColumn ? $goldPrice->gold_rate : null;
+            $displayInventoryStatus = null;
+            if ($hasInventoryStatusColumn) {
+                $displayInventoryStatus = optional($goldPrice->inventoryStatus)->description;
+                if ($displayInventoryStatus === null && $goldPrice->inventory_status_id !== null) {
+                    $displayInventoryStatus = $inventoryStatusMap[$goldPrice->inventory_status_id] ?? null;
+                }
+            }
+
+            if ($hasGoldRateColumn && $displayGoldRate === null) {
+                continue;
+            }
+            if ($hasInventoryStatusColumn && $displayInventoryStatus === null) {
+                continue;
+            }
+
+            $result[] = [
+                'base_price' => $displayBasePrice,
+                'service_fee' => $goldPrice->service_fee ?? 0,
+                'gold_rate' => $displayGoldRate,
+                'inventory_status' => $displayInventoryStatus,
+            ];
         }
 
-        if (Schema::hasColumn('gold_prices', 'base_price') && $goldPrice->base_price !== null) {
-            return $goldPrice->base_price;
-        }
-
-        if (Schema::hasColumn('gold_prices', 'max_price') && $goldPrice->max_price !== null) {
-            return $goldPrice->max_price;
-        }
-
-        if (Schema::hasColumn('gold_prices', 'min_price') && $goldPrice->min_price !== null) {
-            return $goldPrice->min_price;
-        }
-
-        return null;
+        return $result;
     }
 
     private function assertAdminRole()

@@ -26,8 +26,21 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="alert alert-info mb-0">
-                                <strong>Today's Base Price:</strong>
-                                {{ $todayBasePrice !== null ? ('Rp ' . number_format($todayBasePrice, 2, ',', '.')) : '-' }}
+                                <strong>Today's Base Price List:</strong>
+                                @if(count($todayBasePriceList) > 0)
+                                    @foreach($todayBasePriceList as $todayBasePrice)
+                                        <span class="badge badge-light mr-1 mb-1">
+                                            {{ $todayBasePrice['gold_rate'] !== null ? number_format($todayBasePrice['gold_rate'], 2, ',', '.') . '%' : '-' }}
+                                            /
+                                            {{ $todayBasePrice['inventory_status'] ?? '-' }}
+                                            :
+                                            Rp {{ number_format($todayBasePrice['base_price'], 2, ',', '.') }}
+                                            + Fee Rp {{ number_format($todayBasePrice['service_fee'] ?? 0, 2, ',', '.') }}
+                                        </span>
+                                    @endforeach
+                                @else
+                                    -
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -56,9 +69,41 @@
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text">Rp</span>
                                                     </div>
-                                                    <input type="text" inputmode="decimal" class="form-control" id="base_price" name="base_price" value="{{ old('base_price') }}" placeholder="Contoh: 20.342,25" required />
+                                                    <input type="text" inputmode="decimal" class="form-control" id="base_price" name="base_price" value="{{ old('base_price') }}" placeholder="10.000,00" required />
                                                 </div>
-                                                <small class="form-text text-muted">Format rupiah: 100.000,00</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <label class="col-3 col-form-label" for="gold_rate">Gold Rate <span style="color: red">*</span></label>
+                                            <div class="col-9">
+                                                <input type="number" step="0.01" min="0" class="form-control" id="gold_rate" name="gold_rate" value="{{ old('gold_rate') }}" placeholder="Ex: 37.50" required />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <label class="col-3 col-form-label" for="service_fee">Service Fee <span style="color: red">*</span></label>
+                                            <div class="col-9">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Rp</span>
+                                                    </div>
+                                                    <input type="text" inputmode="decimal" class="form-control" id="service_fee" name="service_fee" value="{{ old('service_fee') }}" placeholder="2.000,00" required />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <label class="col-3 col-form-label" for="inventory_status_id">Inventory Status <span style="color: red">*</span></label>
+                                            <div class="col-9">
+                                                <select class="form-control" id="inventory_status_id" name="inventory_status_id" required>
+                                                    <option value="">Select inventory status</option>
+                                                    @foreach($inventoryStatuses as $inventoryStatus)
+                                                    <option value="{{ $inventoryStatus->id }}" {{ (string) old('inventory_status_id') === (string) $inventoryStatus->id ? 'selected' : '' }}>
+                                                        {{ $inventoryStatus->description }}
+                                                    </option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
 
@@ -90,7 +135,10 @@
                                             <thead>
                                                 <tr>
                                                     <th>Date</th>
+                                                    <th class="text-right">Gold Rate</th>
+                                                    <th>Inventory Status</th>
                                                     <th class="text-right">Base Price</th>
+                                                    <th class="text-right">Service Fee</th>
                                                     <th>Notes</th>
                                                     <th>Created By</th>
                                                     <th>Created At</th>
@@ -101,19 +149,25 @@
                                                 @php
                                                     $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
                                                     $displayPriceDate = $goldPrice->price_date ?? optional($goldPrice->created_at)->toDateString();
+                                                    $displayGoldRate = $goldPrice->gold_rate ?? '-';
+                                                    $displayInventoryStatus = optional($goldPrice->inventoryStatus)->description ?? '-';
+                                                    $displayServiceFee = $goldPrice->service_fee ?? 0;
                                                     $displayNotes = $goldPrice->notes ?? '-';
                                                     $displayCreatedBy = $goldPrice->created_by ?? '-';
                                                 @endphp
                                                 <tr>
                                                     <td>{{ $displayPriceDate ? \Carbon\Carbon::parse($displayPriceDate)->format('d-M-Y') : '-' }}</td>
+                                                    <td class="text-right">{{ is_numeric($displayGoldRate) ? number_format($displayGoldRate, 2, ',', '.') . '%' : '-' }}</td>
+                                                    <td>{{ $displayInventoryStatus }}</td>
                                                     <td class="text-right">{{ $displayBasePrice !== null ? ('Rp ' . number_format($displayBasePrice, 2, ',', '.')) : '-' }}</td>
+                                                    <td class="text-right">{{ 'Rp ' . number_format($displayServiceFee, 2, ',', '.') }}</td>
                                                     <td>{{ $displayNotes }}</td>
                                                     <td>{{ $displayCreatedBy }}</td>
                                                     <td>{{ optional($goldPrice->created_at)->format('d-M-Y H:i') }}</td>
                                                 </tr>
                                                 @empty
                                                 <tr>
-                                                    <td colspan="5" class="text-center text-muted">{{ __("No gold price history yet.") }}</td>
+                                                    <td colspan="8" class="text-center text-muted">{{ __("No gold price history yet.") }}</td>
                                                 </tr>
                                                 @endforelse
                                             </tbody>
@@ -169,14 +223,21 @@
             });
         }
 
-        var input = document.getElementById('base_price');
-        if (!input) {
+        var basePriceInput = document.getElementById('base_price');
+        var serviceFeeInput = document.getElementById('service_fee');
+        if (!basePriceInput && !serviceFeeInput) {
             return;
         }
 
-        input.value = formatRupiah(input.value);
-        input.addEventListener('blur', function() {
+        [basePriceInput, serviceFeeInput].forEach(function(input) {
+            if (!input) {
+                return;
+            }
+
             input.value = formatRupiah(input.value);
+            input.addEventListener('blur', function() {
+                input.value = formatRupiah(input.value);
+            });
         });
     })();
 </script>

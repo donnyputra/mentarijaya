@@ -51,8 +51,21 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="alert alert-info mb-0">
-                                <strong>Today's Base Gold Price:</strong>
-                                {{ $todayBaseGoldPrice !== null ? ('Rp ' . number_format($todayBaseGoldPrice, 2, ',', '.')) : '-' }}
+                                <strong>Today's Gold Price List:</strong>
+                                @if(count($todayGoldPriceList) > 0)
+                                    @foreach($todayGoldPriceList as $todayGoldPrice)
+                                        <span class="badge badge-light mr-1 mb-1">
+                                            {{ $todayGoldPrice['gold_rate'] !== null ? number_format($todayGoldPrice['gold_rate'], 2, ',', '.') . '%' : '-' }}
+                                            /
+                                            {{ $todayGoldPrice['inventory_status'] ?? '-' }}
+                                            :
+                                            Rp {{ number_format($todayGoldPrice['base_price'], 2, ',', '.') }}
+                                            + Fee Rp {{ number_format($todayGoldPrice['service_fee'] ?? 0, 2, ',', '.') }}
+                                        </span>
+                                    @endforeach
+                                @else
+                                    -
+                                @endif
                             </div>
                         </div>
                     </div>
