@@ -402,6 +402,12 @@ class GoldPriceController extends Controller
                 continue;
             }
 
+            $existingCell = $historyMatrices[$dateKey]['matrix'][$statusId][$rateKey] ?? null;
+            if ($existingCell && ($existingCell['base_price'] !== null || $existingCell['service_fee'] !== null)) {
+                // Rows are already ordered newest-first; keep first value per status+rate.
+                continue;
+            }
+
             $displayBasePrice = $historyRow->base_price ?? $historyRow->max_price ?? $historyRow->min_price;
             $historyMatrices[$dateKey]['matrix'][$statusId][$rateKey] = [
                 'base_price' => $displayBasePrice !== null ? (float) $displayBasePrice : null,

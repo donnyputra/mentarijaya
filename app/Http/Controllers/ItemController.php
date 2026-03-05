@@ -221,6 +221,9 @@ class ItemController extends Controller
                             $item->sales_by = null;
                             $item->sales_price = null;
                             $item->base_gold_price = null;
+                            if (Schema::hasColumn('item', 'base_service_fee')) {
+                                $item->base_service_fee = null;
+                            }
                             if (Schema::hasColumn('item', 'service_fee')) {
                                 $item->service_fee = null;
                             }
@@ -1014,11 +1017,21 @@ class ItemController extends Controller
         $itemId = $request->get('item_id');
 
         try {
-            if (!Schema::hasColumn('item', 'service_fee')) {
+            if (!Schema::hasColumn('item', 'service_fee') || !Schema::hasColumn('item', 'base_service_fee')) {
+                $missingColumns = [];
+                if (!Schema::hasColumn('item', 'service_fee')) {
+                    $missingColumns[] = 'service_fee';
+                }
+                if (!Schema::hasColumn('item', 'base_service_fee')) {
+                    $missingColumns[] = 'base_service_fee';
+                }
+
                 return redirect()
                     ->back()
                     ->withInput()
-                    ->with('error', __('Item table is missing service_fee column. Please run migration first.'));
+                    ->with('error', __('Item table is missing columns: :columns. Please run migration first.', [
+                        'columns' => implode(', ', $missingColumns),
+                    ]));
             }
 
             $normalizedSalesPrice = $this->normalizeLocalizedPrice($request->get('sales_price'));
@@ -1057,6 +1070,9 @@ class ItemController extends Controller
             $todayGoldPriceSetting = $this->getTodayGoldPriceSetting($item->item_gold_rate, $item->inventory_status_id);
             $item->sales_price = round((float) $normalizedSalesPrice, 2);
             $item->base_gold_price = $todayGoldPriceSetting['base_price'] ?? null;
+            if (Schema::hasColumn('item', 'base_service_fee')) {
+                $item->base_service_fee = $todayGoldPriceSetting['service_fee'] ?? null;
+            }
             if (Schema::hasColumn('item', 'service_fee')) {
                 $item->service_fee = round((float) $normalizedServiceFee, 2);
             }
