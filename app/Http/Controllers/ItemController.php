@@ -972,11 +972,28 @@ class ItemController extends Controller
             : null;
         $todayBaseGoldPrice = $todayGoldPriceSetting['base_price'] ?? null;
         $todayServiceFee = $todayGoldPriceSetting['service_fee'] ?? null;
+        $recommendedItemPrice = null;
+        $recommendedServiceFee = null;
         $recommendedSalesPrice = null;
 
-        if ($todayBaseGoldPrice !== null && $item) {
-            $recommendedSalesPrice = round((float) $item->item_weight * (float) $todayBaseGoldPrice, 2);
+        if ($item) {
+            if ($todayBaseGoldPrice !== null) {
+                $recommendedItemPrice = round((float) $item->item_weight * (float) $todayBaseGoldPrice, 2);
+            }
+            if ($todayServiceFee !== null) {
+                $recommendedServiceFee = round((float) $item->item_weight * (float) $todayServiceFee, 2);
+            }
+            if ($recommendedItemPrice !== null && $recommendedServiceFee !== null) {
+                $recommendedSalesPrice = max(0, round($recommendedItemPrice - $recommendedServiceFee, 2));
+            }
         }
+
+        $defaultSalesPrice = $item && $item->sales_price !== null
+            ? round((float) $item->sales_price, 2)
+            : $recommendedSalesPrice;
+        $defaultServiceFee = (Schema::hasColumn('item', 'service_fee') && $item && $item->service_fee !== null)
+            ? round((float) $item->service_fee, 2)
+            : $recommendedServiceFee;
 
         return view('items.employee.sales.form', [
             'item' => $item,
@@ -985,7 +1002,11 @@ class ItemController extends Controller
             'salesByName' => $salesByName,
             'todayBaseGoldPrice' => $todayBaseGoldPrice,
             'todayServiceFee' => $todayServiceFee,
+            'recommendedItemPrice' => $recommendedItemPrice,
+            'recommendedServiceFee' => $recommendedServiceFee,
             'recommendedSalesPrice' => $recommendedSalesPrice,
+            'defaultSalesPrice' => $defaultSalesPrice,
+            'defaultServiceFee' => $defaultServiceFee,
         ]);
     }
 
@@ -993,8 +1014,37 @@ class ItemController extends Controller
         $itemId = $request->get('item_id');
 
         try {
+            if (!Schema::hasColumn('item', 'service_fee')) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with('error', __('Item table is missing service_fee column. Please run migration first.'));
+            }
+
+            $normalizedSalesPrice = $this->normalizeLocalizedPrice($request->get('sales_price'));
+            $normalizedServiceFee = $this->normalizeLocalizedPrice($request->get('service_fee'));
+
+            if ($normalizedSalesPrice === null || !is_numeric($normalizedSalesPrice) || (float) $normalizedSalesPrice < 0) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->withErrors([
+                        'sales_price' => __('Sales price format is invalid.'),
+                    ]);
+            }
+
+            if ($normalizedServiceFee === null || !is_numeric($normalizedServiceFee) || (float) $normalizedServiceFee < 0) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->withErrors([
+                        'service_fee' => __('Service fee format is invalid.'),
+                    ]);
+            }
+
             $request->validate([
-                'sales_price' => 'numeric|required',
+                'sales_price' => 'required',
+                'service_fee' => 'required',
                 'sales_at' => 'date|required',
                 'sales_by_id' => 'required',
                 'sales_status_id' => 'required',
@@ -1005,10 +1055,10 @@ class ItemController extends Controller
 
             $item = \App\Item::where('id', $itemId)->first();
             $todayGoldPriceSetting = $this->getTodayGoldPriceSetting($item->item_gold_rate, $item->inventory_status_id);
-            $item->sales_price = round((float) $request->get("sales_price"), 2);
+            $item->sales_price = round((float) $normalizedSalesPrice, 2);
             $item->base_gold_price = $todayGoldPriceSetting['base_price'] ?? null;
             if (Schema::hasColumn('item', 'service_fee')) {
-                $item->service_fee = $todayGoldPriceSetting['service_fee'] ?? null;
+                $item->service_fee = round((float) $normalizedServiceFee, 2);
             }
             $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
             $item->sales_by = $request->get("sales_by_id");
@@ -1095,6 +1145,26 @@ class ItemController extends Controller
     private function getEmployeeSalesSearchItemsQuery()
     {
         return \App\Item::query();
+    }
+
+    private function normalizeLocalizedPrice($value)
+    {
+        $value = trim((string) $value);
+        $value = str_ireplace('rp', '', $value);
+        $value = preg_replace('/\s+/', '', $value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        if (strpos($value, ',') !== false) {
+            $value = str_replace('.', '', $value);
+            $value = str_replace(',', '.', $value);
+        } elseif (preg_match('/^\d{1,3}(\.\d{3})+$/', $value)) {
+            $value = str_replace('.', '', $value);
+        }
+
+        return $value;
     }
 
     private function getTodayGoldPriceList()
