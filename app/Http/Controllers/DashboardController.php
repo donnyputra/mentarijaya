@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use DataTables;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Item;
+use App\GoldPrice;
 
 class DashboardController extends Controller
 {
@@ -38,7 +40,8 @@ class DashboardController extends Controller
             return view('dashboard.index', [
                 'summaryCollection' => $summaryCollection,
                 'totalWeightSummaryCollection' => $totalWeightSummaryCollection,
-                'itemsCount' => $categorySummaryCollection
+                'itemsCount' => $categorySummaryCollection,
+                'todayBaseGoldPrice' => $this->getTodayBaseGoldPrice(),
             ]);
         }else{
             return view('home');
@@ -160,6 +163,41 @@ class DashboardController extends Controller
                     ");
 
         return $instockItem;
+    }
+
+    private function getTodayBaseGoldPrice()
+    {
+        $today = Carbon::today()->format('Y-m-d');
+
+        $goldPriceQuery = GoldPrice::query();
+        if (Schema::hasColumn('gold_prices', 'price_date')) {
+            $goldPriceQuery = $goldPriceQuery
+                ->whereDate('price_date', '<=', $today)
+                ->orderBy('price_date', 'desc');
+        } else {
+            $goldPriceQuery = $goldPriceQuery
+                ->whereDate('created_at', '<=', $today)
+                ->orderBy('created_at', 'desc');
+        }
+
+        $goldPrice = $goldPriceQuery->orderBy('id', 'desc')->first();
+        if (!$goldPrice) {
+            return null;
+        }
+
+        if (Schema::hasColumn('gold_prices', 'base_price') && $goldPrice->base_price !== null) {
+            return $goldPrice->base_price;
+        }
+
+        if (Schema::hasColumn('gold_prices', 'max_price') && $goldPrice->max_price !== null) {
+            return $goldPrice->max_price;
+        }
+
+        if (Schema::hasColumn('gold_prices', 'min_price') && $goldPrice->min_price !== null) {
+            return $goldPrice->min_price;
+        }
+
+        return null;
     }
 
 }

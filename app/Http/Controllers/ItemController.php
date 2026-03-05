@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -219,6 +220,7 @@ class ItemController extends Controller
                             $item->sales_status_id = null;
                             $item->sales_by = null;
                             $item->sales_price = null;
+                            $item->base_gold_price = null;
                             $item->sales_at = null;
                             $item->item_status_id = $instockItemStatus->id;
                             $item->sales_approved_at = null;
@@ -896,16 +898,17 @@ class ItemController extends Controller
             // 'summary_total_count_per_category' => $this->getSummaryTotalSalesPricePerCategoryByEmployee(Auth::user()->id),
             'total_count_sold_items' => $this->getSummaryTotalCountSoldItemPerCategoryByEmployee(Auth::user()->id),
             'today_list' => $this->getEmployeeTodaySales(Auth::user()->id),
+            'todayBaseGoldPrice' => $this->getTodayBaseGoldPrice(),
         ];
         
         return view('items.employee.sales.entry', $data);
     }
 
     public function employeeItemFind(Request $request) {
-        $itemNo = $request->get('item_no');
+        $itemNo = trim((string) $request->get('item_no'));
 
-        $item = \App\Item::where('item_no', $itemNo)
-                ->whereNull('sales_approved_at')
+        $item = $this->getUnsoldItemsQuery()
+                ->where('item_no', $itemNo)
                 ->first();
 
         if($item) {
@@ -915,14 +918,49 @@ class ItemController extends Controller
         return redirect()->back()->with('error', __('Item No ' . $itemNo . ' is not searchable.'));
     }
 
+    public function employeeSearchAvailableItems(Request $request)
+    {
+        $term = trim((string) $request->get('term', ''));
+
+        $query = $this->getUnsoldItemsQuery();
+
+        if ($term !== '') {
+            $query->where('item_no', 'like', '%' . $term . '%');
+        }
+
+        $items = $query
+            ->orderBy('item_no', 'asc')
+            ->limit(20)
+            ->get(['item_no', 'item_name', 'item_weight']);
+
+        $results = $items->map(function ($item) {
+            return [
+                'id' => $item->item_no,
+                'text' => $item->item_no . ' - ' . $item->item_name . ' (' . number_format($item->item_weight, 2, ',', '.') . ' gr)',
+            ];
+        })->values();
+
+        return response()->json([
+            'results' => $results,
+        ]);
+    }
+
     public function employeeSalesForm($itemId) {
         $salesstatus = \App\SalesStatus::where('code', 'submitted')->first();
 
         $item = \App\Item::where('id', $itemId)->first();
+        $todayBaseGoldPrice = $this->getTodayBaseGoldPrice();
+        $recommendedSalesPrice = null;
+
+        if ($todayBaseGoldPrice !== null && $item) {
+            $recommendedSalesPrice = round((float) $item->item_weight * (float) $todayBaseGoldPrice, 2);
+        }
 
         return view('items.employee.sales.form', [
             'item' => $item,
             'salesstatus' => $salesstatus,
+            'todayBaseGoldPrice' => $todayBaseGoldPrice,
+            'recommendedSalesPrice' => $recommendedSalesPrice,
         ]);
     }
 
@@ -941,7 +979,8 @@ class ItemController extends Controller
             $soldItemStatus = \App\ItemStatus::where('code', '=', 'sold')->first();
 
             $item = \App\Item::where('id', $itemId)->first();
-            $item->sales_price = $request->get("sales_price");
+            $item->sales_price = round((float) $request->get("sales_price"), 2);
+            $item->base_gold_price = $this->getTodayBaseGoldPrice();
             $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
             $item->sales_by = $request->get("sales_by_id");
             $item->sales_status_id = $request->get("sales_status_id");
@@ -961,5 +1000,55 @@ class ItemController extends Controller
         }
 
         return redirect('/items')->with('success', __('Item has been updated.'));
+    }
+
+    private function getTodayBaseGoldPrice()
+    {
+        $today = \Carbon\Carbon::today()->format('Y-m-d');
+
+        $goldPriceQuery = \App\GoldPrice::query();
+        if (Schema::hasColumn('gold_prices', 'price_date')) {
+            $goldPriceQuery = $goldPriceQuery
+                ->whereDate('price_date', '<=', $today)
+                ->orderBy('price_date', 'desc');
+        } else {
+            $goldPriceQuery = $goldPriceQuery
+                ->whereDate('created_at', '<=', $today)
+                ->orderBy('created_at', 'desc');
+        }
+
+        $goldPrice = $goldPriceQuery->orderBy('id', 'desc')->first();
+
+        if (!$goldPrice) {
+            return null;
+        }
+
+        if (Schema::hasColumn('gold_prices', 'base_price') && $goldPrice->base_price !== null) {
+            return $goldPrice->base_price;
+        }
+
+        if (Schema::hasColumn('gold_prices', 'max_price') && $goldPrice->max_price !== null) {
+            return $goldPrice->max_price;
+        }
+
+        if (Schema::hasColumn('gold_prices', 'min_price') && $goldPrice->min_price !== null) {
+            return $goldPrice->min_price;
+        }
+
+        return null;
+    }
+
+    private function getUnsoldItemsQuery()
+    {
+        $query = \App\Item::query()
+            ->whereNull('sales_status_id')
+            ->whereNull('sales_approved_at');
+
+        $soldStatus = \App\ItemStatus::where('code', '=', 'sold')->first();
+        if ($soldStatus) {
+            $query->where('item_status_id', '!=', $soldStatus->id);
+        }
+
+        return $query;
     }
 }

@@ -23,6 +23,14 @@
 
             <div class="content">
                 <div class="container-fluid">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">
+                                <strong>Today's Base Gold Price:</strong>
+                                {{ $todayBaseGoldPrice !== null ? ('Rp ' . number_format($todayBaseGoldPrice, 2, ',', '.')) : '-' }}
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="row">
                         <div class="col-12 table-responsive">

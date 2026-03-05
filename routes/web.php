@@ -69,6 +69,9 @@ Route::resource('buybackstatuses', 'BuybackStatusController')->only('index', 'cr
 Route::post('buybackstatus/{buybackstatus}/update', 'BuybackStatusController@update')->name('buybackstatuses.update');
 Route::post('buybackstatus/{buybackstatus}/delete', 'BuybackStatusController@delete')->name('buybackstatuses.delete');
 
+// System Configuration > Gold Price History
+Route::resource('gold-prices', 'GoldPriceController')->only('index', 'store');
+
 // System Configuration > Users
 Route::resource('users', 'UserController')->only('index', 'create', 'store', 'edit');
 Route::get('users/{user}/changepassword', 'UserController@changepassword')->name('users.changepassword');
@@ -98,6 +101,7 @@ Route::get('employee/items/create', 'ItemController@employeeItemCreate')->name('
 Route::post('employee/items/store', 'ItemController@employeeItemStore')->name('items.employee.store');
 Route::post('employee/items/find', 'ItemController@employeeItemFind')->name('items.employee.find');
 Route::get('employee/sales/entry', 'ItemController@employeeSalesEntry')->name('sales.employee.entry');
+Route::get('employee/sales/search-items', 'ItemController@employeeSearchAvailableItems')->name('sales.employee.search-items');
 Route::get('employee/sales/form/{itemId}', 'ItemController@employeeSalesForm')->name('sales.employee.form');
 Route::post('employee/sales/form/save', 'ItemController@employeeSalesFormSave')->name('sales.employee.form.save');
 
