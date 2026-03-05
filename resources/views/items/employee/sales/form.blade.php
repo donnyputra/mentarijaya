@@ -57,15 +57,33 @@
                                                 {{ $item->item_weight }} gr
                                             </div>
                                         </div>
+                                        <div class="form-group row">
+                                            <label class="col-3 col-form-label">Today's Base Price</label>
+                                            <div class="col-9">
+                                                {{ $todayBaseGoldPrice !== null ? ('Rp ' . number_format($todayBaseGoldPrice, 2, ',', '.')) : '-' }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-3 col-form-label">Recommended Sales Price</label>
+                                            <div class="col-9">
+                                                {{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 2, ',', '.')) : '-' }}
+                                                <small class="form-text text-muted">Recommendation only. You can still change the sales price.</small>
+                                            </div>
+                                        </div>
 
                                         <div class="form-group row">
                                             <label for="sales_price" class="col-3 col-form-label">Sales Price</label>
                                             <div class="col-9">
+                                                @php
+                                                    $recommendedSalesPriceInput = $recommendedSalesPrice !== null
+                                                        ? number_format((float) $recommendedSalesPrice, 2, '.', '')
+                                                        : '';
+                                                @endphp
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                             <div class="input-group-text">Rp</div>
                                                     </div>
-                                                    <input type="text" class="form-control" name="sales_price" value="{{ old('sales_price') }}" />
+                                                    <input type="number" step="0.01" min="0" class="form-control" name="sales_price" value="{{ old('sales_price', $recommendedSalesPriceInput) }}" />
                                                 </div>
                                             </div>
                                         </div>

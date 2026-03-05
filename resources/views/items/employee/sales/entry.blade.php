@@ -1,6 +1,27 @@
 @extends('layouts.admin')
 
 @section('content')
+<style>
+    #item_no + .select2-container {
+        width: 100% !important;
+    }
+
+    #item_no + .select2-container .select2-selection--single {
+        height: calc(2.25rem + 2px) !important;
+        border: 1px solid #ced4da !important;
+        border-radius: .25rem !important;
+    }
+
+    #item_no + .select2-container .select2-selection__rendered {
+        line-height: calc(2.25rem + 0px) !important;
+        padding-left: .75rem !important;
+    }
+
+    #item_no + .select2-container .select2-selection__arrow {
+        height: calc(2.25rem + 0px) !important;
+        right: .45rem !important;
+    }
+</style>
 <?php 
     $totalWeight = 0;
     $totalSales = 0;
@@ -27,6 +48,15 @@
 
             <div class="content">
                 <div class="container-fluid">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">
+                                <strong>Today's Base Gold Price:</strong>
+                                {{ $todayBaseGoldPrice !== null ? ('Rp ' . number_format($todayBaseGoldPrice, 2, ',', '.')) : '-' }}
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-12">
                             <div class="float-right">
@@ -50,7 +80,11 @@
                                                     @csrf
                                                     <label for="item_no" class="col-3 col-form-label">Item No <span style="color: red">*</span></label>
                                                     <div class="col-6">
-                                                        <input type="text" id="item_no" class="form-control" name="item_no" placeholder="Search Item No here.." value="{{ old('item_no') }}" required />
+                                                        <select id="item_no" class="form-control" name="item_no" required>
+                                                            @if(old('item_no'))
+                                                            <option value="{{ old('item_no') }}" selected>{{ old('item_no') }}</option>
+                                                            @endif
+                                                        </select>
                                                     </div>
                                                     <div class="col-3">
                                                         <button type="submit" class="btn btn-primary">{{ __("Find") }}</button>
@@ -162,18 +196,27 @@
 </div>
 @endsection
 
-{{-- @section('custom-script')
+@section('custom-script')
 <script type="text/javascript">
-    $('#card-detail').hide();
-
-    function updateDetailForm() {
-        // console.log($('#item_no').val());
-        if($('#item_no').val() == '') {
-            alert('Item No must be filled.');
-            $('#card-detail').hide();
-        } else {
-            $('#card-detail').show();
-        }
-    }
+    $(function() {
+        $('#item_no').select2({
+            width: '100%',
+            placeholder: 'Search Item No here..',
+            minimumInputLength: 1,
+            ajax: {
+                url: '{{ route("sales.employee.search-items") }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        term: params.term || ''
+                    };
+                },
+                processResults: function (data) {
+                    return data;
+                }
+            }
+        });
+    });
 </script>
-@endsection --}}
+@endsection
