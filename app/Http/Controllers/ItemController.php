@@ -41,6 +41,18 @@ class ItemController extends Controller
         $inventorystatuses = \App\InventoryStatus::all();
         $salesstatuses = \App\SalesStatus::all();
         $users = \App\User::all();
+        $availableGoldRates = DB::table('item')
+            ->whereNull('deleted_at')
+            ->whereNotNull('item_gold_rate')
+            ->select('item_gold_rate')
+            ->distinct()
+            ->orderBy('item_gold_rate', 'asc')
+            ->pluck('item_gold_rate')
+            ->map(function ($goldRate) {
+                return number_format((float) $goldRate, 2, '.', '');
+            })
+            ->values()
+            ->all();
 
         $items = DB::table('item')
                     ->join('store', 'store.id', '=', 'item.store_id')
@@ -97,6 +109,24 @@ class ItemController extends Controller
             $items = $items->where('item.inventory_status_id', '=', $request->session()->get('filter.inventory_status'));
         if($request->session()->get('filter.sales_status') != '')
             $items = $items->where('item.sales_status_id', '=', $request->session()->get('filter.sales_status'));
+        $selectedGoldRates = $request->session()->get('filter.gold_rates', []);
+        if (!is_array($selectedGoldRates)) {
+            $selectedGoldRates = [$selectedGoldRates];
+        }
+        $selectedGoldRates = array_values(array_filter(array_map(function ($goldRate) {
+            if ($goldRate === null || $goldRate === '') {
+                return null;
+            }
+
+            if (!is_numeric($goldRate)) {
+                return null;
+            }
+
+            return number_format((float) $goldRate, 2, '.', '');
+        }, $selectedGoldRates)));
+        if (count($selectedGoldRates) > 0) {
+            $items = $items->whereIn('item.item_gold_rate', $selectedGoldRates);
+        }
 
         //Implement sort
         $sortBy = '';
@@ -145,7 +175,8 @@ class ItemController extends Controller
             'inventorystatuses' => $inventorystatuses,
             'salesstatuses' => $salesstatuses,
             'users' => [Auth::user()],
-            'items' => $items
+            'items' => $items,
+            'availableGoldRates' => $availableGoldRates,
         ]);
     }
 

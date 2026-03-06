@@ -10,15 +10,20 @@
         height: calc(2.25rem + 2px) !important;
         border: 1px solid #ced4da !important;
         border-radius: .25rem !important;
+        display: flex !important;
+        align-items: center !important;
     }
 
     #item_no + .select2-container .select2-selection__rendered {
-        line-height: calc(2.25rem + 0px) !important;
+        line-height: normal !important;
         padding-left: .75rem !important;
+        padding-right: 2rem !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
     }
 
     #item_no + .select2-container .select2-selection__arrow {
-        height: calc(2.25rem + 0px) !important;
+        height: 100% !important;
         right: .45rem !important;
     }
 </style>

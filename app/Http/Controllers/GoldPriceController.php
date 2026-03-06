@@ -263,20 +263,66 @@ class GoldPriceController extends Controller
 
     private function getRateColumns()
     {
-        return [
-            [
-                'key' => '37_5',
-                'label' => '37.5',
-                'value' => 37.5,
-                'value_key' => $this->toRateValueKey(37.5),
-            ],
-            [
-                'key' => '42',
-                'label' => '42',
-                'value' => 42.0,
-                'value_key' => $this->toRateValueKey(42.0),
-            ],
-        ];
+        $defaultRates = [37.5, 42.0];
+        $rateMap = [];
+
+        foreach ($defaultRates as $defaultRate) {
+            $this->registerRateValue($rateMap, $defaultRate);
+        }
+
+        if (Schema::hasColumn('gold_prices', 'gold_rate')) {
+            $goldPriceRates = GoldPrice::query()
+                ->whereNotNull('gold_rate')
+                ->select('gold_rate')
+                ->distinct()
+                ->pluck('gold_rate')
+                ->all();
+            foreach ($goldPriceRates as $goldPriceRate) {
+                $this->registerRateValue($rateMap, $goldPriceRate);
+            }
+        }
+
+        if (Schema::hasTable('item') && Schema::hasColumn('item', 'item_gold_rate')) {
+            $itemRates = DB::table('item')
+                ->whereNotNull('item_gold_rate')
+                ->select('item_gold_rate')
+                ->distinct()
+                ->pluck('item_gold_rate')
+                ->all();
+            foreach ($itemRates as $itemRate) {
+                $this->registerRateValue($rateMap, $itemRate);
+            }
+        }
+
+        $orderedRateMap = [];
+        foreach ($defaultRates as $defaultRate) {
+            $defaultRateKey = $this->toRateValueKey($defaultRate);
+            if (isset($rateMap[$defaultRateKey])) {
+                $orderedRateMap[$defaultRateKey] = $rateMap[$defaultRateKey];
+            }
+        }
+
+        uksort($rateMap, function ($left, $right) {
+            return ((float) $left) <=> ((float) $right);
+        });
+        foreach ($rateMap as $rateKey => $rateValue) {
+            if (isset($orderedRateMap[$rateKey])) {
+                continue;
+            }
+            $orderedRateMap[$rateKey] = $rateValue;
+        }
+
+        $rateColumns = [];
+        foreach ($orderedRateMap as $rateKey => $rateValue) {
+            $rateColumns[] = [
+                'key' => $this->toRateColumnKey($rateValue),
+                'label' => $this->toRateLabel($rateValue),
+                'value' => (float) $rateValue,
+                'value_key' => $rateKey,
+            ];
+        }
+
+        return $rateColumns;
     }
 
     private function getMatrixInventoryStatuses()
@@ -444,5 +490,29 @@ class GoldPriceController extends Controller
     private function toRateValueKey($value)
     {
         return number_format((float) $value, 2, '.', '');
+    }
+
+    private function registerRateValue(&$rateMap, $value)
+    {
+        if ($value === null || !is_numeric($value)) {
+            return;
+        }
+
+        $normalizedValue = round((float) $value, 2);
+        if ($normalizedValue <= 0) {
+            return;
+        }
+
+        $rateMap[$this->toRateValueKey($normalizedValue)] = $normalizedValue;
+    }
+
+    private function toRateColumnKey($value)
+    {
+        return 'rate_' . str_replace('.', '_', $this->toRateValueKey($value));
+    }
+
+    private function toRateLabel($value)
+    {
+        return rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.');
     }
 }
