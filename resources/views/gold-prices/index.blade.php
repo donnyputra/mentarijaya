@@ -265,7 +265,9 @@
         left: 0;
         background: #fff;
         z-index: 3;
-        min-width: 170px;
+        min-width: 110px;
+        width: 1%;
+        white-space: normal;
         box-shadow: 2px 0 0 rgba(0, 0, 0, .05);
     }
 
@@ -275,17 +277,21 @@
     }
 
     .matrix-table .matrix-input {
-        min-width: 150px;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
     }
 
     @media (max-width: 767.98px) {
         .matrix-table .matrix-sticky-col {
-            min-width: 150px;
+            min-width: 96px;
         }
 
         .matrix-table .matrix-input {
-            min-width: 140px;
-            font-size: .95rem;
+            width: 14ch;
+            min-width: 14ch;
+            max-width: 14ch;
+            font-size: .92rem;
         }
     }
 </style>
