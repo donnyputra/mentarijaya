@@ -77,11 +77,11 @@
                                         <div class="form-group row">
                                             <label class="col-3 col-form-label">Daily Price Matrix <span style="color: red">*</span></label>
                                             <div class="col-9">
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered table-sm">
+                                                <div class="table-responsive matrix-scroll-container">
+                                                    <table class="table table-bordered table-sm matrix-table">
                                                         <thead>
                                                             <tr>
-                                                                <th class="align-middle">Status / Type</th>
+                                                                <th class="align-middle matrix-sticky-col">Status / Type</th>
                                                                 @foreach($rateColumns as $rateColumn)
                                                                 <th class="text-center">{{ $rateColumn['label'] }}%</th>
                                                                 @endforeach
@@ -90,7 +90,7 @@
                                                         <tbody>
                                                             @foreach($inventoryStatuses as $inventoryStatus)
                                                             <tr>
-                                                                <td class="align-middle">
+                                                                <td class="align-middle matrix-sticky-col">
                                                                     <strong>{{ $inventoryStatus->description }}</strong>
                                                                     <div class="text-muted small">Base Price</div>
                                                                 </td>
@@ -103,16 +103,15 @@
                                                                     <input
                                                                         type="text"
                                                                         inputmode="decimal"
-                                                                        class="form-control form-control-sm rupiah-input"
+                                                                        class="form-control form-control-sm rupiah-input matrix-input text-right"
                                                                         name="matrix[{{ $inventoryStatus->id }}][{{ $rateColumn['key'] }}][base_price]"
                                                                         value="{{ old('matrix.' . $inventoryStatus->id . '.' . $rateColumn['key'] . '.base_price', $defaultBasePriceDisplay) }}"
-                                                                        placeholder="10.000,00"
                                                                     />
                                                                 </td>
                                                                 @endforeach
                                                             </tr>
                                                             <tr>
-                                                                <td class="align-middle text-muted small">Service Fee</td>
+                                                                <td class="align-middle text-muted small matrix-sticky-col">Service Fee</td>
                                                                 @foreach($rateColumns as $rateColumn)
                                                                 <td>
                                                                     @php
@@ -122,10 +121,9 @@
                                                                     <input
                                                                         type="text"
                                                                         inputmode="decimal"
-                                                                        class="form-control form-control-sm rupiah-input"
+                                                                        class="form-control form-control-sm rupiah-input matrix-input text-right"
                                                                         name="matrix[{{ $inventoryStatus->id }}][{{ $rateColumn['key'] }}][service_fee]"
                                                                         value="{{ old('matrix.' . $inventoryStatus->id . '.' . $rateColumn['key'] . '.service_fee', $defaultServiceFeeDisplay) }}"
-                                                                        placeholder="2.000,00"
                                                                     />
                                                                 </td>
                                                                 @endforeach
@@ -174,11 +172,11 @@
                                             @endif
                                         </div>
                                         <div class="card-body p-2">
-                                            <div class="table-responsive">
-                                                <table class="table table-bordered table-sm mb-0">
+                                            <div class="table-responsive matrix-scroll-container">
+                                                <table class="table table-bordered table-sm mb-0 matrix-table">
                                                     <thead>
                                                         <tr>
-                                                            <th class="align-middle">Status / Type</th>
+                                                            <th class="align-middle matrix-sticky-col">Status / Type</th>
                                                             @foreach($rateColumns as $rateColumn)
                                                             <th class="text-center">{{ $rateColumn['label'] }}%</th>
                                                             @endforeach
@@ -187,7 +185,7 @@
                                                     <tbody>
                                                         @foreach($inventoryStatuses as $inventoryStatus)
                                                         <tr>
-                                                            <td class="align-middle">
+                                                            <td class="align-middle matrix-sticky-col">
                                                                 <strong>{{ $inventoryStatus->description }}</strong>
                                                                 <div class="text-muted small">Base Price</div>
                                                             </td>
@@ -201,7 +199,7 @@
                                                             @endforeach
                                                         </tr>
                                                         <tr>
-                                                            <td class="align-middle text-muted small">Service Fee</td>
+                                                            <td class="align-middle text-muted small matrix-sticky-col">Service Fee</td>
                                                             @foreach($rateColumns as $rateColumn)
                                                             @php
                                                                 $historyServiceFee = $historyMatrix['matrix'][$inventoryStatus->id][$rateColumn['key']]['service_fee'] ?? null;
@@ -243,6 +241,54 @@
 @endsection
 
 @section('custom-script')
+<style>
+    .matrix-scroll-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: .25rem;
+    }
+
+    .matrix-table {
+        width: max-content;
+        min-width: 100%;
+        table-layout: auto;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    .matrix-table .matrix-sticky-col {
+        position: sticky;
+        left: 0;
+        background: #fff;
+        z-index: 3;
+        min-width: 170px;
+        box-shadow: 2px 0 0 rgba(0, 0, 0, .05);
+    }
+
+    .matrix-table thead .matrix-sticky-col {
+        background: #f8f9fa;
+        z-index: 4;
+    }
+
+    .matrix-table .matrix-input {
+        min-width: 150px;
+    }
+
+    @media (max-width: 767.98px) {
+        .matrix-table .matrix-sticky-col {
+            min-width: 150px;
+        }
+
+        .matrix-table .matrix-input {
+            min-width: 140px;
+            font-size: .95rem;
+        }
+    }
+</style>
 <script type="text/javascript">
     (function() {
         function formatRupiah(value) {
