@@ -199,13 +199,18 @@ class GoldPriceController extends Controller
         $hasGoldRateColumn = Schema::hasColumn('gold_prices', 'gold_rate');
         $hasInventoryStatusColumn = Schema::hasColumn('gold_prices', 'inventory_status_id');
         $inventoryStatusMap = [];
+        $inventoryStatusOrderMap = [];
 
         $goldPriceQuery = GoldPrice::query();
         if ($hasInventoryStatusColumn) {
             $goldPriceQuery = $goldPriceQuery->with('inventoryStatus');
-            $inventoryStatusMap = InventoryStatus::withTrashed()
-                ->pluck('description', 'id')
-                ->toArray();
+            $inventoryStatuses = InventoryStatus::withTrashed()
+                ->orderBy('id', 'asc')
+                ->get(['id', 'description']);
+            foreach ($inventoryStatuses as $index => $inventoryStatus) {
+                $inventoryStatusMap[$inventoryStatus->id] = $inventoryStatus->description;
+                $inventoryStatusOrderMap[$inventoryStatus->id] = $index;
+            }
         }
         if (Schema::hasColumn('gold_prices', 'price_date')) {
             $goldPriceQuery = $goldPriceQuery
@@ -221,6 +226,7 @@ class GoldPriceController extends Controller
             ->get();
 
         $result = [];
+        $seenPairs = [];
         foreach ($goldPrices as $goldPrice) {
             $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
             if ($displayBasePrice === null) {
@@ -243,13 +249,41 @@ class GoldPriceController extends Controller
                 continue;
             }
 
+            $pairKey = ($hasGoldRateColumn && $displayGoldRate !== null
+                    ? number_format((float) $displayGoldRate, 2, '.', '')
+                    : 'no_rate')
+                . '|' . ($hasInventoryStatusColumn ? (string) ($goldPrice->inventory_status_id ?? 'no_status') : 'no_status');
+            if (isset($seenPairs[$pairKey])) {
+                continue;
+            }
+            $seenPairs[$pairKey] = true;
+
             $result[] = [
                 'base_price' => $displayBasePrice,
                 'service_fee' => $goldPrice->service_fee ?? 0,
                 'gold_rate' => $displayGoldRate,
                 'inventory_status' => $displayInventoryStatus,
+                'inventory_status_id' => $goldPrice->inventory_status_id,
             ];
         }
+
+        usort($result, function ($left, $right) use ($inventoryStatusOrderMap) {
+            $leftRate = $left['gold_rate'] !== null ? (float) $left['gold_rate'] : INF;
+            $rightRate = $right['gold_rate'] !== null ? (float) $right['gold_rate'] : INF;
+            if ($leftRate !== $rightRate) {
+                return $leftRate <=> $rightRate;
+            }
+
+            $leftOrder = $inventoryStatusOrderMap[$left['inventory_status_id']] ?? PHP_INT_MAX;
+            $rightOrder = $inventoryStatusOrderMap[$right['inventory_status_id']] ?? PHP_INT_MAX;
+
+            return $leftOrder <=> $rightOrder;
+        });
+
+        foreach ($result as &$row) {
+            unset($row['inventory_status_id']);
+        }
+        unset($row);
 
         return $result;
     }

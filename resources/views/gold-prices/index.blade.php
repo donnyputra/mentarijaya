@@ -28,15 +28,27 @@
                             <div class="alert alert-info mb-0">
                                 <strong>Today's Base Price List:</strong>
                                 @if(count($todayBasePriceList) > 0)
-                                    @foreach($todayBasePriceList as $todayBasePrice)
-                                        <span class="badge badge-light mr-1 mb-1">
-                                            {{ $todayBasePrice['gold_rate'] !== null ? number_format($todayBasePrice['gold_rate'], 2, ',', '.') . '%' : '-' }}
-                                            /
-                                            {{ $todayBasePrice['inventory_status'] ?? '-' }}
-                                            :
-                                            Rp {{ number_format($todayBasePrice['base_price'], 2, ',', '.') }}
-                                            + Fee Rp {{ number_format($todayBasePrice['service_fee'] ?? 0, 2, ',', '.') }}
-                                        </span>
+                                    @php
+                                        $groupedTodayBasePriceList = collect($todayBasePriceList)->groupBy(function ($todayBasePrice) {
+                                            return $todayBasePrice['gold_rate'] !== null
+                                                ? number_format((float) $todayBasePrice['gold_rate'], 2, '.', '')
+                                                : 'unknown';
+                                        });
+                                    @endphp
+                                    @foreach($groupedTodayBasePriceList as $goldRateKey => $todayBasePriceRows)
+                                        <div class="mb-1">
+                                            <span class="badge badge-secondary mr-1 mb-1">
+                                                {{ $goldRateKey !== 'unknown' ? number_format((float) $goldRateKey, 2, ',', '.') . '%' : '-' }}
+                                            </span>
+                                            @foreach($todayBasePriceRows as $todayBasePrice)
+                                                <span class="badge badge-light mr-1 mb-1">
+                                                    {{ $todayBasePrice['inventory_status'] ?? '-' }}
+                                                    :
+                                                    Rp {{ number_format($todayBasePrice['base_price'], 2, ',', '.') }}
+                                                    + Fee Rp {{ number_format($todayBasePrice['service_fee'] ?? 0, 2, ',', '.') }}
+                                                </span>
+                                            @endforeach
+                                        </div>
                                     @endforeach
                                 @else
                                     -
