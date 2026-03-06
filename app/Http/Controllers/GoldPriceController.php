@@ -266,24 +266,9 @@ class GoldPriceController extends Controller
         $defaultRates = [37.5, 42.0];
         $rateMap = [];
 
-        foreach ($defaultRates as $defaultRate) {
-            $this->registerRateValue($rateMap, $defaultRate);
-        }
-
-        if (Schema::hasColumn('gold_prices', 'gold_rate')) {
-            $goldPriceRates = GoldPrice::query()
-                ->whereNotNull('gold_rate')
-                ->select('gold_rate')
-                ->distinct()
-                ->pluck('gold_rate')
-                ->all();
-            foreach ($goldPriceRates as $goldPriceRate) {
-                $this->registerRateValue($rateMap, $goldPriceRate);
-            }
-        }
-
         if (Schema::hasTable('item') && Schema::hasColumn('item', 'item_gold_rate')) {
             $itemRates = DB::table('item')
+                ->whereNull('deleted_at')
                 ->whereNotNull('item_gold_rate')
                 ->select('item_gold_rate')
                 ->distinct()
@@ -294,26 +279,18 @@ class GoldPriceController extends Controller
             }
         }
 
-        $orderedRateMap = [];
-        foreach ($defaultRates as $defaultRate) {
-            $defaultRateKey = $this->toRateValueKey($defaultRate);
-            if (isset($rateMap[$defaultRateKey])) {
-                $orderedRateMap[$defaultRateKey] = $rateMap[$defaultRateKey];
+        if (count($rateMap) === 0) {
+            foreach ($defaultRates as $defaultRate) {
+                $this->registerRateValue($rateMap, $defaultRate);
             }
         }
 
         uksort($rateMap, function ($left, $right) {
             return ((float) $left) <=> ((float) $right);
         });
-        foreach ($rateMap as $rateKey => $rateValue) {
-            if (isset($orderedRateMap[$rateKey])) {
-                continue;
-            }
-            $orderedRateMap[$rateKey] = $rateValue;
-        }
 
         $rateColumns = [];
-        foreach ($orderedRateMap as $rateKey => $rateValue) {
+        foreach ($rateMap as $rateKey => $rateValue) {
             $rateColumns[] = [
                 'key' => $this->toRateColumnKey($rateValue),
                 'label' => $this->toRateLabel($rateValue),
