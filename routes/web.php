@@ -69,10 +69,8 @@ Route::resource('buybackstatuses', 'BuybackStatusController')->only('index', 'cr
 Route::post('buybackstatus/{buybackstatus}/update', 'BuybackStatusController@update')->name('buybackstatuses.update');
 Route::post('buybackstatus/{buybackstatus}/delete', 'BuybackStatusController@delete')->name('buybackstatuses.delete');
 
-Route::resource('gold-price', 'GoldPriceController')->only('index', 'create', 'store');
-
-Route::resource('receipts', 'ReceiptsController')->only('index', 'create', 'show');
-Route::get('receipts/{receipt}/pdf', 'ReceiptsController@pdf')->name('receipts.pdf');
+// System Configuration > Gold Price History
+Route::resource('gold-prices', 'GoldPriceController')->only('index', 'store');
 
 // System Configuration > Users
 Route::resource('users', 'UserController')->only('index', 'create', 'store', 'edit');
@@ -103,6 +101,7 @@ Route::get('employee/items/create', 'ItemController@employeeItemCreate')->name('
 Route::post('employee/items/store', 'ItemController@employeeItemStore')->name('items.employee.store');
 Route::post('employee/items/find', 'ItemController@employeeItemFind')->name('items.employee.find');
 Route::get('employee/sales/entry', 'ItemController@employeeSalesEntry')->name('sales.employee.entry');
+Route::get('employee/sales/search-items', 'ItemController@employeeSearchAvailableItems')->name('sales.employee.search-items');
 Route::get('employee/sales/form/{itemId}', 'ItemController@employeeSalesForm')->name('sales.employee.form');
 Route::post('employee/sales/form/save', 'ItemController@employeeSalesFormSave')->name('sales.employee.form.save');
 
@@ -118,8 +117,3 @@ Route::get('/pdf/items', 'PdfController@itemsPdf')->name('pdf.items');
 
 Route::resource('photos', 'PhotosController')->only('store');
 Route::delete('photos', 'PhotosController@destroy')->name('photos.destroy');
-
-// Checkout
-Route::get('employee/checkout/entry', 'ItemController@checkoutEntry')->name('checkout.employee.entry');
-Route::get('item/simplelist', 'ItemController@getItemsPagination')->name('item.simplelist');
-Route::post('employee/checkout/submit', 'ItemController@checkoutSubmit')->name('checkout.employee.submit');

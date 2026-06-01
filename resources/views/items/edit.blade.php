@@ -276,5 +276,6 @@
 			document.getElementById("item_gold_rate").value = 37.5;
 		}
 	});
+
 </script>
 @endsection

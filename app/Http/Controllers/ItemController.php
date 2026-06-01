@@ -222,6 +222,10 @@ class ItemController extends Controller
                             $item->sales_status_id = null;
                             $item->sales_by = null;
                             $item->sales_price = null;
+                            $item->base_gold_price = null;
+                            if (Schema::hasColumn('item', 'service_fee')) {
+                                $item->service_fee = null;
+                            }
                             $item->sales_at = null;
                             $item->item_status_id = $instockItemStatus->id;
                             $item->sales_approved_at = null;
@@ -901,17 +905,17 @@ class ItemController extends Controller
             // 'summary_total_count_per_category' => $this->getSummaryTotalSalesPricePerCategoryByEmployee(Auth::user()->id),
             'total_count_sold_items' => $this->getSummaryTotalCountSoldItemPerCategoryByEmployee(Auth::user()->id),
             'today_list' => $this->getEmployeeTodaySales(Auth::user()->id),
+            'todayGoldPriceList' => $this->getTodayGoldPriceList(),
         ];
         
         return view('items.employee.sales.entry', $data);
     }
 
     public function employeeItemFind(Request $request) {
-        $itemNo = $request->get('item_no');
+        $itemNo = trim((string) $request->get('item_no'));
 
-        $item = \App\Item::where('item_no', $itemNo)
-                ->whereNull('sales_status_id')
-                ->whereNull('sales_approved_at')
+        $item = $this->getEmployeeSalesSearchItemsQuery()
+                ->where('item_no', $itemNo)
                 ->first();
 
         if($item) {
@@ -921,14 +925,71 @@ class ItemController extends Controller
         return redirect()->back()->with('error', __('Item No ' . $itemNo . ' is not searchable.'));
     }
 
+    public function employeeSearchAvailableItems(Request $request)
+    {
+        $term = trim((string) $request->get('term', ''));
+
+        $query = $this->getEmployeeSalesSearchItemsQuery();
+
+        if ($term !== '') {
+            $query->where('item_no', 'like', '%' . $term . '%');
+        }
+
+        $items = $query
+            ->orderBy('item_no', 'asc')
+            ->limit(20)
+            ->get(['item_no', 'item_name', 'item_weight']);
+
+        $results = $items->map(function ($item) {
+            return [
+                'id' => $item->item_no,
+                'text' => $item->item_no . ' - ' . $item->item_name . ' (' . number_format($item->item_weight, 2, ',', '.') . ' gr)',
+            ];
+        })->values();
+
+        return response()->json([
+            'results' => $results,
+        ]);
+    }
+
     public function employeeSalesForm($itemId) {
         $salesstatus = \App\SalesStatus::where('code', 'submitted')->first();
 
         $item = \App\Item::where('id', $itemId)->first();
+        $selectedSalesStatus = $salesstatus;
+        if ($item && $item->sales_status_id) {
+            $selectedSalesStatus = \App\SalesStatus::where('id', $item->sales_status_id)->first() ?? $salesstatus;
+        }
+
+        $salesById = Auth::id();
+        $salesByName = Auth::user()->name;
+        if ($item && $item->sales_by) {
+            $existingSalesBy = \App\User::where('id', $item->sales_by)->first();
+            if ($existingSalesBy) {
+                $salesById = $existingSalesBy->id;
+                $salesByName = $existingSalesBy->name;
+            }
+        }
+
+        $todayGoldPriceSetting = $item
+            ? $this->getTodayGoldPriceSetting($item->item_gold_rate, $item->inventory_status_id)
+            : null;
+        $todayBaseGoldPrice = $todayGoldPriceSetting['base_price'] ?? null;
+        $todayServiceFee = $todayGoldPriceSetting['service_fee'] ?? null;
+        $recommendedSalesPrice = null;
+
+        if ($todayBaseGoldPrice !== null && $item) {
+            $recommendedSalesPrice = round((float) $item->item_weight * (float) $todayBaseGoldPrice, 2);
+        }
 
         return view('items.employee.sales.form', [
             'item' => $item,
-            'salesstatus' => $salesstatus,
+            'salesstatus' => $selectedSalesStatus,
+            'salesById' => $salesById,
+            'salesByName' => $salesByName,
+            'todayBaseGoldPrice' => $todayBaseGoldPrice,
+            'todayServiceFee' => $todayServiceFee,
+            'recommendedSalesPrice' => $recommendedSalesPrice,
         ]);
     }
 
@@ -1087,6 +1148,7 @@ class ItemController extends Controller
             $receipt = DB::transaction(function () use ($itemId, $request) {
                 $soldItemStatus = \App\ItemStatus::where('code', '=', 'sold')->first();
 
+<<<<<<< HEAD
                 $item = \App\Item::where('id', $itemId)->firstOrFail();
                 $item->sales_price = $request->get('sales_price');
                 $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
@@ -1095,6 +1157,20 @@ class ItemController extends Controller
                 $item->service_fee = $request->get('service_fee') ?: 0;
                 $item->item_status_id = $soldItemStatus->id;
                 $item->save();
+=======
+            $item = \App\Item::where('id', $itemId)->first();
+            $todayGoldPriceSetting = $this->getTodayGoldPriceSetting($item->item_gold_rate, $item->inventory_status_id);
+            $item->sales_price = round((float) $request->get("sales_price"), 2);
+            $item->base_gold_price = $todayGoldPriceSetting['base_price'] ?? null;
+            if (Schema::hasColumn('item', 'service_fee')) {
+                $item->service_fee = $todayGoldPriceSetting['service_fee'] ?? null;
+            }
+            $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
+            $item->sales_by = $request->get("sales_by_id");
+            $item->sales_status_id = $request->get("sales_status_id");
+            $item->item_status_id = $soldItemStatus->id;
+            $item->save();
+>>>>>>> a9b4da350795a33b6cfcbf92390f83409ff9d0c2
 
                 return $this->upsertReceiptForItem($item, $request);
             });
@@ -1114,6 +1190,7 @@ class ItemController extends Controller
         return redirect('/items')->with('success', __('Item has been updated.'));
     }
 
+<<<<<<< HEAD
     private function upsertReceiptForItem(Item $item, Request $request)
     {
         $receiptDetail = $this->findReceiptDetailForItem($item->id);
@@ -1270,5 +1347,133 @@ class ItemController extends Controller
         }
 
         return ReceiptDetails::with('receipt')->where('item_id', $itemId)->latest('id')->first();
+=======
+    private function getTodayBaseGoldPrice($goldRate = null, $inventoryStatusId = null)
+    {
+        $todayGoldPriceSetting = $this->getTodayGoldPriceSetting($goldRate, $inventoryStatusId);
+
+        return $todayGoldPriceSetting['base_price'];
+    }
+
+    private function getTodayGoldPriceSetting($goldRate = null, $inventoryStatusId = null)
+    {
+        $today = \Carbon\Carbon::today()->format('Y-m-d');
+
+        $goldPriceQuery = \App\GoldPrice::query();
+        if (Schema::hasColumn('gold_prices', 'price_date')) {
+            $goldPriceQuery = $goldPriceQuery
+                ->whereDate('price_date', '<=', $today)
+                ->orderBy('price_date', 'desc');
+        } else {
+            $goldPriceQuery = $goldPriceQuery
+                ->whereDate('created_at', '<=', $today)
+                ->orderBy('created_at', 'desc');
+        }
+
+        if (Schema::hasColumn('gold_prices', 'gold_rate') && $goldRate !== null) {
+            $goldPriceQuery = $goldPriceQuery->where('gold_rate', (float) $goldRate);
+        }
+
+        if (Schema::hasColumn('gold_prices', 'inventory_status_id') && $inventoryStatusId !== null) {
+            $goldPriceQuery = $goldPriceQuery->where('inventory_status_id', (int) $inventoryStatusId);
+        }
+
+        $goldPrice = $goldPriceQuery->orderBy('id', 'desc')->first();
+
+        if (!$goldPrice) {
+            return [
+                'base_price' => null,
+                'service_fee' => null,
+            ];
+        }
+
+        $basePrice = null;
+        if (Schema::hasColumn('gold_prices', 'base_price') && $goldPrice->base_price !== null) {
+            $basePrice = $goldPrice->base_price;
+        }
+        if ($basePrice === null && Schema::hasColumn('gold_prices', 'max_price') && $goldPrice->max_price !== null) {
+            $basePrice = $goldPrice->max_price;
+        }
+        if ($basePrice === null && Schema::hasColumn('gold_prices', 'min_price') && $goldPrice->min_price !== null) {
+            $basePrice = $goldPrice->min_price;
+        }
+
+        $serviceFee = null;
+        if (Schema::hasColumn('gold_prices', 'service_fee') && $goldPrice->service_fee !== null) {
+            $serviceFee = $goldPrice->service_fee;
+        }
+
+        return [
+            'base_price' => $basePrice,
+            'service_fee' => $serviceFee,
+        ];
+    }
+
+    private function getEmployeeSalesSearchItemsQuery()
+    {
+        return \App\Item::query();
+    }
+
+    private function getTodayGoldPriceList()
+    {
+        $today = \Carbon\Carbon::today()->format('Y-m-d');
+        $hasGoldRateColumn = Schema::hasColumn('gold_prices', 'gold_rate');
+        $hasInventoryStatusColumn = Schema::hasColumn('gold_prices', 'inventory_status_id');
+        $inventoryStatusMap = [];
+
+        $goldPriceQuery = \App\GoldPrice::query();
+        if ($hasInventoryStatusColumn) {
+            $goldPriceQuery = $goldPriceQuery->with('inventoryStatus');
+            $inventoryStatusMap = \App\InventoryStatus::withTrashed()
+                ->pluck('description', 'id')
+                ->toArray();
+        }
+        if (Schema::hasColumn('gold_prices', 'price_date')) {
+            $goldPriceQuery = $goldPriceQuery
+                ->whereDate('price_date', '<=', $today)
+                ->orderBy('price_date', 'desc');
+        } else {
+            $goldPriceQuery = $goldPriceQuery
+                ->whereDate('created_at', '<=', $today)
+                ->orderBy('created_at', 'desc');
+        }
+
+        $goldPrices = $goldPriceQuery
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $result = [];
+        foreach ($goldPrices as $goldPrice) {
+            $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
+            if ($displayBasePrice === null) {
+                continue;
+            }
+
+            $displayGoldRate = $hasGoldRateColumn ? $goldPrice->gold_rate : null;
+            $displayInventoryStatus = null;
+            if ($hasInventoryStatusColumn) {
+                $displayInventoryStatus = optional($goldPrice->inventoryStatus)->description;
+                if ($displayInventoryStatus === null && $goldPrice->inventory_status_id !== null) {
+                    $displayInventoryStatus = $inventoryStatusMap[$goldPrice->inventory_status_id] ?? null;
+                }
+            }
+
+            if ($hasGoldRateColumn && $displayGoldRate === null) {
+                continue;
+            }
+            if ($hasInventoryStatusColumn && $displayInventoryStatus === null) {
+                continue;
+            }
+
+            $result[] = [
+                'base_price' => $displayBasePrice,
+                'service_fee' => $goldPrice->service_fee ?? 0,
+                'gold_rate' => $displayGoldRate,
+                'inventory_status' => $displayInventoryStatus,
+            ];
+        }
+
+        return $result;
+>>>>>>> a9b4da350795a33b6cfcbf92390f83409ff9d0c2
     }
 }

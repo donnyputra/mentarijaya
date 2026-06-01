@@ -27,7 +27,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Datatable -->
     <link rel="stylesheet" href="//cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.4.0/css/responsive.dataTables.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Select2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 
     <livewire:styles>
 </head>
@@ -250,18 +251,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 <span class="badge badge-danger navbar-badge">Under Dev</span>
                             </a>
                         </li>
-                        <!-- <li class="nav-item">
-                            <a href="{{ route('gold-price.index') }}"
-                                class="nav-link @if(strpos(Route::currentRouteName(), 'goldprice.') !== false) active @endif">
-                                <i class="fas fa-dollar-sign nav-icon"></i>
-                                <p>{{ __("Gold Price") }}</p>
-                            </a>
-                        </li> -->
                         <li class="nav-item">
-                            <a href="{{ route('receipts.index') }}"
-                                class="nav-link @if(strpos(Route::currentRouteName(), 'receipts.') !== false) active @endif">
-                                <i class="fas fa-clipboard nav-icon"></i>
-                                <p>{{ __("Receipts") }}</p>
+                            <a href="{{ route('gold-prices.index') }}"
+                                class="nav-link @if(strpos(Route::currentRouteName(), 'gold-prices.') !== false) active @endif">
+                                <i class="fas fa-coins nav-icon"></i>
+                                <p>{{ __("Gold Price History") }}</p>
                             </a>
                         </li>
                         @endif
@@ -460,6 +454,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Datatable Jquery -->
     <script src="//cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
     <script src="//cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
+<<<<<<< HEAD
+=======
+    <!-- Select2 -->
+>>>>>>> a9b4da350795a33b6cfcbf92390f83409ff9d0c2
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     @if ($message = Session::get('success'))
