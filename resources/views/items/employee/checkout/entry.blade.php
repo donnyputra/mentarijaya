@@ -12,8 +12,10 @@
     $oldItemNames = old('item_names', []);
     $oldItemWeights = old('item_weights', []);
     $oldItemGoldRates = old('item_gold_rates', []);
+    $oldRecommendedSalesPrices = old('recommended_sales_prices', []);
     $oldSalesPrices = old('sales_prices', []);
     $oldServiceFees = old('service_fees', []);
+    $oldItemNotes = old('item_notes', []);
 @endphp
 <div class="container">
     <div class="row justify-content-center">
@@ -56,7 +58,7 @@
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ route('checkout.employee.submit') }}">
+                    <form method="POST" action="{{ route($checkoutSubmitRouteName) }}">
                         @csrf
 
                         <div class="card mb-3">
@@ -94,19 +96,26 @@
                                     <table class="table table-striped table-hover">
                                         <thead>
                                             <tr>
+                                                <th class="text-center" style="width: 44px;"></th>
                                                 <th>Item No</th>
                                                 <th>Item Name</th>
                                                 <th class="text-right">Weight</th>
                                                 <th class="text-right">Gold Rate</th>
+                                                <th class="text-right" style="min-width: 170px;">Recommended Sales Price</th>
                                                 <th class="text-right" style="min-width: 160px;">Sales Price</th>
                                                 <th class="text-right" style="min-width: 160px;">Service Fee</th>
-                                                <th class="text-right">Line Total</th>
-                                                <th class="text-center">Action</th>
+                                                <th class="text-right" style="min-width: 170px;">Sales Total</th>
+                                                <th style="min-width: 220px;">Notes</th>
                                             </tr>
                                         </thead>
                                         <tbody id="checkout-items-body">
                                             @forelse($oldItemIds as $index => $itemId)
                                             <tr data-item-id="{{ $itemId }}">
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-item" title="{{ __('Remove') }}" aria-label="{{ __('Remove') }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
                                                 <td>
                                                     {{ $oldItemNos[$index] ?? '-' }}
                                                     <input type="hidden" name="item_ids[]" value="{{ $itemId }}">
@@ -114,31 +123,37 @@
                                                     <input type="hidden" name="item_names[]" value="{{ $oldItemNames[$index] ?? '' }}">
                                                     <input type="hidden" name="item_weights[]" value="{{ $oldItemWeights[$index] ?? '' }}">
                                                     <input type="hidden" name="item_gold_rates[]" value="{{ $oldItemGoldRates[$index] ?? '' }}">
+                                                    <input type="hidden" name="recommended_sales_prices[]" value="{{ $oldRecommendedSalesPrices[$index] ?? '' }}">
                                                 </td>
                                                 <td>{{ $oldItemNames[$index] ?? '-' }}</td>
                                                 <td class="text-right item-weight-display">{{ number_format((float) ($oldItemWeights[$index] ?? 0), 2, ',', '.') }} gr</td>
                                                 <td class="text-right">{{ number_format((float) ($oldItemGoldRates[$index] ?? 0), 2, ',', '.') }}%</td>
+                                                <td class="text-right recommended-sales-price-display">{{ ($oldRecommendedSalesPrices[$index] ?? '') !== '' ? ('Rp ' . number_format((float) $oldRecommendedSalesPrices[$index], 2, ',', '.')) : '-' }}</td>
                                                 <td>
-                                                    <input type="number" step="0.01" min="0" class="form-control text-right sales-price-input" name="sales_prices[]" value="{{ $oldSalesPrices[$index] ?? '' }}" required>
+                                                    <input type="hidden" class="sales-price-input" name="sales_prices[]" value="{{ $oldSalesPrices[$index] ?? ($oldRecommendedSalesPrices[$index] ?? '') }}">
+                                                    <input type="text" inputmode="decimal" class="form-control text-right sales-price-display-input" value="{{ ($oldSalesPrices[$index] ?? ($oldRecommendedSalesPrices[$index] ?? '')) !== '' ? number_format((float) ($oldSalesPrices[$index] ?? ($oldRecommendedSalesPrices[$index] ?? 0)), 2, ',', '.') : '' }}" required>
                                                 </td>
                                                 <td>
-                                                    <input type="number" step="0.01" min="0" class="form-control text-right service-fee-input" name="service_fees[]" value="{{ $oldServiceFees[$index] ?? 0 }}">
+                                                    <input type="hidden" class="service-fee-input" name="service_fees[]" value="{{ $oldServiceFees[$index] ?? 0 }}">
+                                                    <input type="text" inputmode="decimal" class="form-control text-right service-fee-display-input" value="{{ number_format((float) ($oldServiceFees[$index] ?? 0), 2, ',', '.') }}">
                                                 </td>
                                                 <td class="text-right line-total-display">Rp 0,00</td>
-                                                <td class="text-center">
-                                                    <button type="button" class="btn btn-sm btn-danger remove-item">{{ __("Remove") }}</button>
+                                                <td>
+                                                    <textarea class="form-control" name="item_notes[]" rows="2">{{ $oldItemNotes[$index] ?? '' }}</textarea>
                                                 </td>
                                             </tr>
                                             @empty
                                             <tr id="checkout-empty-row">
-                                                <td colspan="8" class="text-center text-muted">{{ __("No items in cart.") }}</td>
+                                                <td colspan="10" class="text-center text-muted">{{ __("No items in cart.") }}</td>
                                             </tr>
                                             @endforelse
                                         </tbody>
                                         <tfoot>
                                             <tr>
+                                                <th></th>
                                                 <th colspan="2">Totals</th>
                                                 <th class="text-right" id="checkout-total-weight">0,00 gr</th>
+                                                <th></th>
                                                 <th></th>
                                                 <th></th>
                                                 <th></th>
@@ -179,9 +194,90 @@
         });
     }
 
+    function formatLocaleNumber(value) {
+        return Number(value || 0).toLocaleString('id-ID', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function parseLocaleNumber(value) {
+        const rawValue = String(value || '').trim();
+        let normalized = rawValue;
+
+        if (rawValue.indexOf(',') !== -1) {
+            normalized = rawValue.replace(/\./g, '').replace(',', '.');
+        } else {
+            const dotCount = (rawValue.match(/\./g) || []).length;
+            normalized = dotCount > 1 ? rawValue.replace(/\./g, '') : rawValue;
+            normalized = normalized.replace(/,/g, '');
+        }
+
+        normalized = normalized.replace(/[^0-9.]/g, '');
+        const parsed = parseFloat(normalized);
+
+        return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function syncSalesPriceField($input) {
+        const $row = $input.closest('tr');
+        const parsedValue = parseLocaleNumber($input.val());
+
+        $row.find('.sales-price-input').val(parsedValue > 0 ? parsedValue.toFixed(2) : '');
+    }
+
+    function syncServiceFeeField($input) {
+        const $row = $input.closest('tr');
+        const parsedValue = parseLocaleNumber($input.val());
+
+        $row.find('.service-fee-input').val(parsedValue > 0 ? parsedValue.toFixed(2) : '0.00');
+    }
+
+    function formatEditableNumber(value) {
+        const numericValue = Number(value || 0);
+
+        if (!Number.isFinite(numericValue) || numericValue <= 0) {
+            return '';
+        }
+
+        if (Math.floor(numericValue) === numericValue) {
+            return String(numericValue);
+        }
+
+        return numericValue.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+    }
+
+    function initializeSalesPriceFields(context) {
+        $(context).find('.sales-price-display-input').each(function() {
+            const $input = $(this);
+            const parsedValue = parseLocaleNumber($input.val());
+
+            if (parsedValue > 0) {
+                $input.val(formatLocaleNumber(parsedValue));
+            }
+
+            syncSalesPriceField($input);
+        });
+    }
+
+    function initializeServiceFeeFields(context) {
+        $(context).find('.service-fee-display-input').each(function() {
+            const $input = $(this);
+            const parsedValue = parseLocaleNumber($input.val());
+
+            $input.val(formatLocaleNumber(parsedValue));
+            syncServiceFeeField($input);
+        });
+    }
+
     function buildCheckoutRow(item) {
         return `
             <tr data-item-id="${item.id}">
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-item" title="{{ __("Remove") }}" aria-label="{{ __("Remove") }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
                 <td>
                     ${item.item_no}
                     <input type="hidden" name="item_ids[]" value="${item.id}">
@@ -189,19 +285,23 @@
                     <input type="hidden" name="item_names[]" value="${item.item_name}">
                     <input type="hidden" name="item_weights[]" value="${item.item_weight}">
                     <input type="hidden" name="item_gold_rates[]" value="${item.item_gold_rate}">
+                    <input type="hidden" name="recommended_sales_prices[]" value="${item.recommended_sales_price !== null ? item.recommended_sales_price : ''}">
                 </td>
                 <td>${item.item_name}</td>
                 <td class="text-right item-weight-display">${formatDecimal(item.item_weight)} gr</td>
                 <td class="text-right">${formatDecimal(item.item_gold_rate)}%</td>
+                <td class="text-right recommended-sales-price-display">${item.recommended_sales_price !== null ? formatIdr(item.recommended_sales_price) : '-'}</td>
                 <td>
-                    <input type="number" step="0.01" min="0" class="form-control text-right sales-price-input" name="sales_prices[]" value="" required>
+                    <input type="hidden" class="sales-price-input" name="sales_prices[]" value="${item.recommended_sales_price !== null ? item.recommended_sales_price : ''}">
+                    <input type="text" inputmode="decimal" class="form-control text-right sales-price-display-input" value="${item.recommended_sales_price !== null ? formatLocaleNumber(item.recommended_sales_price) : ''}" required>
                 </td>
                 <td>
-                    <input type="number" step="0.01" min="0" class="form-control text-right service-fee-input" name="service_fees[]" value="0">
+                    <input type="hidden" class="service-fee-input" name="service_fees[]" value="${item.service_fee !== null ? item.service_fee : 0}">
+                    <input type="text" inputmode="decimal" class="form-control text-right service-fee-display-input" value="${formatLocaleNumber(item.service_fee !== null ? item.service_fee : 0)}">
                 </td>
                 <td class="text-right line-total-display">${formatIdr(0)}</td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-sm btn-danger remove-item">{{ __("Remove") }}</button>
+                <td>
+                    <textarea class="form-control" name="item_notes[]" rows="2"></textarea>
                 </td>
             </tr>
         `;
@@ -228,7 +328,7 @@
 
         if (itemCount === 0) {
             if (!$('#checkout-empty-row').length) {
-                $('#checkout-items-body').append('<tr id="checkout-empty-row"><td colspan="8" class="text-center text-muted">{{ __("No items in cart.") }}</td></tr>');
+                $('#checkout-items-body').append('<tr id="checkout-empty-row"><td colspan="10" class="text-center text-muted">{{ __("No items in cart.") }}</td></tr>');
             }
         } else {
             $('#checkout-empty-row').remove();
@@ -245,6 +345,7 @@
 
         $('#item_picker').select2({
             placeholder: '--Select--',
+            minimumInputLength: 1,
             ajax: {
                 url: '{{ route("item.simplelist") }}',
                 dataType: 'json',
@@ -256,7 +357,12 @@
                     };
                 },
                 processResults: function(data) {
-                    return data;
+                    return {
+                        results: data.results || [],
+                        pagination: data.pagination || {
+                            more: false
+                        }
+                    };
                 }
             }
         });
@@ -282,7 +388,41 @@
             syncCheckoutSummary();
         });
 
-        $(document).on('input', '.sales-price-input, .service-fee-input', function() {
+        $(document).on('focus', '.sales-price-display-input', function() {
+            const hiddenValue = $(this).closest('tr').find('.sales-price-input').val();
+            const parsedValue = parseLocaleNumber(hiddenValue);
+            $(this).val(formatEditableNumber(parsedValue));
+        });
+
+        $(document).on('input', '.sales-price-display-input', function() {
+            syncSalesPriceField($(this));
+            syncCheckoutSummary();
+        });
+
+        $(document).on('blur', '.sales-price-display-input', function() {
+            const parsedValue = parseLocaleNumber($(this).val());
+            $(this).val(parsedValue > 0 ? formatLocaleNumber(parsedValue) : '');
+            syncSalesPriceField($(this));
+        });
+
+        $(document).on('focus', '.service-fee-display-input', function() {
+            const hiddenValue = $(this).closest('tr').find('.service-fee-input').val();
+            const parsedValue = parseLocaleNumber(hiddenValue);
+            $(this).val(formatEditableNumber(parsedValue));
+        });
+
+        $(document).on('input', '.service-fee-display-input', function() {
+            syncServiceFeeField($(this));
+            syncCheckoutSummary();
+        });
+
+        $(document).on('blur', '.service-fee-display-input', function() {
+            const parsedValue = parseLocaleNumber($(this).val());
+            $(this).val(formatLocaleNumber(parsedValue));
+            syncServiceFeeField($(this));
+        });
+
+        $(document).on('input', '.service-fee-input', function() {
             syncCheckoutSummary();
         });
 
@@ -291,6 +431,8 @@
             syncCheckoutSummary();
         });
 
+        initializeSalesPriceFields(document);
+        initializeServiceFeeFields(document);
         syncCheckoutSummary();
     });
 </script>

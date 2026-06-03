@@ -4,130 +4,168 @@
     <meta charset="UTF-8">
     <title>Receipt {{ $receipt->uuid }}</title>
     <style>
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 10px;
-            color: #000;
-            margin: 12px;
+        @page {
+            margin: 0;
+            size: 155mm 105mm;
         }
 
-        .center {
+        body {
+            margin: 0;
+            font-family: DejaVu Sans, sans-serif;
+            color: #000;
+            font-size: 9px;
+        }
+
+        .page {
+            position: relative;
+            width: 155mm;
+            height: 105mm;
+            page-break-after: always;
+            overflow: hidden;
+        }
+
+        .page:last-child {
+            page-break-after: auto;
+        }
+
+        .field {
+            position: absolute;
+            white-space: nowrap;
+        }
+
+        .field-block {
+            position: absolute;
+            line-height: 1.25;
+            word-break: break-word;
+        }
+
+        .date {
+            top: 14mm;
+            left: 96mm;
+            width: 24mm;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+        }
+
+        .customer-name {
+            top: 21mm;
+            left: 92mm;
+            width: 34mm;
+            font-size: 9px;
+        }
+
+        .customer-address {
+            top: 29mm;
+            left: 92mm;
+            width: 34mm;
+            font-size: 9px;
+            min-height: 12mm;
+        }
+
+        .row {
+            position: absolute;
+            left: 0;
+            width: 155mm;
+            height: 9.8mm;
+            font-size: 8px;
+        }
+
+        .item-name {
+            left: 33mm;
+            width: 38mm;
+            top: 1.2mm;
+            min-height: 8mm;
+            line-height: 1.1;
+        }
+
+        .gold-rate {
+            left: 79mm;
+            width: 10mm;
+            top: 2.2mm;
             text-align: center;
         }
 
-        .title {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 4px;
+        .weight {
+            left: 92mm;
+            width: 12mm;
+            top: 2.2mm;
+            text-align: center;
         }
 
-        .muted {
-            color: #222;
+        .service-fee {
+            left: 106mm;
+            width: 14mm;
+            top: 2.2mm;
+            text-align: center;
         }
 
-        .divider {
-            border-top: 1px dashed #000;
-            margin: 8px 0;
+        .notes {
+            left: 121mm;
+            width: 10mm;
+            top: 2.5mm;
+            text-align: center;
+            font-size: 7px;
+            line-height: 1.05;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .total-in-words {
+            left: 14mm;
+            top: 84.5mm;
+            width: 64mm;
+            min-height: 10mm;
+            font-size: 8px;
+            line-height: 1.15;
         }
 
-        td {
-            vertical-align: top;
-            padding: 2px 0;
+        .grand-total {
+            left: 116mm;
+            top: 84.5mm;
+            width: 18mm;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 700;
         }
 
-        .text-right {
-            text-align: right;
-        }
-
-        .totals td {
-            padding-top: 4px;
+        .receipt-qr {
+            position: absolute;
+            left: 137mm;
+            top: 86mm;
+            width: 14mm;
+            height: 14mm;
         }
     </style>
 </head>
 <body>
-    <div class="center">
-        <div class="title">{{ $receipt->store ? $receipt->store->name : config('app.name') }}</div>
-        @if($receipt->store && $receipt->store->code)
-        <div class="muted">{{ $receipt->store->code }}</div>
-        @endif
-        <div>RECEIPT</div>
+@php
+    $detailPages = $receipt->details->chunk(6);
+@endphp
+@foreach($detailPages as $detailPage)
+    <div class="page">
+        <div class="field date">{{ optional($receipt->receipt_date)->format('d - m - y') }}</div>
+        <div class="field-block customer-name">{{ $receipt->customer_name ?: '-' }}</div>
+        <div class="field-block customer-address">{{ $receipt->customer_address ?: '-' }}</div>
+
+        @foreach($detailPage as $detail)
+            @php
+                $itemTop = 48 + ($loop->index * 10.3);
+                $itemName = trim($detail->item_name . ' - ' . ($detail->item_no ?: optional($detail->item)->item_no ?: '-'));
+                $serviceFee = $showServiceFee && $detail->service_fee !== null
+                    ? number_format((float) $detail->service_fee, 0, ',', '.')
+                    : '';
+            @endphp
+            <div class="row" style="top: {{ $itemTop }}mm;">
+                <div class="field-block item-name">{{ $itemName }}</div>
+                <div class="field gold-rate">{{ number_format((float) $detail->item_gold_rate, 2, ',', '.') }}%</div>
+                <div class="field weight">{{ number_format((float) $detail->item_weight, 3, ',', '.') }}</div>
+                <div class="field service-fee">{{ $serviceFee }}</div>
+                <div class="field-block notes">{{ $detail->notes ?: '' }}</div>
+            </div>
+        @endforeach
+
+        <div class="field-block total-in-words">{{ $receiptTotalInWords }}</div>
+        <div class="field grand-total">{{ number_format((float) $receipt->receipt_total, 0, ',', '.') }}</div>
+        <img src="{{ $receiptQrUrl }}" alt="Receipt QR" class="receipt-qr">
     </div>
-
-    <div class="divider"></div>
-
-    <table>
-        <tr>
-            <td>ID</td>
-            <td class="text-right">{{ $receipt->uuid }}</td>
-        </tr>
-        <tr>
-            <td>Date</td>
-            <td class="text-right">{{ optional($receipt->receipt_date)->format('d/m/Y H:i') }}</td>
-        </tr>
-        <tr>
-            <td>Customer</td>
-            <td class="text-right">{{ $receipt->customer_name ?: '-' }}</td>
-        </tr>
-        <tr>
-            <td>Sales</td>
-            <td class="text-right">{{ optional($receipt->salesUser)->name ?: '-' }}</td>
-        </tr>
-    </table>
-
-    <div class="divider"></div>
-
-    @foreach($receipt->details as $detail)
-    <div>
-        <strong>{{ $detail->item_name }}</strong><br>
-        {{ $detail->item_no ?: optional($detail->item)->item_no ?: '-' }}<br>
-        {{ number_format($detail->item_weight, 2, ',', '.') }} gr / {{ number_format($detail->item_gold_rate, 2, ',', '.') }}%
-    </div>
-    <table>
-        <tr>
-            <td>Sales Price</td>
-            <td class="text-right">{{ $detail->sales_price !== null ? ('Rp ' . number_format($detail->sales_price, 2, ',', '.')) : '-' }}</td>
-        </tr>
-        @if($showServiceFee)
-        <tr>
-            <td>Service Fee</td>
-            <td class="text-right">{{ $detail->service_fee !== null ? ('Rp ' . number_format($detail->service_fee, 2, ',', '.')) : '-' }}</td>
-        </tr>
-        @endif
-        <tr>
-            <td><strong>Subtotal</strong></td>
-            <td class="text-right"><strong>{{ $detail->line_total !== null ? ('Rp ' . number_format($detail->line_total, 2, ',', '.')) : '-' }}</strong></td>
-        </tr>
-    </table>
-    @if(!$loop->last)
-    <div class="divider"></div>
-    @endif
-    @endforeach
-
-    <div class="divider"></div>
-
-    <table class="totals">
-        <tr>
-            <td><strong>Total</strong></td>
-            <td class="text-right"><strong>Rp {{ number_format($receipt->receipt_total, 2, ',', '.') }}</strong></td>
-        </tr>
-    </table>
-
-    @if($receipt->customer_address)
-    <div class="divider"></div>
-    <div>
-        <strong>Address</strong><br>
-        {{ $receipt->customer_address }}
-    </div>
-    @endif
-
-    <div class="divider"></div>
-    <div class="center">
-        Thank you
-    </div>
+@endforeach
 </body>
 </html>

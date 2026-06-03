@@ -1,6 +1,43 @@
 @extends('layouts.admin')
 
 @section('content')
+<style>
+    .receipt-detail-table th,
+    .receipt-detail-table td {
+        vertical-align: top;
+    }
+
+    .receipt-detail-table .col-item-no {
+        min-width: 80px;
+    }
+
+    .receipt-detail-table .col-item-name {
+        min-width: 120px;
+    }
+
+    .receipt-detail-table .col-weight,
+    .receipt-detail-table .col-gold-rate {
+        min-width: 90px;
+    }
+
+    .receipt-detail-table .col-average-price,
+    .receipt-detail-table .col-recommended,
+    .receipt-detail-table .col-sales-price,
+    .receipt-detail-table .col-notes,
+    .receipt-detail-table .col-service-fee,
+    .receipt-detail-table .col-line-total {
+        min-width: 150px;
+    }
+
+    .receipt-detail-table .col-notes {
+        min-width: 220px;
+        white-space: normal;
+    }
+
+    .receipt-detail-table .money-cell {
+        white-space: nowrap;
+    }
+</style>
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
@@ -41,39 +78,73 @@
                                 </div>
                             </div>
 
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="border rounded p-3">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-3 text-center">
+                                                <img src="{{ $receiptQrUrl }}" alt="Receipt QR Code" class="img-fluid" style="max-width: 180px;">
+                                            </div>
+                                            <div class="col-md-9">
+                                                <div><strong>Receipt Check URL:</strong></div>
+                                                <div><a href="{{ $receiptCheckUrl }}" target="_blank">{{ $receiptCheckUrl }}</a></div>
+                                                <small class="text-muted">Scan the QR code to open the public receipt verification page.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="table-responsive">
-                                <table class="table table-striped table-hover">
+                                <table class="table table-striped table-hover receipt-detail-table">
                                     <thead>
                                         <tr>
-                                            <th>Item No</th>
-                                            <th>Item Name</th>
-                                            <th class="text-right">Weight</th>
-                                            <th class="text-right">Gold Rate</th>
-                                            <th class="text-right">Sales Price</th>
+                                            <th class="col-item-no">Item No</th>
+                                            <th class="col-item-name">Name</th>
+                                            <th class="text-right col-weight">Weight</th>
+                                            <th class="text-right col-gold-rate">Rate</th>
+                                            <th class="text-right col-recommended">Reco</th>
+                                            <th class="text-right col-average-price">AVG Sales</th>
+                                            <th class="text-right col-sales-price">Sales Price</th>
+                                            <th class="col-notes">Notes</th>
                                             @if($showServiceFee)
-                                            <th class="text-right">Service Fee</th>
+                                            <th class="text-right col-service-fee">Service Fee</th>
                                             @endif
-                                            <th class="text-right">Line Total</th>
+                                            <th class="text-right col-line-total">Line Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($receipt->details as $detail)
+                                        @php
+                                            $recommendedSalesPrice = null;
+                                            if ($detail->item && $detail->item->base_gold_price !== null && $detail->item_weight !== null) {
+                                                $recommendedSalesPrice = (float) $detail->item->base_gold_price * (float) $detail->item_weight;
+                                            }
+
+                                            $averageSalesPrice = null;
+                                            if ($detail->sales_price !== null && (float) $detail->item_weight > 0) {
+                                                $averageSalesPrice = (float) $detail->sales_price / (float) $detail->item_weight;
+                                            }
+                                        @endphp
                                         <tr>
                                             <td>{{ $detail->item_no ?: optional($detail->item)->item_no ?: '-' }}</td>
                                             <td>{{ $detail->item_name }}</td>
                                             <td class="text-right">{{ number_format($detail->item_weight, 2, ',', '.') }} gr</td>
                                             <td class="text-right">{{ number_format($detail->item_gold_rate, 2, ',', '.') }}%</td>
-                                            <td class="text-right">{{ $detail->sales_price !== null ? ('Rp ' . number_format($detail->sales_price, 2, ',', '.')) : '-' }}</td>
+                                            <td class="text-right money-cell">{{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 2, ',', '.')) : '-' }}</td>
+                                            <td class="text-right money-cell">{{ $averageSalesPrice !== null ? ('Rp ' . number_format($averageSalesPrice, 2, ',', '.') . ' / gr') : '-' }}</td>
+                                            <td class="text-right money-cell">{{ $detail->sales_price !== null ? ('Rp ' . number_format($detail->sales_price, 2, ',', '.')) : '-' }}</td>
+                                            <td>{{ $detail->notes ?: '-' }}</td>
                                             @if($showServiceFee)
-                                            <td class="text-right">{{ $detail->service_fee !== null ? ('Rp ' . number_format($detail->service_fee, 2, ',', '.')) : '-' }}</td>
+                                            <td class="text-right money-cell">{{ $detail->service_fee !== null ? ('Rp ' . number_format($detail->service_fee, 2, ',', '.')) : '-' }}</td>
                                             @endif
-                                            <td class="text-right">{{ $detail->line_total !== null ? ('Rp ' . number_format($detail->line_total, 2, ',', '.')) : '-' }}</td>
+                                            <td class="text-right money-cell">{{ $detail->line_total !== null ? ('Rp ' . number_format($detail->line_total, 2, ',', '.')) : '-' }}</td>
                                         </tr>
                                         @endforeach
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <th colspan="{{ $showServiceFee ? 6 : 5 }}" class="text-right">Grand Total</th>
+                                            <th colspan="{{ $showServiceFee ? 9 : 8 }}" class="text-right">Grand Total</th>
                                             <th class="text-right">Rp {{ number_format($receipt->receipt_total, 2, ',', '.') }}</th>
                                         </tr>
                                     </tfoot>
