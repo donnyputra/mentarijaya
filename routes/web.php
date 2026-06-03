@@ -100,6 +100,7 @@ Route::get('employee/items/index', 'ItemController@employeeItemIndex')->name('it
 Route::get('employee/items/create', 'ItemController@employeeItemCreate')->name('items.employee.create');
 Route::post('employee/items/store', 'ItemController@employeeItemStore')->name('items.employee.store');
 Route::post('employee/items/find', 'ItemController@employeeItemFind')->name('items.employee.find');
+Route::post('employee/sales/find', 'ItemController@employeeItemFind')->name('sales.employee.find');
 Route::get('employee/sales/entry', 'ItemController@employeeSalesEntry')->name('sales.employee.entry');
 Route::get('employee/sales/search-items', 'ItemController@employeeSearchAvailableItems')->name('sales.employee.search-items');
 Route::get('employee/checkout/items', 'ItemController@getItemsPagination')->name('item.simplelist');

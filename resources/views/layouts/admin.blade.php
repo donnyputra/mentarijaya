@@ -352,6 +352,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 <p>{{ __('Checkout') }}</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('receipts.index') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'receipts.') !== false) active @endif">
+                                <i class="nav-icon fas fa-receipt"></i>
+                                <p>{{ __('Receipts') }}</p>
+                            </a>
+                        </li>
                         @endif
 
                         @if(Auth::user()->authRole()->name == 'admin')
