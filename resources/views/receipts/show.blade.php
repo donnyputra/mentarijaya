@@ -145,6 +145,12 @@
                                 <a class="btn btn-secondary" href="{{ route('receipts.index') }}" role="button">{{ __("Back") }}</a>
                                 @if(Auth::user()->authRole()->name === 'admin')
                                 <a class="btn btn-primary" href="{{ route('receipts.edit', $receipt->id) }}" role="button">{{ __("Edit Transaction") }}</a>
+                                @if(!$receiptApproved)
+                                <form method="POST" action="{{ route('receipts.approve', $receipt->id) }}" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success">{{ __("Approve Receipt") }}</button>
+                                </form>
+                                @endif
                                 @endif
                                 @if($receiptApproved)
                                 <a class="btn btn-dark" href="{{ route('receipts.pdf', ['receipt' => $receipt->id]) }}" target="_blank" role="button">{{ __("Print Receipt") }}</a>

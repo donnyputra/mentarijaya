@@ -128,6 +128,7 @@ Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.up
 Route::get('/pdf/items', 'PdfController@itemsPdf')->name('pdf.items');
 Route::resource('receipts', 'ReceiptsController')->only('index', 'show', 'edit');
 Route::post('receipts/{receipt}/update', 'ReceiptsController@update')->name('receipts.update');
+Route::post('receipts/{receipt}/approve', 'ReceiptsController@approve')->name('receipts.approve');
 Route::get('receipts/{receipt}/pdf', 'ReceiptsController@pdf')->name('receipts.pdf');
 
 Route::resource('photos', 'PhotosController')->only('store');

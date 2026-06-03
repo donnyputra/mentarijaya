@@ -201,6 +201,40 @@ class ReceiptsController extends Controller
         );
     }
 
+    public function approve($id)
+    {
+        $this->ensureAdminAccess();
+
+        try {
+            $receipt = DB::transaction(function () use ($id) {
+                $receipt = Receipts::with('details.item')->lockForUpdate()->findOrFail($id);
+                $completedSalesStatus = \App\SalesStatus::where('code', 'completed')->first();
+                $soldItemStatus = \App\ItemStatus::where('code', 'sold')->firstOrFail();
+                $approvedAt = \Carbon\Carbon::now()->toDateTimeString();
+
+                foreach ($receipt->details as $detail) {
+                    if (!$detail->item) {
+                        continue;
+                    }
+
+                    $item = \App\Item::where('id', $detail->item->id)->lockForUpdate()->firstOrFail();
+                    $item->item_status_id = $soldItemStatus->id;
+                    if ($completedSalesStatus) {
+                        $item->sales_status_id = $completedSalesStatus->id;
+                    }
+                    $item->sales_approved_at = $approvedAt;
+                    $item->save();
+                }
+
+                return $receipt;
+            });
+        } catch (\Throwable $exception) {
+            return redirect()->route('receipts.show', $id)->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('receipts.show', $receipt->id)->with('success', __('Receipt has been approved.'));
+    }
+
     /**
      * Remove the specified resource from storage.
      *
