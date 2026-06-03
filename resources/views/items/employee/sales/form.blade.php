@@ -31,7 +31,10 @@
                                     <div class="card-title">{{ __("Sales Information") }}</div>
                                 </div>
                                 <div class="card-body">
-                                    <form method="POST" action="{{ route($salesFormSaveRouteName) }}">
+									<form method="POST" action="{{ route($salesFormSaveRouteName) }}">
+                                        @php
+                                            $existingReceipt = optional($receiptDetail)->receipt;
+                                        @endphp
                                         @csrf
                                         <div class="form-group row" hidden>
                                             <label class="col-3 col-form-label">Item ID</label>
@@ -70,7 +73,7 @@
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <label class="col-3 col-form-label">Recommended Sales Price</label>
+                                            <label class="col-3 col-form-label">Reco Sales Price</label>
                                             <div class="col-9">
                                                 {{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 2, ',', '.')) : '-' }}
                                                 <small class="form-text text-muted">Recommendation only. You can still change the sales price.</small>
@@ -120,25 +123,25 @@
                                         <div class="form-group row">
                                             <label for="item_note" class="col-3 col-form-label">Item Note</label>
                                             <div class="col-9">
-                                                <textarea class="form-control" id="item_note" name="item_note" rows="2">{{ old('item_note') }}</textarea>
+                                                <textarea class="form-control" id="item_note" name="item_note" rows="2">{{ old('item_note', optional($receiptDetail)->notes) }}</textarea>
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label for="customer_name" class="col-3 col-form-label">Customer Name</label>
                                             <div class="col-9">
-                                                <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ old('customer_name') }}" />
+                                                <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ old('customer_name', optional($existingReceipt)->customer_name) }}" />
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label for="customer_address" class="col-3 col-form-label">Customer Address</label>
                                             <div class="col-9">
-                                                <textarea class="form-control" id="customer_address" name="customer_address" rows="2">{{ old('customer_address') }}</textarea>
+                                                <textarea class="form-control" id="customer_address" name="customer_address" rows="2">{{ old('customer_address', optional($existingReceipt)->customer_address) }}</textarea>
                                             </div>
                                         </div>
                 
                                         <div class="float-right">
                                             <a class="btn btn-secondary" href="{{ url()->previous() }}" role="button">{{ __("Back") }}</a>
-                                            <button type="submit" class="btn btn-primary">{{ __("Save & Print Receipt") }}</button>
+                                            <button type="submit" class="btn btn-primary">{{ __("Submit For Approval") }}</button>
                                         </div>
                                     </form>
                                 </div>

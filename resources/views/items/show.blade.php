@@ -231,8 +231,17 @@
 											<div class="float-right">
 												<a class="btn btn-secondary" href="{{ route('items.index') }}" role="button">{{ __("Back") }}</a>
 												@if($receiptDetail && $receiptDetail->receipt)
+												@php
+													$receiptApproved = $receiptDetail->receipt->isApproved();
+												@endphp
+												@if($receiptApproved || Auth::user()->authRole()->name == 'admin')
 												<a class="btn btn-info" href="{{ route('receipts.show', $receiptDetail->receipt->id) }}" role="button">{{ __("Receipt") }}</a>
+												@endif
+												@if($receiptApproved)
 												<a class="btn btn-dark" href="{{ route('receipts.pdf', $receiptDetail->receipt->id) }}" target="_blank" role="button">{{ __("Print Receipt") }}</a>
+												@elseif(Auth::user()->authRole()->name == 'admin')
+												<span class="btn btn-warning disabled" role="button">{{ __("Waiting Approval") }}</span>
+												@endif
 												@endif
 												<a class="btn btn-primary" href="{{ route('items.edit', $item->id) }}" role="button">{{ __("Edit") }}</a>
 											</div>

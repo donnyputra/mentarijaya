@@ -74,26 +74,16 @@
                                     <div><strong>Customer Name:</strong> {{ $receipt->customer_name ?: '-' }}</div>
                                     <div><strong>Customer Address:</strong> {{ $receipt->customer_address ?: '-' }}</div>
                                     <div><strong>Total:</strong> Rp {{ number_format($receipt->receipt_total, 2, ',', '.') }}</div>
+                                    <div><strong>Status:</strong> {{ $receiptApproved ? 'Approved' : 'Submitted - waiting for admin approval' }}</div>
                                     <div><strong>Service Fee:</strong> {{ $showServiceFee ? 'Shown automatically' : 'Hidden automatically' }}</div>
                                 </div>
                             </div>
 
-                            <div class="row mb-4">
-                                <div class="col-md-12">
-                                    <div class="border rounded p-3">
-                                        <div class="row align-items-center">
-                                            <div class="col-md-3 text-center">
-                                                <img src="{{ $receiptQrUrl }}" alt="Receipt QR Code" class="img-fluid" style="max-width: 180px;">
-                                            </div>
-                                            <div class="col-md-9">
-                                                <div><strong>Receipt Check URL:</strong></div>
-                                                <div><a href="{{ $receiptCheckUrl }}" target="_blank">{{ $receiptCheckUrl }}</a></div>
-                                                <small class="text-muted">Scan the QR code to open this receipt detail page.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            @if(!$receiptApproved)
+                            <div class="alert alert-warning">
+                                {{ __("This transaction is still submitted. Receipt printing stays locked until admin approval.") }}
                             </div>
+                            @endif
 
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover receipt-detail-table">
@@ -153,7 +143,12 @@
 
                             <div class="float-right">
                                 <a class="btn btn-secondary" href="{{ route('receipts.index') }}" role="button">{{ __("Back") }}</a>
+                                @if(Auth::user()->authRole()->name === 'admin')
+                                <a class="btn btn-primary" href="{{ route('receipts.edit', $receipt->id) }}" role="button">{{ __("Edit Transaction") }}</a>
+                                @endif
+                                @if($receiptApproved)
                                 <a class="btn btn-dark" href="{{ route('receipts.pdf', ['receipt' => $receipt->id]) }}" target="_blank" role="button">{{ __("Print Receipt") }}</a>
+                                @endif
                             </div>
                         </div>
                     </div>

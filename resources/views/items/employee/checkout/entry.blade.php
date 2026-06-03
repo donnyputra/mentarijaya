@@ -39,25 +39,6 @@
 
             <div class="content">
                 <div class="container-fluid">
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <div class="card-title">{{ __("Find Item") }}</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group row mb-0">
-                                <label for="item_picker" class="col-3 col-form-label">Item <span style="color: red">*</span></label>
-                                <div class="col-6">
-                                    <select id="item_picker" class="form-control">
-                                        <option value="">{{ __("--Select--") }}</option>
-                                    </select>
-                                </div>
-                                <div class="col-3">
-                                    <button type="button" id="add-item" class="btn btn-primary">{{ __("Add Item") }}</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <form method="POST" action="{{ route($checkoutSubmitRouteName) }}">
                         @csrf
 
@@ -82,6 +63,25 @@
                                     <label for="customer_address" class="col-3 col-form-label">Customer Address</label>
                                     <div class="col-9">
                                         <textarea class="form-control" id="customer_address" name="customer_address" rows="2">{{ old('customer_address') }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <div class="card-title">{{ __("Find Item") }}</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group row mb-0">
+                                    <label for="item_picker" class="col-3 col-form-label">Item <span style="color: red">*</span></label>
+                                    <div class="col-6">
+                                        <select id="item_picker" class="form-control">
+                                            <option value="">{{ __("--Select--") }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-3">
+                                        <button type="button" id="add-item" class="btn btn-primary">{{ __("Add Item") }}</button>
                                     </div>
                                 </div>
                             </div>
@@ -165,7 +165,7 @@
                                 </div>
 
                                 <div class="float-right">
-                                    <button type="submit" id="checkout-submit" class="btn btn-primary">{{ __("Checkout & Print Receipt") }}</button>
+                                    <button type="submit" id="checkout-submit" class="btn btn-primary">{{ __("Submit For Approval") }}</button>
                                 </div>
                             </div>
                         </div>

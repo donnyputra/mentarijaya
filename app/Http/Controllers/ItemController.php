@@ -212,6 +212,7 @@ class ItemController extends Controller
                             $item->sales_status_id = $completedSalesStatus->id;
                             $item->sales_approved_at = $approvedAt;
                             $item->save();
+                            $this->syncReceiptSnapshotForItem($item);
                         }
                     }
                 break;
@@ -233,6 +234,7 @@ class ItemController extends Controller
                             $item->item_status_id = $instockItemStatus->id;
                             $item->sales_approved_at = null;
                             $item->save();
+                            $this->removeReceiptSnapshotForItem($item);
                         }
                     }
                 default:
@@ -398,6 +400,7 @@ class ItemController extends Controller
     {
         try {
             $item = Item::findOrFail($id);
+            $receiptDetail = $this->findReceiptDetailForItem($id);
         } catch (\Exception $ex) {
             return redirect()->route('items.index')->withError($ex->getMessage());
         }
@@ -433,6 +436,7 @@ class ItemController extends Controller
             'users' => $users,
             'item' => $item,
             'photos' => $photos,
+            'receiptDetail' => $receiptDetail,
         ]);
     }
 
@@ -461,11 +465,18 @@ class ItemController extends Controller
                 'sales_by' => 'nullable',
                 'sales_status_id' => 'nullable',
                 'created_by' => 'required',
+                'service_fee' => 'nullable|numeric|min:0',
+                'item_note' => 'nullable|string|max:1000',
+                'customer_name' => 'nullable|string|max:255',
+                'customer_address' => 'nullable|string|max:255',
             ]);
 
             $itemStatusSold = \App\ItemStatus::where('code', '=', 'sold')->first();
+            $submittedSalesStatus = \App\SalesStatus::where('code', '=', 'submitted')->first();
+            $completedSalesStatus = \App\SalesStatus::where('code', '=', 'completed')->first();
 
             $item = Item::findOrFail($id);
+            $isAdmin = Auth::user()->authRole()->name == 'admin';
             $item->item_no = $request->get("item_no");
             $item->item_name = $request->get("item_name");
             $item->item_weight = $request->get("item_weight");
@@ -474,13 +485,36 @@ class ItemController extends Controller
             $item->category_id = $request->get("category_id");
             $item->allocation_id = $request->get("allocation_id");
             $item->store_id = $request->get("store_id");
-            $item->sales_price = ($request->get('sales_price') != null) ? $request->get("sales_price") : null;
-            $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
-            $item->sales_by = $request->get("sales_by");
-            $item->sales_status_id = $request->get("sales_status_id");
-            $item->item_status_id = ($request->get("sales_status_id") != NULL) ? $itemStatusSold->id : $request->get("item_status_id");
+            if ($isAdmin) {
+                $item->sales_price = ($request->get('sales_price') != null) ? $request->get("sales_price") : null;
+                if (Schema::hasColumn('item', 'service_fee')) {
+                    $item->service_fee = ($request->get('service_fee') != null) ? $request->get("service_fee") : null;
+                }
+                $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
+                $item->sales_by = $request->get("sales_by");
+                $item->sales_status_id = $request->get("sales_status_id");
+                if ($item->sales_status_id === null || ($submittedSalesStatus && (int) $item->sales_status_id === (int) $submittedSalesStatus->id)) {
+                    $item->sales_approved_at = null;
+                }
+                if ($completedSalesStatus && (int) $item->sales_status_id === (int) $completedSalesStatus->id) {
+                    $item->sales_approved_at = \Carbon\Carbon::now()->toDateTimeString();
+                }
+                $item->item_status_id = ($request->get("sales_status_id") != NULL) ? $itemStatusSold->id : $request->get("item_status_id");
+            } else {
+                $item->item_status_id = ($item->sales_status_id != NULL) ? $itemStatusSold->id : $request->get("item_status_id");
+            }
             $item->created_by = $request->get('created_by');
             $item->save();
+
+            if ($item->sales_status_id !== null && $item->sales_at !== null) {
+                $this->syncReceiptSnapshotForItem($item, [
+                    'notes' => $request->get('item_note'),
+                    'customer_name' => $request->get('customer_name'),
+                    'customer_address' => $request->get('customer_address'),
+                ]);
+            } else {
+                $this->removeReceiptSnapshotForItem($item);
+            }
 
         } catch (\Exception $ex) {
             return redirect('/items')->with('error', $ex->getMessage());
@@ -994,6 +1028,7 @@ class ItemController extends Controller
             'todayBaseGoldPrice' => $todayBaseGoldPrice,
             'todayServiceFee' => $todayServiceFee,
             'recommendedSalesPrice' => $recommendedSalesPrice,
+            'receiptDetail' => $item ? $this->findReceiptDetailForItem($item->id) : null,
             'salesEntryRouteName' => $this->getSalesEntryRouteName(),
             'salesFormSaveRouteName' => $this->getSalesFormSaveRouteName(),
         ]);
@@ -1161,7 +1196,8 @@ class ItemController extends Controller
         $receipt = $transactionResult['receipt'];
         $this->notifyAdminsAboutSubmittedTransaction($receipt, $transactionResult['items']);
 
-        return redirect()->route('receipts.show', $receipt->id);
+        return redirect()->route($this->getCheckoutEntryRouteName())
+            ->with('success', __('Transaction submitted and waiting for admin approval.'));
     }
 
     public function employeeSalesFormSave(Request $request) {
@@ -1225,7 +1261,8 @@ class ItemController extends Controller
         }
 
         if ($receipt) {
-            return redirect()->route('receipts.show', $receipt->id);
+            return redirect()->route($this->getSalesEntryRouteName())
+                ->with('success', __('Transaction submitted and waiting for admin approval.'));
         }
 
         return redirect('/items')->with('success', __('Item has been updated.'));
@@ -1364,6 +1401,118 @@ class ItemController extends Controller
         return $receipt;
     }
 
+    private function syncReceiptSnapshotForItem(Item $item, array $attributes = [])
+    {
+        $receiptDetail = $this->findReceiptDetailForItem($item->id);
+        $receipt = $receiptDetail ? $receiptDetail->receipt : new Receipts();
+        $serviceFee = (float) ($item->service_fee ?: 0);
+        $salesPrice = (float) ($item->sales_price ?: 0);
+        $lineTotal = $salesPrice + $serviceFee;
+
+        $receipt->receipt_date = $item->sales_at;
+        if (Schema::hasColumn('receipts', 'store_id')) {
+            $receipt->store_id = $item->store_id;
+        }
+
+        if (Schema::hasColumn('receipts', 'sales_by')) {
+            $receipt->sales_by = $item->sales_by;
+        }
+
+        if (array_key_exists('customer_name', $attributes)) {
+            $receipt->customer_name = $attributes['customer_name'];
+        }
+
+        if (array_key_exists('customer_address', $attributes)) {
+            $receipt->customer_address = $attributes['customer_address'];
+        }
+
+        $receipt->receipt_total = $lineTotal;
+        $receipt->receipt_total_string = 'Rp ' . number_format($lineTotal, 2, ',', '.');
+        $receipt->save();
+
+        if (!$receiptDetail) {
+            $receiptDetail = new ReceiptDetails();
+        }
+
+        $receiptDetail->receipt_date = $item->sales_at;
+        $receiptDetail->receipt_id = $receipt->id;
+        $receiptDetail->item_name = $item->item_name;
+        $receiptDetail->item_gold_rate = $item->item_gold_rate;
+        $receiptDetail->item_weight = $item->item_weight;
+        $receiptDetail->service_fee = $serviceFee;
+        if (Schema::hasColumn('receipt_details', 'notes') && array_key_exists('notes', $attributes)) {
+            $itemNote = trim((string) $attributes['notes']);
+            $receiptDetail->notes = $itemNote !== '' ? $itemNote : null;
+        }
+
+        if (Schema::hasColumn('receipt_details', 'item_id')) {
+            $receiptDetail->item_id = $item->id;
+        }
+
+        if (Schema::hasColumn('receipt_details', 'item_no')) {
+            $receiptDetail->item_no = $item->item_no;
+        }
+
+        if (Schema::hasColumn('receipt_details', 'sales_price')) {
+            $receiptDetail->sales_price = $salesPrice;
+        }
+
+        if (Schema::hasColumn('receipt_details', 'line_total')) {
+            $receiptDetail->line_total = $lineTotal;
+        }
+
+        $receiptDetail->save();
+
+        $this->syncReceiptHeaderFromDetails($receipt);
+
+        return $receipt;
+    }
+
+    private function removeReceiptSnapshotForItem(Item $item)
+    {
+        $receiptDetail = $this->findReceiptDetailForItem($item->id);
+        if (!$receiptDetail) {
+            return;
+        }
+
+        $receipt = $receiptDetail->receipt;
+        $receiptDetail->delete();
+
+        if (!$receipt) {
+            return;
+        }
+
+        if (!$receipt->details()->exists()) {
+            $receipt->delete();
+            return;
+        }
+
+        $this->syncReceiptHeaderFromDetails($receipt);
+    }
+
+    private function syncReceiptHeaderFromDetails(Receipts $receipt)
+    {
+        $details = $receipt->details()->orderBy('id')->get();
+        if ($details->isEmpty()) {
+            $receipt->delete();
+            return null;
+        }
+
+        $receipt->receipt_total = (float) $details->sum(function ($detail) {
+            return (float) ($detail->line_total ?? 0);
+        });
+        $receipt->receipt_total_string = 'Rp ' . number_format((float) $receipt->receipt_total, 2, ',', '.');
+
+        $firstDetail = $details->first();
+        if ($firstDetail && $firstDetail->receipt_date) {
+            $receipt->receipt_date = $firstDetail->receipt_date;
+        }
+
+        $receipt->save();
+
+        return $receipt;
+    }
+
     private function assertReceiptSnapshotSchema()
     {
         $missingColumns = [];
@@ -1418,13 +1567,21 @@ class ItemController extends Controller
 
         $admins = $this->getAdminUsers();
         if ($admins->isEmpty()) {
+            \Log::warning('Unable to send admin transaction notification: no admin users found.');
             return;
         }
 
         $payload = $this->buildAdminTransactionNotificationPayload($receipt, $items);
+        $notificationsTableReady = Schema::hasTable('notifications');
+
+        if (!$notificationsTableReady) {
+            \Log::warning('Unable to persist admin transaction notification: notifications table is missing.', [
+                'receipt_id' => $receipt->id,
+            ]);
+        }
 
         try {
-            if (Schema::hasTable('notifications')) {
+            if ($notificationsTableReady) {
                 Notification::send($admins, new EmployeeTransactionSubmittedNotification($payload));
             }
 
@@ -1433,6 +1590,9 @@ class ItemController extends Controller
             \Log::warning('Unable to send admin transaction notification.', [
                 'receipt_id' => $receipt->id,
                 'message' => $exception->getMessage(),
+                'broadcast_driver' => config('broadcasting.default'),
+                'pusher_key_configured' => !empty(config('broadcasting.connections.pusher.key')),
+                'notifications_table_ready' => $notificationsTableReady,
             ]);
         }
     }

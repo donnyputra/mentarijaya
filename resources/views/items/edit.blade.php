@@ -38,6 +38,11 @@
 										</form>
 										
 										<form method="POST" action="{{ route('items.update', $item->id) }}">
+											@php
+												$itemNote = old('item_note', optional($receiptDetail)->notes);
+												$receiptCustomerName = old('customer_name', optional(optional($receiptDetail)->receipt)->customer_name);
+												$receiptCustomerAddress = old('customer_address', optional(optional($receiptDetail)->receipt)->customer_address);
+											@endphp
 
 											<div class="row">
 												<div class="col-12 mb-3">
@@ -192,6 +197,17 @@
 																</div>
 															</div>
 															<div class="form-group row">
+																<label for="service_fee" class="col-3 col-form-label">Service Fee</label>
+																<div class="col-9">
+																	<div class="input-group">
+																		<div class="input-group-prepend">
+																				<div class="input-group-text">Rp</div>
+																		</div>
+																		<input type="number" step="0.01" min="0" class="form-control" name="service_fee" value="{{ old('service_fee', $item->service_fee) }}" />
+																	</div>
+																</div>
+															</div>
+															<div class="form-group row">
 																<label for="sales_at" class="col-3 col-form-label">Sales At</label>
 																<div class="col-9">
 																	<div class="input-group">
@@ -208,6 +224,24 @@
 																			<option value="{{ $user->id }}" {{ $user->id == $item->sales_by ? 'selected' : '' }}>{{ $user->name }}</option>
 																		@endforeach
 																	</select>
+																</div>
+															</div>
+															<div class="form-group row">
+																<label for="item_note" class="col-3 col-form-label">Item Note</label>
+																<div class="col-9">
+																	<textarea class="form-control" id="item_note" name="item_note" rows="2">{{ $itemNote }}</textarea>
+																</div>
+															</div>
+															<div class="form-group row mb-0">
+																<label for="customer_name" class="col-3 col-form-label">Customer Name</label>
+																<div class="col-9">
+																	<input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ $receiptCustomerName }}" />
+																</div>
+															</div>
+															<div class="form-group row mb-0">
+																<label for="customer_address" class="col-3 col-form-label">Customer Address</label>
+																<div class="col-9">
+																	<textarea class="form-control" id="customer_address" name="customer_address" rows="2">{{ $receiptCustomerAddress }}</textarea>
 																</div>
 															</div>
 														</div>

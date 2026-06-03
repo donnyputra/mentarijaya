@@ -126,7 +126,8 @@ Route::get('/dashboard/summary', 'DashboardController@summaryDailyDatatable')->n
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');
 
 Route::get('/pdf/items', 'PdfController@itemsPdf')->name('pdf.items');
-Route::resource('receipts', 'ReceiptsController')->only('index', 'show');
+Route::resource('receipts', 'ReceiptsController')->only('index', 'show', 'edit');
+Route::post('receipts/{receipt}/update', 'ReceiptsController@update')->name('receipts.update');
 Route::get('receipts/{receipt}/pdf', 'ReceiptsController@pdf')->name('receipts.pdf');
 
 Route::resource('photos', 'PhotosController')->only('store');

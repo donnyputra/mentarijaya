@@ -25,20 +25,34 @@
                         @include('includes._sort-icon', ['field' => 'receipt_date'])
                     </a></th>
                     <th class="text-center">Name</th>
+                    <th class="text-center">Status</th>
                     <th class="text-right">Total</th>
                     <th class="text-center">Action</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($receipts as $receipt)
+                    @php
+                        $receiptApproved = $receipt->isApproved();
+                    @endphp
                     <tr>
                         <td class="text-center">{{ $receipt->uuid }}</td>
                         <td class="text-center">{{ optional($receipt->receipt_date)->format('d-M-Y H:i') }}</td>
                         <td class="text-center">{{ $receipt->customer_name ?: '-' }}</td>
+                        <td class="text-center">
+                            <span class="badge {{ $receiptApproved ? 'badge-success' : 'badge-warning' }}">
+                                {{ $receiptApproved ? __('Approved') : __('Submitted') }}
+                            </span>
+                        </td>
                         <td class="text-right">Rp. {{ number_format($receipt->receipt_total, 2, ',', '.') }}</td>
                         <td class="text-center">
                             <a href="{{ route('receipts.show', $receipt->id) }}" class="btn btn-sm btn-light"><span><i class="fa fa-eye"></i></span></a>
+                            @if(Auth::user()->authRole()->name === 'admin')
+                            <a href="{{ route('receipts.edit', $receipt->id) }}" class="btn btn-sm btn-light"><span><i class="fa fa-edit"></i></span></a>
+                            @endif
+                            @if($receiptApproved)
                             <a href="{{ route('receipts.pdf', $receipt->id) }}" target="_blank" class="btn btn-sm btn-light"><span><i class="fa fa-print"></i></span></a>
+                            @endif
                         </td>
                     </tr>
                 @endforeach

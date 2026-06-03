@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -29,8 +30,18 @@ class ReceiptsListTable extends Component
 
     public function render()
     {
+        $query = \App\Receipts::search($this->search)
+            ->with('details.item');
+
+        if (Auth::user()->authRole()->name !== 'admin') {
+            $query->whereHas('details')
+                ->whereDoesntHave('details.item', function ($builder) {
+                    $builder->whereNull('sales_approved_at');
+                });
+        }
+
         return view('livewire.receipts-list-table', [
-            'receipts' => \App\Receipts::search($this->search)
+            'receipts' => $query
                 ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
                 ->paginate($this->perPage),
         ]);

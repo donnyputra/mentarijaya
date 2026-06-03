@@ -45,4 +45,23 @@ class Receipts extends Model
     {
         return $this->belongsTo(User::class, 'sales_by');
     }
+
+    public function isApproved()
+    {
+        if (!$this->relationLoaded('details')) {
+            $this->load('details.item');
+        } elseif ($this->details->contains(function ($detail) {
+            return !$detail->relationLoaded('item');
+        })) {
+            $this->load('details.item');
+        }
+
+        if ($this->details->isEmpty()) {
+            return false;
+        }
+
+        return !$this->details->contains(function ($detail) {
+            return !$detail->item || $detail->item->sales_approved_at === null;
+        });
+    }
 }
