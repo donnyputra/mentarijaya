@@ -14,7 +14,7 @@
 						<div class="col-sm-6">
 							<ol class="breadcrumb float-sm-right">
 								<li class="breadcrumb-item"><a href="/">{{ __("Home") }}</a></li>
-								<li class="breadcrumb-item"><a href="{{ route("sales.employee.entry") }}">{{ __("Sales") }}</a></li>
+								<li class="breadcrumb-item"><a href="{{ route($salesEntryRouteName) }}">{{ __("Sales") }}</a></li>
 								<li class="breadcrumb-item active">{{ __("Entry Sales") }}</li>
 							</ol>
 						</div><!-- /.col -->
@@ -31,7 +31,7 @@
                                     <div class="card-title">{{ __("Sales Information") }}</div>
                                 </div>
                                 <div class="card-body">
-                                    <form method="POST" action="{{ route('sales.employee.form.save') }}">
+                                    <form method="POST" action="{{ route($salesFormSaveRouteName) }}">
                                         @csrf
                                         <div class="form-group row" hidden>
                                             <label class="col-3 col-form-label">Item ID</label>
@@ -115,6 +115,12 @@
                                                     <input type="text" class="form-control dateselect" id="sales_by_id" name="sales_by_id" value="{{ old('sales_by_id', $salesById) }}" hidden />
                                                     <input type="text" class="form-control dateselect" id="sales_by_text" name="sales_by_text" value="{{ old('sales_by_text', $salesByName) }}" disabled />
                                                 </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="item_note" class="col-3 col-form-label">Item Note</label>
+                                            <div class="col-9">
+                                                <textarea class="form-control" id="item_note" name="item_note" rows="2">{{ old('item_note') }}</textarea>
                                             </div>
                                         </div>
                                         <div class="form-group row">

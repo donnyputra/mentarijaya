@@ -25,7 +25,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-12">
-                                <a class="btn btn-primary float-right mb-3" href="{{ route('gold-price.create') }}" role="button"><span><i class="nav-icon fas fa-plus"></i></span></a>
+                                <a class="btn btn-primary float-right mb-3" href="{{ route('gold-prices.index') }}" role="button"><span><i class="nav-icon fas fa-plus"></i></span></a>
                         </div>
                     </div>
                     <div class="row">

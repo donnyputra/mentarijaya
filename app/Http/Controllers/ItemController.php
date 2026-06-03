@@ -6,12 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use App\Events\AdminTransactionCreated;
 use App\Item;
 use App\ItemNumber;
+use App\Notifications\EmployeeTransactionSubmittedNotification;
 use App\ReceiptDetails;
 use App\Receipts;
 
@@ -727,7 +730,6 @@ class ItemController extends Controller
                         FROM item
                         LEFT JOIN category ON item.category_id = category.id
                         WHERE created_by = ".$userId."
-                        AND item.item_approved_at IS NULL
                         GROUP BY category.code, category.description
                     ");
         
@@ -743,7 +745,6 @@ class ItemController extends Controller
                         FROM item
                         LEFT JOIN category ON item.category_id = category.id
                         WHERE created_by = ".$userId."
-                        AND item.item_approved_at IS NULL
                         GROUP BY category.code, category.description
                     ");
         
@@ -906,6 +907,9 @@ class ItemController extends Controller
             'total_count_sold_items' => $this->getSummaryTotalCountSoldItemPerCategoryByEmployee(Auth::user()->id),
             'today_list' => $this->getEmployeeTodaySales(Auth::user()->id),
             'todayGoldPriceList' => $this->getTodayGoldPriceList(),
+            'salesEntryRouteName' => $this->getSalesEntryRouteName(),
+            'salesFindRouteName' => $this->getSalesFindRouteName(),
+            'salesSearchItemsRouteName' => $this->getSalesSearchItemsRouteName(),
         ];
         
         return view('items.employee.sales.entry', $data);
@@ -919,7 +923,7 @@ class ItemController extends Controller
                 ->first();
 
         if($item) {
-            return redirect('/employee/sales/form/' . $item->id);
+            return redirect()->route($this->getSalesFormRouteName(), ['itemId' => $item->id]);
         }
 
         return redirect()->back()->with('error', __('Item No ' . $itemNo . ' is not searchable.'));
@@ -990,12 +994,16 @@ class ItemController extends Controller
             'todayBaseGoldPrice' => $todayBaseGoldPrice,
             'todayServiceFee' => $todayServiceFee,
             'recommendedSalesPrice' => $recommendedSalesPrice,
+            'salesEntryRouteName' => $this->getSalesEntryRouteName(),
+            'salesFormSaveRouteName' => $this->getSalesFormSaveRouteName(),
         ]);
     }
 
     public function checkoutEntry()
     {
-        return view('items.employee.checkout.entry');
+        return view('items.employee.checkout.entry', [
+            'checkoutSubmitRouteName' => $this->getCheckoutSubmitRouteName(),
+        ]);
     }
 
     public function getItemsPagination(Request $request)
@@ -1011,15 +1019,27 @@ class ItemController extends Controller
 
         if ($term !== '') {
             $query->where(function ($builder) use ($term) {
-                $builder->where('item_no', 'like', '%' . $term . '%')
-                    ->orWhere('item_name', 'like', '%' . $term . '%');
+                $builder->where('item_no', 'like', $term . '%')
+                    ->orWhere('item_name', 'like', $term . '%');
             });
         }
 
         $paginator = $query->orderBy('item_no')
-            ->paginate($perPage, ['id', 'item_no', 'item_name', 'item_weight', 'item_gold_rate', 'store_id'], 'page', $page);
+            ->simplePaginate($perPage, ['id', 'item_no', 'item_name', 'item_weight', 'item_gold_rate', 'store_id', 'inventory_status_id'], 'page', $page);
 
-        $results = $paginator->getCollection()->map(function ($item) {
+        $goldPriceSettings = $this->getTodayGoldPriceSettingsForItems($paginator->getCollection());
+
+        $results = $paginator->getCollection()->map(function ($item) use ($goldPriceSettings) {
+            $cacheKey = $this->makeGoldPriceSettingKey($item->item_gold_rate, $item->inventory_status_id);
+            $todayGoldPriceSetting = $goldPriceSettings[$cacheKey] ?? [
+                'base_price' => null,
+                'service_fee' => 0,
+            ];
+            $recommendedSalesPrice = null;
+            if (($todayGoldPriceSetting['base_price'] ?? null) !== null && $item->item_weight !== null) {
+                $recommendedSalesPrice = round((float) $todayGoldPriceSetting['base_price'] * (float) $item->item_weight, 2);
+            }
+
             return [
                 'id' => $item->id,
                 'text' => $item->item_no . ' - ' . $item->item_name,
@@ -1028,6 +1048,8 @@ class ItemController extends Controller
                 'item_weight' => $item->item_weight,
                 'item_gold_rate' => $item->item_gold_rate,
                 'store_id' => $item->store_id,
+                'recommended_sales_price' => $recommendedSalesPrice,
+                'service_fee' => $todayGoldPriceSetting['service_fee'] ?? 0,
             ];
         })->values();
 
@@ -1050,6 +1072,8 @@ class ItemController extends Controller
             'sales_prices.*' => 'required|numeric|min:0',
             'service_fees' => 'nullable|array',
             'service_fees.*' => 'nullable|numeric|min:0',
+            'item_notes' => 'nullable|array',
+            'item_notes.*' => 'nullable|string|max:1000',
             'sales_at' => 'required|date',
             'customer_name' => 'nullable|string|max:255',
             'customer_address' => 'nullable|string|max:255',
@@ -1060,6 +1084,7 @@ class ItemController extends Controller
         }));
         $salesPrices = array_values($request->get('sales_prices', []));
         $serviceFees = array_values($request->get('service_fees', []));
+        $itemNotes = array_values($request->get('item_notes', []));
 
         if (count($itemIds) !== count($salesPrices)) {
             return redirect()->back()->withInput()->with('error', __('Checkout data is not aligned.'));
@@ -1070,7 +1095,7 @@ class ItemController extends Controller
         }
 
         try {
-            $receipt = DB::transaction(function () use ($itemIds, $salesPrices, $serviceFees, $request) {
+            $transactionResult = DB::transaction(function () use ($itemIds, $salesPrices, $serviceFees, $itemNotes, $request) {
                 $submittedSalesStatus = \App\SalesStatus::where('code', 'submitted')->firstOrFail();
                 $soldItemStatus = \App\ItemStatus::where('code', 'sold')->firstOrFail();
                 $salesAt = \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s');
@@ -1098,8 +1123,10 @@ class ItemController extends Controller
 
                     $salesPrice = (float) $salesPrices[$index];
                     $serviceFee = (float) ($serviceFees[$index] ?? 0);
+                    $todayGoldPriceSetting = $this->getTodayGoldPriceSetting($item->item_gold_rate, $item->inventory_status_id);
 
                     $item->sales_price = $salesPrice;
+                    $item->base_gold_price = $todayGoldPriceSetting['base_price'] ?? null;
                     $item->sales_at = $salesAt;
                     $item->sales_by = Auth::id();
                     $item->sales_status_id = $submittedSalesStatus->id;
@@ -1111,19 +1138,28 @@ class ItemController extends Controller
                         'item' => $item,
                         'sales_price' => $salesPrice,
                         'service_fee' => $serviceFee,
+                        'notes' => trim((string) ($itemNotes[$index] ?? '')),
                     ];
                 }
 
-                return $this->createReceiptForItems(
-                    $payload,
-                    $salesAt,
-                    $request->get('customer_name'),
-                    $request->get('customer_address')
-                );
+                return [
+                    'items' => array_map(function ($row) {
+                        return $row['item'];
+                    }, $payload),
+                    'receipt' => $this->createReceiptForItems(
+                        $payload,
+                        $salesAt,
+                        $request->get('customer_name'),
+                        $request->get('customer_address')
+                    ),
+                ];
             });
         } catch (\Exception $ex) {
             return redirect()->back()->withInput()->with('error', $ex->getMessage());
         }
+
+        $receipt = $transactionResult['receipt'];
+        $this->notifyAdminsAboutSubmittedTransaction($receipt, $transactionResult['items']);
 
         return redirect()->route('receipts.show', $receipt->id);
     }
@@ -1141,39 +1177,44 @@ class ItemController extends Controller
                 'sales_by_id' => 'required',
                 'sales_status_id' => 'required',
                 'service_fee' => 'nullable|numeric|min:0',
+                'item_note' => 'nullable|string|max:1000',
                 'customer_name' => 'nullable|string|max:255',
                 'customer_address' => 'nullable|string|max:255',
             ]);
 
-            $receipt = DB::transaction(function () use ($itemId, $request) {
+            $transactionResult = DB::transaction(function () use ($itemId, $request) {
                 $soldItemStatus = \App\ItemStatus::where('code', '=', 'sold')->first();
+                $submittedSalesStatus = \App\SalesStatus::where('code', 'submitted')->first();
+                $item = \App\Item::where('id', $itemId)->lockForUpdate()->firstOrFail();
+                $originalSalesStatusId = $item->sales_status_id;
+                $todayGoldPriceSetting = $this->getTodayGoldPriceSetting($item->item_gold_rate, $item->inventory_status_id);
 
-<<<<<<< HEAD
-                $item = \App\Item::where('id', $itemId)->firstOrFail();
-                $item->sales_price = $request->get('sales_price');
+                $item->sales_price = round((float) $request->get('sales_price'), 2);
+                $item->base_gold_price = $todayGoldPriceSetting['base_price'] ?? null;
+                if (Schema::hasColumn('item', 'service_fee')) {
+                    $item->service_fee = $todayGoldPriceSetting['service_fee'] ?? null;
+                }
                 $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
                 $item->sales_by = $request->get('sales_by_id');
                 $item->sales_status_id = $request->get('sales_status_id');
-                $item->service_fee = $request->get('service_fee') ?: 0;
                 $item->item_status_id = $soldItemStatus->id;
                 $item->save();
-=======
-            $item = \App\Item::where('id', $itemId)->first();
-            $todayGoldPriceSetting = $this->getTodayGoldPriceSetting($item->item_gold_rate, $item->inventory_status_id);
-            $item->sales_price = round((float) $request->get("sales_price"), 2);
-            $item->base_gold_price = $todayGoldPriceSetting['base_price'] ?? null;
-            if (Schema::hasColumn('item', 'service_fee')) {
-                $item->service_fee = $todayGoldPriceSetting['service_fee'] ?? null;
-            }
-            $item->sales_at = ($request->get('sales_at') != null) ? \Carbon\Carbon::createFromFormat('m/d/Y', $request->get('sales_at'))->format('Y-m-d H:i:s') : null;
-            $item->sales_by = $request->get("sales_by_id");
-            $item->sales_status_id = $request->get("sales_status_id");
-            $item->item_status_id = $soldItemStatus->id;
-            $item->save();
->>>>>>> a9b4da350795a33b6cfcbf92390f83409ff9d0c2
 
-                return $this->upsertReceiptForItem($item, $request);
+                return [
+                    'item' => $item,
+                    'receipt' => $this->upsertReceiptForItem($item, $request),
+                    'should_notify' => $this->shouldNotifyAdminsAboutSubmittedSale(
+                        $originalSalesStatusId,
+                        $item->sales_status_id,
+                        optional($submittedSalesStatus)->id
+                    ),
+                ];
             });
+
+            $receipt = $transactionResult['receipt'];
+            if ($transactionResult['should_notify']) {
+                $this->notifyAdminsAboutSubmittedTransaction($receipt, [$transactionResult['item']]);
+            }
 
         } catch (\Exception $ex) {
             if(Auth::user()->authRole()->name == 'employee') {
@@ -1190,7 +1231,6 @@ class ItemController extends Controller
         return redirect('/items')->with('success', __('Item has been updated.'));
     }
 
-<<<<<<< HEAD
     private function upsertReceiptForItem(Item $item, Request $request)
     {
         $receiptDetail = $this->findReceiptDetailForItem($item->id);
@@ -1225,6 +1265,10 @@ class ItemController extends Controller
         $receiptDetail->item_gold_rate = $item->item_gold_rate;
         $receiptDetail->item_weight = $item->item_weight;
         $receiptDetail->service_fee = $serviceFee;
+        if (Schema::hasColumn('receipt_details', 'notes')) {
+            $itemNote = trim((string) $request->get('item_note'));
+            $receiptDetail->notes = $itemNote !== '' ? $itemNote : null;
+        }
 
         if (Schema::hasColumn('receipt_details', 'item_id')) {
             $receiptDetail->item_id = $item->id;
@@ -1285,6 +1329,7 @@ class ItemController extends Controller
             $salesPrice = (float) $row['sales_price'];
             $serviceFee = (float) $row['service_fee'];
             $lineTotal = $salesPrice + $serviceFee;
+            $itemNote = trim((string) ($row['notes'] ?? ''));
 
             $receiptDetail = new ReceiptDetails();
             $receiptDetail->receipt_date = $salesAt;
@@ -1293,6 +1338,9 @@ class ItemController extends Controller
             $receiptDetail->item_gold_rate = $item->item_gold_rate;
             $receiptDetail->item_weight = $item->item_weight;
             $receiptDetail->service_fee = $serviceFee;
+            if (Schema::hasColumn('receipt_details', 'notes')) {
+                $receiptDetail->notes = $itemNote !== '' ? $itemNote : null;
+            }
 
             if (Schema::hasColumn('receipt_details', 'item_id')) {
                 $receiptDetail->item_id = $item->id;
@@ -1347,7 +1395,110 @@ class ItemController extends Controller
         }
 
         return ReceiptDetails::with('receipt')->where('item_id', $itemId)->latest('id')->first();
-=======
+    }
+
+    private function shouldNotifyAdminsAboutSubmittedSale($originalSalesStatusId, $currentSalesStatusId, $submittedSalesStatusId)
+    {
+        if (!Auth::check() || Auth::user()->authRole()->name !== 'employee') {
+            return false;
+        }
+
+        if (!$submittedSalesStatusId) {
+            return false;
+        }
+
+        return $originalSalesStatusId === null && (int) $currentSalesStatusId === (int) $submittedSalesStatusId;
+    }
+
+    private function notifyAdminsAboutSubmittedTransaction(Receipts $receipt, array $items)
+    {
+        if (!Auth::check() || Auth::user()->authRole()->name !== 'employee') {
+            return;
+        }
+
+        $admins = $this->getAdminUsers();
+        if ($admins->isEmpty()) {
+            return;
+        }
+
+        $payload = $this->buildAdminTransactionNotificationPayload($receipt, $items);
+
+        try {
+            if (Schema::hasTable('notifications')) {
+                Notification::send($admins, new EmployeeTransactionSubmittedNotification($payload));
+            }
+
+            broadcast(new AdminTransactionCreated($admins->pluck('id')->all(), $payload));
+        } catch (\Throwable $exception) {
+            \Log::warning('Unable to send admin transaction notification.', [
+                'receipt_id' => $receipt->id,
+                'message' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    private function getAdminUsers()
+    {
+        return \App\User::query()
+            ->select('users.*')
+            ->join('user_roles', 'user_roles.user_id', '=', 'users.id')
+            ->join('roles', 'roles.id', '=', 'user_roles.role_id')
+            ->where('roles.name', 'admin')
+            ->distinct()
+            ->get();
+    }
+
+    private function buildAdminTransactionNotificationPayload(Receipts $receipt, array $items)
+    {
+        $itemsCollection = collect($items)->filter();
+        $firstItem = $itemsCollection->first();
+        $itemCount = $itemsCollection->count();
+        $itemNumbers = $itemsCollection
+            ->pluck('item_no')
+            ->filter()
+            ->values()
+            ->all();
+
+        $message = $itemCount > 0
+            ? 'New sales for ' . $this->formatNotificationItemNumbers($itemNumbers)
+            : 'New sales transaction submitted';
+
+        return [
+            'title' => __('New Sales Transaction'),
+            'message' => $message . '.',
+            'employee_name' => Auth::user()->name,
+            'receipt_id' => $receipt->id,
+            'item_id' => $firstItem ? $firstItem->id : null,
+            'item_no' => $firstItem ? $firstItem->item_no : null,
+            'item_count' => $itemCount,
+            'receipt_total' => (float) $receipt->receipt_total,
+            'receipt_total_string' => 'Rp ' . number_format((float) $receipt->receipt_total, 2, ',', '.'),
+            'url' => route('receipts.show', $receipt->id),
+        ];
+    }
+
+    private function formatNotificationItemNumbers(array $itemNumbers)
+    {
+        $itemNumbers = array_values(array_filter($itemNumbers));
+        $count = count($itemNumbers);
+
+        if ($count === 0) {
+            return __('transaction');
+        }
+
+        if ($count === 1) {
+            return $itemNumbers[0];
+        }
+
+        if ($count === 2) {
+            return $itemNumbers[0] . ' and ' . $itemNumbers[1];
+        }
+
+        $lastItemNumber = array_pop($itemNumbers);
+
+        return implode(', ', $itemNumbers) . ', and ' . $lastItemNumber;
+    }
+
     private function getTodayBaseGoldPrice($goldRate = null, $inventoryStatusId = null)
     {
         $todayGoldPriceSetting = $this->getTodayGoldPriceSetting($goldRate, $inventoryStatusId);
@@ -1409,9 +1560,151 @@ class ItemController extends Controller
         ];
     }
 
+    private function getTodayGoldPriceSettingsForItems($items)
+    {
+        $items = collect($items)->filter();
+        if ($items->isEmpty()) {
+            return [];
+        }
+
+        $today = \Carbon\Carbon::today()->format('Y-m-d');
+        $hasGoldRateColumn = Schema::hasColumn('gold_prices', 'gold_rate');
+        $hasInventoryStatusColumn = Schema::hasColumn('gold_prices', 'inventory_status_id');
+        $hasPriceDateColumn = Schema::hasColumn('gold_prices', 'price_date');
+
+        $query = \App\GoldPrice::query();
+
+        if ($hasPriceDateColumn) {
+            $query->whereDate('price_date', '<=', $today)
+                ->orderBy('price_date', 'desc');
+        } else {
+            $query->whereDate('created_at', '<=', $today)
+                ->orderBy('created_at', 'desc');
+        }
+
+        if ($hasGoldRateColumn) {
+            $goldRates = $items->pluck('item_gold_rate')
+                ->filter(function ($value) {
+                    return $value !== null;
+                })
+                ->unique()
+                ->values()
+                ->all();
+
+            if (count($goldRates) > 0) {
+                $query->whereIn('gold_rate', $goldRates);
+            }
+        }
+
+        if ($hasInventoryStatusColumn) {
+            $inventoryStatusIds = $items->pluck('inventory_status_id')
+                ->filter(function ($value) {
+                    return $value !== null;
+                })
+                ->unique()
+                ->values()
+                ->all();
+
+            if (count($inventoryStatusIds) > 0) {
+                $query->whereIn('inventory_status_id', $inventoryStatusIds);
+            }
+        }
+
+        $settings = [];
+        foreach ($query->orderBy('id', 'desc')->get() as $goldPrice) {
+            $cacheKey = $this->makeGoldPriceSettingKey(
+                $hasGoldRateColumn ? $goldPrice->gold_rate : null,
+                $hasInventoryStatusColumn ? $goldPrice->inventory_status_id : null
+            );
+
+            if (isset($settings[$cacheKey])) {
+                continue;
+            }
+
+            $basePrice = null;
+            if (Schema::hasColumn('gold_prices', 'base_price') && $goldPrice->base_price !== null) {
+                $basePrice = $goldPrice->base_price;
+            }
+            if ($basePrice === null && Schema::hasColumn('gold_prices', 'max_price') && $goldPrice->max_price !== null) {
+                $basePrice = $goldPrice->max_price;
+            }
+            if ($basePrice === null && Schema::hasColumn('gold_prices', 'min_price') && $goldPrice->min_price !== null) {
+                $basePrice = $goldPrice->min_price;
+            }
+
+            $settings[$cacheKey] = [
+                'base_price' => $basePrice,
+                'service_fee' => $goldPrice->service_fee ?? 0,
+            ];
+        }
+
+        return $settings;
+    }
+
+    private function makeGoldPriceSettingKey($goldRate, $inventoryStatusId)
+    {
+        $goldRatePart = $goldRate !== null ? number_format((float) $goldRate, 2, '.', '') : 'null';
+        $inventoryStatusPart = $inventoryStatusId !== null ? (string) (int) $inventoryStatusId : 'null';
+
+        return $goldRatePart . '|' . $inventoryStatusPart;
+    }
+
     private function getEmployeeSalesSearchItemsQuery()
     {
         return \App\Item::query();
+    }
+
+    private function getSalesRoutePrefix()
+    {
+        if (Auth::check() && Auth::user()->authRole()->name === 'admin') {
+            return 'sales.admin';
+        }
+
+        return 'sales.employee';
+    }
+
+    private function getSalesEntryRouteName()
+    {
+        return $this->getSalesRoutePrefix() . '.entry';
+    }
+
+    private function getSalesFindRouteName()
+    {
+        return $this->getSalesRoutePrefix() . '.find';
+    }
+
+    private function getSalesSearchItemsRouteName()
+    {
+        return $this->getSalesRoutePrefix() . '.search-items';
+    }
+
+    private function getSalesFormRouteName()
+    {
+        return $this->getSalesRoutePrefix() . '.form';
+    }
+
+    private function getSalesFormSaveRouteName()
+    {
+        return $this->getSalesRoutePrefix() . '.form.save';
+    }
+
+    private function getCheckoutRoutePrefix()
+    {
+        if (Auth::check() && Auth::user()->authRole()->name === 'admin') {
+            return 'checkout.admin';
+        }
+
+        return 'checkout.employee';
+    }
+
+    private function getCheckoutEntryRouteName()
+    {
+        return $this->getCheckoutRoutePrefix() . '.entry';
+    }
+
+    private function getCheckoutSubmitRouteName()
+    {
+        return $this->getCheckoutRoutePrefix() . '.submit';
     }
 
     private function getTodayGoldPriceList()
@@ -1474,6 +1767,5 @@ class ItemController extends Controller
         }
 
         return $result;
->>>>>>> a9b4da350795a33b6cfcbf92390f83409ff9d0c2
     }
 }

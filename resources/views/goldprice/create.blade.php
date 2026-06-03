@@ -14,7 +14,7 @@
 						<div class="col-sm-6">
 							<ol class="breadcrumb float-sm-right">
 								<li class="breadcrumb-item"><a href="/">{{ __("Home") }}</a></li>
-								<li class="breadcrumb-item"><a href="{{ route("gold-price.index") }}">{{ __("Gold Price") }}</a></li>
+									<li class="breadcrumb-item"><a href="{{ route("gold-prices.index") }}">{{ __("Gold Price") }}</a></li>
 								<li class="breadcrumb-item active">{{ __("New Gold Price") }}</li>
 							</ol>
 						</div><!-- /.col -->
@@ -29,7 +29,7 @@
 							<div class="table-responsive">
 								<div class="card">
 									<div class="card-body">
-										<form method="POST" action="{{ route('gold-price.store') }}">
+											<form method="POST" action="{{ route('gold-prices.store') }}">
 											<div class="form-group">
 												@csrf
 												<label for="min_price">Minimum Price (per gram)</label>

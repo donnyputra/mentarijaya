@@ -17,6 +17,7 @@ class ReceiptDetails extends Model
         'sales_price',
         'service_fee',
         'line_total',
+        'notes',
     ];
 
     protected $casts = [

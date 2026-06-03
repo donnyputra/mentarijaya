@@ -5,7 +5,7 @@ namespace App\Http\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ItemstatusesTable extends Component
+class ItemStatusesTable extends Component
 {
 	use WithPagination;	
 

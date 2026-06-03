@@ -64,11 +64,7 @@ class EmployeeItemsTable extends Component
                     'create_users.name as created_by_name'
                 )
                 ->where('item.deleted_at', '=', null)
-                ->where('item.created_by', '=', Auth::user()->id)                
-                ->where(function($query) {
-                    $query->whereNull('item.item_approved_at');
-                    // $query->whereNull('item.sales_approved_at');
-                })
+                ->where('item.created_by', '=', Auth::user()->id)
 
                 // apply advanced filter
                 ->where(function($queryFilterStoreInput) {

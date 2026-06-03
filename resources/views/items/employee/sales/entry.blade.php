@@ -88,7 +88,7 @@
                                             <div class="card-title">{{ __("Find Item") }}</div>
                                         </div>
                                         <div class="card-body">
-                                            <form method="POST" action="{{ route('items.employee.find') }}">
+                                            <form method="POST" action="{{ route($salesFindRouteName) }}">
                                                 <div class="form-group row">
                                                     @csrf
                                                     <label for="item_no" class="col-3 col-form-label">Item No <span style="color: red">*</span></label>
@@ -217,7 +217,7 @@
             placeholder: 'Search Item No here..',
             minimumInputLength: 1,
             ajax: {
-                url: '{{ route("sales.employee.search-items") }}',
+                url: '{{ route($salesSearchItemsRouteName) }}',
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
