@@ -74,7 +74,7 @@
                                     <div><strong>Customer Name:</strong> {{ $receipt->customer_name ?: '-' }}</div>
                                     <div><strong>Customer Address:</strong> {{ $receipt->customer_address ?: '-' }}</div>
                                     <div><strong>Total:</strong> Rp {{ number_format($receipt->receipt_total, 2, ',', '.') }}</div>
-                                    <div><strong>Print Mode:</strong> {{ $showServiceFee ? 'Show Service Fee' : 'Hide Service Fee' }}</div>
+                                    <div><strong>Service Fee:</strong> {{ $showServiceFee ? 'Shown automatically' : 'Hidden automatically' }}</div>
                                 </div>
                             </div>
 
@@ -88,7 +88,7 @@
                                             <div class="col-md-9">
                                                 <div><strong>Receipt Check URL:</strong></div>
                                                 <div><a href="{{ $receiptCheckUrl }}" target="_blank">{{ $receiptCheckUrl }}</a></div>
-                                                <small class="text-muted">Scan the QR code to open the public receipt verification page.</small>
+                                                <small class="text-muted">Scan the QR code to open this receipt detail page.</small>
                                             </div>
                                         </div>
                                     </div>
@@ -153,10 +153,7 @@
 
                             <div class="float-right">
                                 <a class="btn btn-secondary" href="{{ route('receipts.index') }}" role="button">{{ __("Back") }}</a>
-                                <a class="btn btn-light" href="{{ route('receipts.show', ['receipt' => $receipt->id, 'show_service_fee' => 0]) }}" role="button">{{ __("Preview Without Fee") }}</a>
-                                <a class="btn btn-info" href="{{ route('receipts.show', ['receipt' => $receipt->id, 'show_service_fee' => 1]) }}" role="button">{{ __("Preview With Fee") }}</a>
-                                <a class="btn btn-secondary" href="{{ route('receipts.pdf', ['receipt' => $receipt->id, 'show_service_fee' => 0]) }}" target="_blank" role="button">{{ __("Print Without Fee") }}</a>
-                                <a class="btn btn-dark" href="{{ route('receipts.pdf', ['receipt' => $receipt->id, 'show_service_fee' => 1]) }}" target="_blank" role="button">{{ __("Print With Fee") }}</a>
+                                <a class="btn btn-dark" href="{{ route('receipts.pdf', ['receipt' => $receipt->id]) }}" target="_blank" role="button">{{ __("Print Receipt") }}</a>
                             </div>
                         </div>
                     </div>

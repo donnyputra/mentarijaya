@@ -54,7 +54,7 @@ class ReceiptsController extends Controller
     public function show(Request $request, $id)
     {
         $receipt = $this->findReceipt($id);
-        $showServiceFee = $request->boolean('show_service_fee', true);
+        $showServiceFee = $this->shouldShowServiceFee($receipt);
         $receiptCheckUrl = route('receipts.show', ['receipt' => $receipt->id]);
 
         return view('receipts.show', [
@@ -102,7 +102,7 @@ class ReceiptsController extends Controller
     public function pdf(Request $request, $id)
     {
         $receipt = $this->findReceipt($id);
-        $showServiceFee = $request->boolean('show_service_fee', true);
+        $showServiceFee = $this->shouldShowServiceFee($receipt);
         $receiptDetailUrl = route('receipts.show', ['receipt' => $receipt->id]);
 
         $pdf = PDF::loadView('pdf.receipt', [
@@ -112,7 +112,7 @@ class ReceiptsController extends Controller
             'receiptQrUrl' => $this->makeReceiptQrUrl($receiptDetailUrl, 90),
         ]);
 
-        return $pdf->setPaper([0, 0, 439.37, 297.64], 'landscape')->stream('receipt-' . $receipt->uuid . '.pdf');
+        return $pdf->setPaper([0, 0, 419.53, 283.46], 'landscape')->stream('receipt-' . $receipt->uuid . '.pdf');
     }
 
     private function findReceipt($id)
@@ -129,6 +129,13 @@ class ReceiptsController extends Controller
         $size = max(60, (int) $size);
 
         return 'https://api.qrserver.com/v1/create-qr-code/?size=' . $size . 'x' . $size . '&data=' . urlencode($url);
+    }
+
+    private function shouldShowServiceFee(Receipts $receipt)
+    {
+        return $receipt->details->contains(function ($detail) {
+            return (float) ($detail->service_fee ?? 0) > 0;
+        });
     }
 
     private function convertAmountToBahasa($amount)

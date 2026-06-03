@@ -6,7 +6,7 @@
     <style>
         @page {
             margin: 0;
-            size: 155mm 105mm;
+            size: 148mm 100mm;
         }
 
         body {
@@ -18,8 +18,8 @@
 
         .page {
             position: relative;
-            width: 155mm;
-            height: 105mm;
+            width: 148mm;
+            height: 100mm;
             page-break-after: always;
             overflow: hidden;
         }
@@ -40,24 +40,24 @@
         }
 
         .date {
-            top: 14mm;
-            left: 96mm;
+            top: 8.5mm;
+            left: 105mm;
             width: 24mm;
             font-size: 10px;
             letter-spacing: 0.05em;
         }
 
         .customer-name {
-            top: 21mm;
-            left: 92mm;
-            width: 34mm;
+            top: 15.5mm;
+            left: 101mm;
+            width: 30mm;
             font-size: 9px;
         }
 
         .customer-address {
-            top: 29mm;
-            left: 92mm;
-            width: 34mm;
+            top: 22.5mm;
+            left: 101mm;
+            width: 30mm;
             font-size: 9px;
             min-height: 12mm;
         }
@@ -65,7 +65,7 @@
         .row {
             position: absolute;
             left: 0;
-            width: 155mm;
+            width: 148mm;
             height: 9.8mm;
             font-size: 8px;
         }
@@ -110,7 +110,7 @@
 
         .total-in-words {
             left: 14mm;
-            top: 84.5mm;
+            top: 80mm;
             width: 64mm;
             min-height: 10mm;
             font-size: 8px;
@@ -119,7 +119,7 @@
 
         .grand-total {
             left: 116mm;
-            top: 84.5mm;
+            top: 75.5mm;
             width: 18mm;
             text-align: center;
             font-size: 10px;
@@ -128,10 +128,10 @@
 
         .receipt-qr {
             position: absolute;
-            left: 137mm;
-            top: 86mm;
-            width: 14mm;
-            height: 14mm;
+            left: 132mm;
+            top: 81.5mm;
+            width: 12mm;
+            height: 12mm;
         }
     </style>
 </head>
