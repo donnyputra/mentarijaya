@@ -1,4 +1,4 @@
-@extends('layouts.admin	')
+@extends('layouts.admin')
 
 @section('content')
 <div class="container">
@@ -123,10 +123,15 @@
 													</div>
 												</div>
 												<div class="col-md-6 mb-3 col-xs-12">
-													<div class="card">
-														<div class="card-header">
-															<div class="card-title">{{ __("Sales Information") }}</div>
-														</div>
+														<div class="card">
+															<div class="card-header">
+																<div class="card-title">{{ __("Sales Information") }}</div>
+																<div class="card-tools text-muted" style="font-size: 0.9rem;">
+																	Base Gold Price: {{ $item->base_gold_price !== null ? ('Rp ' . number_format($item->base_gold_price, 2, ',', '.')) : '-' }}
+																	|
+																	Base Service Fee: {{ $item->base_service_fee !== null ? ('Rp ' . number_format($item->base_service_fee, 2, ',', '.')) : '-' }}
+																</div>
+															</div>
 														@php
 															if($item->sales_status_id != null){
 																$salesStatus = $item->salesStatus->description;
@@ -140,40 +145,40 @@
 																$salesBy = '';
 															}
 														@endphp
-														<div class="card-body">
-															<div class="form-group row">
-																<label for="sales_status_id" class="col-3 col-form-label">Sales Status</label>
-																<div class="col-9">
-																	<input type="text" class="form-control" name="sales_status" readonly value=" {{ $salesStatus }}" />
+															<div class="card-body">
+																<div class="form-group row">
+																	<label for="sales_status_id" class="col-3 col-form-label">Sales Status</label>
+																	<div class="col-9">
+																		<input type="text" class="form-control" name="sales_status" readonly value=" {{ $salesStatus }}" />
 																</div>
 															</div>
-															<div class="form-group row">
-																<label for="sales_price" class="col-3 col-form-label">Sales Price</label>
-																<div class="col-9">
-																	<div class="input-group">
-																		<div class="input-group-prepend">
-																				<div class="input-group-text">Rp</div>
+																<div class="form-group row">
+																	<label for="sales_price" class="col-3 col-form-label">Sales Price</label>
+																	<div class="col-9">
+																		<div class="input-group">
+																			<div class="input-group-prepend">
+																					<div class="input-group-text">Rp</div>
+																			</div>
+																			<input type="text" class="form-control sales_price" readonly name="sales_price" value="{{ $item->sales_price }}" />
 																		</div>
-																		<input type="text" class="form-control sales_price" readonly name="sales_price" value="{{ $item->sales_price }}" />
 																	</div>
 																</div>
-															</div>
-															<div class="form-group row">
-																<label for="service_fee" class="col-3 col-form-label">Service Fee</label>
-																<div class="col-9">
-																	<div class="input-group">
-																		<div class="input-group-prepend">
-																				<div class="input-group-text">Rp</div>
+																<div class="form-group row">
+																	<label for="service_fee" class="col-3 col-form-label">Service Fee</label>
+																	<div class="col-9">
+																		<div class="input-group">
+																			<div class="input-group-prepend">
+																					<div class="input-group-text">Rp</div>
+																			</div>
+																			<input type="text" class="form-control" readonly name="service_fee" value="{{ $item->service_fee !== null ? number_format($item->service_fee, 2, ',', '.') : '' }}" />
 																		</div>
-																		<input type="text" class="form-control sales_price" readonly name="service_fee" value="{{ $item->service_fee }}" />
 																	</div>
 																</div>
-															</div>
-															<div class="form-group row">
-																<label for="sales_at" class="col-3 col-form-label">Sales At</label>
-																<div class="col-9">
-																	<div class="input-group">
-																		<input type="text" class="form-control" name="sales_at" readonly placeholder="" value="{{ $item->sales_at != null ? Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $item->sales_at)->format('m/d/Y') : '' }}" />
+																<div class="form-group row">
+																	<label for="sales_at" class="col-3 col-form-label">Sales At</label>
+																	<div class="col-9">
+																		<div class="input-group">
+																			<input type="text" class="form-control" name="sales_at" readonly placeholder="" value="{{ $item->sales_at != null ? Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $item->sales_at)->format('m/d/Y') : '' }}" />
 																	</div>
 																</div>
 															</div>

@@ -29,6 +29,11 @@
                             <div class="card">
                                 <div class="card-header">
                                     <div class="card-title">{{ __("Sales Information") }}</div>
+                                    <div class="card-tools text-muted" style="font-size: 0.9rem;">
+                                        Base Price: {{ $todayBaseGoldPrice !== null ? ('Rp ' . number_format($todayBaseGoldPrice, 2, ',', '.')) : '-' }}
+                                        |
+                                        Service Fee: {{ $todayServiceFee !== null ? ('Rp ' . number_format($todayServiceFee, 2, ',', '.')) : '-' }}
+                                    </div>
                                 </div>
                                 <div class="card-body">
 									<form method="POST" action="{{ route($salesFormSaveRouteName) }}">
@@ -60,23 +65,42 @@
                                                 {{ $item->item_weight }} gr
                                             </div>
                                         </div>
-                                        <div class="form-group row">
-                                            <label class="col-3 col-form-label">Today's Base Price</label>
-                                            <div class="col-9">
-                                                {{ $todayBaseGoldPrice !== null ? ('Rp ' . number_format($todayBaseGoldPrice, 2, ',', '.')) : '-' }}
+	                                        <div class="form-group row">
+	                                            <label class="col-3 col-form-label">Recommended Item Price</label>
+	                                            <div class="col-9">
+                                                {{ $recommendedItemPrice !== null ? ('Rp ' . number_format($recommendedItemPrice, 2, ',', '.')) : '-' }}
                                             </div>
                                         </div>
+
                                         <div class="form-group row">
-                                            <label class="col-3 col-form-label">Today's Service Fee</label>
+                                            <label class="col-3 col-form-label">Recommended Service Fee</label>
                                             <div class="col-9">
-                                                {{ $todayServiceFee !== null ? ('Rp ' . number_format($todayServiceFee, 2, ',', '.')) : '-' }}
+                                                {{ $recommendedServiceFee !== null ? ('Rp ' . number_format($recommendedServiceFee, 2, ',', '.')) : '-' }}
                                             </div>
                                         </div>
+
                                         <div class="form-group row">
-                                            <label class="col-3 col-form-label">Reco Sales Price</label>
+                                            <label class="col-3 col-form-label">Recommended Sales Price</label>
                                             <div class="col-9">
                                                 {{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 2, ',', '.')) : '-' }}
-                                                <small class="form-text text-muted">Recommendation only. You can still change the sales price.</small>
+                                                <small class="form-text text-muted">Recommendation only. You can still change the service fee and sales price.</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <label for="service_fee" class="col-3 col-form-label">Service Fee</label>
+                                            <div class="col-9">
+                                                @php
+                                                    $defaultServiceFeeInput = $defaultServiceFee !== null
+                                                        ? number_format((float) $defaultServiceFee, 2, ',', '.')
+                                                        : '';
+                                                @endphp
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                            <div class="input-group-text">Rp</div>
+                                                    </div>
+                                                    <input type="text" inputmode="decimal" class="form-control rupiah-input" id="service_fee" name="service_fee" value="{{ old('service_fee', $defaultServiceFeeInput) }}" />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -84,15 +108,15 @@
                                             <label for="sales_price" class="col-3 col-form-label">Sales Price</label>
                                             <div class="col-9">
                                                 @php
-                                                    $recommendedSalesPriceInput = $recommendedSalesPrice !== null
-                                                        ? number_format((float) $recommendedSalesPrice, 2, '.', '')
+                                                    $defaultSalesPriceInput = $defaultSalesPrice !== null
+                                                        ? number_format((float) $defaultSalesPrice, 2, ',', '.')
                                                         : '';
                                                 @endphp
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                             <div class="input-group-text">Rp</div>
                                                     </div>
-                                                    <input type="number" step="0.01" min="0" class="form-control" name="sales_price" value="{{ old('sales_price', $recommendedSalesPriceInput) }}" />
+                                                    <input type="text" inputmode="decimal" class="form-control rupiah-input" id="sales_price" name="sales_price" value="{{ old('sales_price', $defaultSalesPriceInput) }}" />
                                                 </div>
                                             </div>
                                         </div>
@@ -162,5 +186,43 @@
 	$(function() {
         $('#sales_at').datepicker();
     });
+
+    (function() {
+        function formatRupiah(value) {
+            if (!value) {
+                return '';
+            }
+
+            var cleaned = String(value).replace(/rp/ig, '').replace(/\s+/g, '');
+            if (cleaned.indexOf(',') !== -1) {
+                cleaned = cleaned.replace(/\./g, '');
+                cleaned = cleaned.replace(',', '.');
+            } else if (/^\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+                cleaned = cleaned.replace(/\./g, '');
+            }
+
+            var numeric = Number(cleaned);
+            if (!isFinite(numeric)) {
+                return value;
+            }
+
+            return numeric.toLocaleString('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        var inputs = document.querySelectorAll('.rupiah-input');
+        if (!inputs || inputs.length === 0) {
+            return;
+        }
+
+        Array.prototype.forEach.call(inputs, function(input) {
+            input.value = formatRupiah(input.value);
+            input.addEventListener('blur', function() {
+                input.value = formatRupiah(input.value);
+            });
+        });
+    })();
 </script>
 @endsection

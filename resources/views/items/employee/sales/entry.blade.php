@@ -10,15 +10,20 @@
         height: calc(2.25rem + 2px) !important;
         border: 1px solid #ced4da !important;
         border-radius: .25rem !important;
+        display: flex !important;
+        align-items: center !important;
     }
 
     #item_no + .select2-container .select2-selection__rendered {
-        line-height: calc(2.25rem + 0px) !important;
+        line-height: normal !important;
         padding-left: .75rem !important;
+        padding-right: 2rem !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
     }
 
     #item_no + .select2-container .select2-selection__arrow {
-        height: calc(2.25rem + 0px) !important;
+        height: 100% !important;
         right: .45rem !important;
     }
 </style>
@@ -53,15 +58,27 @@
                             <div class="alert alert-info mb-0">
                                 <strong>Today's Gold Price List:</strong>
                                 @if(count($todayGoldPriceList) > 0)
-                                    @foreach($todayGoldPriceList as $todayGoldPrice)
-                                        <span class="badge badge-light mr-1 mb-1">
-                                            {{ $todayGoldPrice['gold_rate'] !== null ? number_format($todayGoldPrice['gold_rate'], 2, ',', '.') . '%' : '-' }}
-                                            /
-                                            {{ $todayGoldPrice['inventory_status'] ?? '-' }}
-                                            :
-                                            Rp {{ number_format($todayGoldPrice['base_price'], 2, ',', '.') }}
-                                            + Fee Rp {{ number_format($todayGoldPrice['service_fee'] ?? 0, 2, ',', '.') }}
-                                        </span>
+                                    @php
+                                        $groupedTodayGoldPriceList = collect($todayGoldPriceList)->groupBy(function ($todayGoldPrice) {
+                                            return $todayGoldPrice['gold_rate'] !== null
+                                                ? number_format((float) $todayGoldPrice['gold_rate'], 2, '.', '')
+                                                : 'unknown';
+                                        });
+                                    @endphp
+                                    @foreach($groupedTodayGoldPriceList as $goldRateKey => $todayGoldPriceRows)
+                                        <div class="mb-1">
+                                            <span class="badge badge-secondary mr-1 mb-1">
+                                                {{ $goldRateKey !== 'unknown' ? number_format((float) $goldRateKey, 2, ',', '.') . '%' : '-' }}
+                                            </span>
+                                            @foreach($todayGoldPriceRows as $todayGoldPrice)
+                                                <span class="badge badge-light mr-1 mb-1">
+                                                    {{ $todayGoldPrice['inventory_status'] ?? '-' }}
+                                                    :
+                                                    Rp {{ number_format($todayGoldPrice['base_price'], 2, ',', '.') }}
+                                                    + Fee Rp {{ number_format($todayGoldPrice['service_fee'] ?? 0, 2, ',', '.') }}
+                                                </span>
+                                            @endforeach
+                                        </div>
                                     @endforeach
                                 @else
                                     -

@@ -6,6 +6,7 @@ use App\GoldPrice;
 use App\InventoryStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class GoldPriceController extends Controller
@@ -18,33 +19,21 @@ class GoldPriceController extends Controller
     public function index()
     {
         $this->assertAdminRole();
-
-        $goldPrices = GoldPrice::query();
-        if (Schema::hasColumn('gold_prices', 'inventory_status_id')) {
-            $goldPrices = $goldPrices->with('inventoryStatus');
-        }
-        if (Schema::hasColumn('gold_prices', 'price_date')) {
-            $goldPrices = $goldPrices->orderBy('price_date', 'desc');
-        } else {
-            $goldPrices = $goldPrices->orderBy('created_at', 'desc');
-        }
-        if (Schema::hasColumn('gold_prices', 'gold_rate')) {
-            $goldPrices = $goldPrices->orderBy('gold_rate', 'asc');
-        }
-        if (Schema::hasColumn('gold_prices', 'inventory_status_id')) {
-            $goldPrices = $goldPrices->orderBy('inventory_status_id', 'asc');
-        }
-
-        $goldPrices = $goldPrices
-            ->orderBy('id', 'desc')
-            ->paginate(20);
-
+        $inventoryStatuses = $this->getMatrixInventoryStatuses();
+        $rateColumns = $this->getRateColumns();
+        $selectedPriceDate = old('price_date', now()->toDateString());
         $todayBasePriceList = $this->getTodayBasePriceList();
+        $matrixDefaults = $this->getMatrixDefaults($inventoryStatuses, $rateColumns, $selectedPriceDate);
+        [$historyMatrices, $historyPaginator] = $this->getHistoryMatrices($inventoryStatuses, $rateColumns);
 
         return view('gold-prices.index', [
-            'goldPrices' => $goldPrices,
             'todayBasePriceList' => $todayBasePriceList,
-            'inventoryStatuses' => InventoryStatus::orderBy('description', 'asc')->get(),
+            'inventoryStatuses' => $inventoryStatuses,
+            'rateColumns' => $rateColumns,
+            'selectedPriceDate' => $selectedPriceDate,
+            'matrixDefaults' => $matrixDefaults,
+            'historyMatrices' => $historyMatrices,
+            'historyPaginator' => $historyPaginator,
         ]);
     }
 
@@ -72,70 +61,112 @@ class GoldPriceController extends Controller
 
         $request->validate([
             'price_date' => 'required|date',
-            'gold_rate' => 'required|numeric|min:0',
-            'inventory_status_id' => 'required|integer|exists:inventory_status,id',
-            'base_price' => 'required',
-            'service_fee' => 'required',
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        $normalizedBasePrice = $this->normalizeLocalizedPrice($request->get('base_price'));
-        if ($normalizedBasePrice === null || !is_numeric($normalizedBasePrice) || (float) $normalizedBasePrice < 0) {
+        $matrix = $request->input('matrix', []);
+        $inventoryStatuses = $this->getMatrixInventoryStatuses();
+        $rateColumns = $this->getRateColumns();
+        $entries = [];
+        $errors = [];
+
+        foreach ($inventoryStatuses as $inventoryStatus) {
+            $statusMatrix = $matrix[$inventoryStatus->id] ?? [];
+
+            foreach ($rateColumns as $rateColumn) {
+                $rateMatrix = $statusMatrix[$rateColumn['key']] ?? [];
+                $rawBasePrice = trim((string) ($rateMatrix['base_price'] ?? ''));
+                $rawServiceFee = trim((string) ($rateMatrix['service_fee'] ?? ''));
+                $hasBasePrice = $rawBasePrice !== '';
+                $hasServiceFee = $rawServiceFee !== '';
+
+                if (!$hasBasePrice && !$hasServiceFee) {
+                    continue;
+                }
+
+                if (!$hasBasePrice || !$hasServiceFee) {
+                    $errors[] = sprintf(
+                        '%s (%s%%): base price and service fee must both be filled.',
+                        $inventoryStatus->description,
+                        $rateColumn['label']
+                    );
+                    continue;
+                }
+
+                $normalizedBasePrice = $this->normalizeLocalizedPrice($rawBasePrice);
+                $normalizedServiceFee = $this->normalizeLocalizedPrice($rawServiceFee);
+                if ($normalizedBasePrice === null || !is_numeric($normalizedBasePrice) || (float) $normalizedBasePrice < 0) {
+                    $errors[] = sprintf('%s (%s%%): invalid base price format.', $inventoryStatus->description, $rateColumn['label']);
+                    continue;
+                }
+                if ($normalizedServiceFee === null || !is_numeric($normalizedServiceFee) || (float) $normalizedServiceFee < 0) {
+                    $errors[] = sprintf('%s (%s%%): invalid service fee format.', $inventoryStatus->description, $rateColumn['label']);
+                    continue;
+                }
+
+                $entries[] = [
+                    'inventory_status_id' => (int) $inventoryStatus->id,
+                    'gold_rate' => round((float) $rateColumn['value'], 2),
+                    'base_price' => round((float) $normalizedBasePrice, 2),
+                    'service_fee' => round((float) $normalizedServiceFee, 2),
+                ];
+            }
+        }
+
+        if (count($errors) > 0) {
             return redirect()
                 ->back()
                 ->withInput()
                 ->withErrors([
-                    'base_price' => __('Base price format is invalid. Use format like 20.342,25'),
+                    'matrix' => implode(' ', $errors),
                 ]);
         }
 
-        $normalizedServiceFee = $this->normalizeLocalizedPrice($request->get('service_fee'));
-        if ($normalizedServiceFee === null || !is_numeric($normalizedServiceFee) || (float) $normalizedServiceFee < 0) {
+        if (count($entries) === 0) {
             return redirect()
                 ->back()
                 ->withInput()
                 ->withErrors([
-                    'service_fee' => __('Service fee format is invalid. Use format like 2.500,00'),
+                    'matrix' => __('Please fill at least one base price and service fee pair.'),
                 ]);
         }
 
-        $basePrice = round((float) $normalizedBasePrice, 2);
-        $serviceFee = round((float) $normalizedServiceFee, 2);
-        $goldRate = round((float) $request->get('gold_rate'), 2);
-        $inventoryStatusId = (int) $request->get('inventory_status_id');
-
-        $goldPrice = new GoldPrice();
-        if (Schema::hasColumn('gold_prices', 'price_date')) {
-            $goldPrice->price_date = $request->get('price_date');
-        }
-        if (Schema::hasColumn('gold_prices', 'gold_rate')) {
-            $goldPrice->gold_rate = $goldRate;
-        }
-        if (Schema::hasColumn('gold_prices', 'inventory_status_id')) {
-            $goldPrice->inventory_status_id = $inventoryStatusId;
-        }
-        if (Schema::hasColumn('gold_prices', 'base_price')) {
-            $goldPrice->base_price = $basePrice;
-        }
-        if (Schema::hasColumn('gold_prices', 'service_fee')) {
-            $goldPrice->service_fee = $serviceFee;
-        }
-        if (Schema::hasColumn('gold_prices', 'min_price')) {
-            $goldPrice->min_price = $basePrice;
-        }
-        if (Schema::hasColumn('gold_prices', 'max_price')) {
-            $goldPrice->max_price = $basePrice;
-        }
-        if (Schema::hasColumn('gold_prices', 'notes')) {
-            $goldPrice->notes = $request->get('notes');
-        }
-        if (Schema::hasColumn('gold_prices', 'created_by_user_id')) {
-            $goldPrice->created_by_user_id = Auth::id();
-        }
-        if (Schema::hasColumn('gold_prices', 'created_by')) {
-            $goldPrice->created_by = Auth::user()->name;
-        }
-        $goldPrice->save();
+        DB::transaction(function () use ($entries, $request) {
+            foreach ($entries as $entry) {
+                $goldPrice = new GoldPrice();
+                if (Schema::hasColumn('gold_prices', 'price_date')) {
+                    $goldPrice->price_date = $request->get('price_date');
+                }
+                if (Schema::hasColumn('gold_prices', 'gold_rate')) {
+                    $goldPrice->gold_rate = $entry['gold_rate'];
+                }
+                if (Schema::hasColumn('gold_prices', 'inventory_status_id')) {
+                    $goldPrice->inventory_status_id = $entry['inventory_status_id'];
+                }
+                if (Schema::hasColumn('gold_prices', 'base_price')) {
+                    $goldPrice->base_price = $entry['base_price'];
+                }
+                if (Schema::hasColumn('gold_prices', 'service_fee')) {
+                    $goldPrice->service_fee = $entry['service_fee'];
+                }
+                if (Schema::hasColumn('gold_prices', 'min_price')) {
+                    $goldPrice->min_price = $entry['base_price'];
+                }
+                if (Schema::hasColumn('gold_prices', 'max_price')) {
+                    $goldPrice->max_price = $entry['base_price'];
+                }
+                if (Schema::hasColumn('gold_prices', 'notes')) {
+                    $goldPrice->notes = $request->get('notes');
+                }
+                if (Schema::hasColumn('gold_prices', 'created_by_user_id')) {
+                    $goldPrice->created_by_user_id = Auth::id();
+                }
+                if (Schema::hasColumn('gold_prices', 'created_by')) {
+                    $goldPrice->created_by = Auth::user()->name;
+                }
+                $goldPrice->save();
+            }
+        });
 
         return redirect()->route('gold-prices.index')->with('success', __('Gold base price has been added.'));
     }
@@ -168,13 +199,18 @@ class GoldPriceController extends Controller
         $hasGoldRateColumn = Schema::hasColumn('gold_prices', 'gold_rate');
         $hasInventoryStatusColumn = Schema::hasColumn('gold_prices', 'inventory_status_id');
         $inventoryStatusMap = [];
+        $inventoryStatusOrderMap = [];
 
         $goldPriceQuery = GoldPrice::query();
         if ($hasInventoryStatusColumn) {
             $goldPriceQuery = $goldPriceQuery->with('inventoryStatus');
-            $inventoryStatusMap = InventoryStatus::withTrashed()
-                ->pluck('description', 'id')
-                ->toArray();
+            $inventoryStatuses = InventoryStatus::withTrashed()
+                ->orderBy('id', 'asc')
+                ->get(['id', 'description']);
+            foreach ($inventoryStatuses as $index => $inventoryStatus) {
+                $inventoryStatusMap[$inventoryStatus->id] = $inventoryStatus->description;
+                $inventoryStatusOrderMap[$inventoryStatus->id] = $index;
+            }
         }
         if (Schema::hasColumn('gold_prices', 'price_date')) {
             $goldPriceQuery = $goldPriceQuery
@@ -190,6 +226,7 @@ class GoldPriceController extends Controller
             ->get();
 
         $result = [];
+        $seenPairs = [];
         foreach ($goldPrices as $goldPrice) {
             $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
             if ($displayBasePrice === null) {
@@ -212,13 +249,41 @@ class GoldPriceController extends Controller
                 continue;
             }
 
+            $pairKey = ($hasGoldRateColumn && $displayGoldRate !== null
+                    ? number_format((float) $displayGoldRate, 2, '.', '')
+                    : 'no_rate')
+                . '|' . ($hasInventoryStatusColumn ? (string) ($goldPrice->inventory_status_id ?? 'no_status') : 'no_status');
+            if (isset($seenPairs[$pairKey])) {
+                continue;
+            }
+            $seenPairs[$pairKey] = true;
+
             $result[] = [
                 'base_price' => $displayBasePrice,
                 'service_fee' => $goldPrice->service_fee ?? 0,
                 'gold_rate' => $displayGoldRate,
                 'inventory_status' => $displayInventoryStatus,
+                'inventory_status_id' => $goldPrice->inventory_status_id,
             ];
         }
+
+        usort($result, function ($left, $right) use ($inventoryStatusOrderMap) {
+            $leftRate = $left['gold_rate'] !== null ? (float) $left['gold_rate'] : INF;
+            $rightRate = $right['gold_rate'] !== null ? (float) $right['gold_rate'] : INF;
+            if ($leftRate !== $rightRate) {
+                return $leftRate <=> $rightRate;
+            }
+
+            $leftOrder = $inventoryStatusOrderMap[$left['inventory_status_id']] ?? PHP_INT_MAX;
+            $rightOrder = $inventoryStatusOrderMap[$right['inventory_status_id']] ?? PHP_INT_MAX;
+
+            return $leftOrder <=> $rightOrder;
+        });
+
+        foreach ($result as &$row) {
+            unset($row['inventory_status_id']);
+        }
+        unset($row);
 
         return $result;
     }
@@ -228,5 +293,237 @@ class GoldPriceController extends Controller
         if (Auth::user()->authRole()->name !== 'admin') {
             abort(403);
         }
+    }
+
+    private function getRateColumns()
+    {
+        $defaultRates = [37.5, 42.0];
+        $rateMap = [];
+
+        if (Schema::hasTable('item') && Schema::hasColumn('item', 'item_gold_rate')) {
+            $itemRates = DB::table('item')
+                ->whereNull('deleted_at')
+                ->whereNotNull('item_gold_rate')
+                ->select('item_gold_rate')
+                ->distinct()
+                ->pluck('item_gold_rate')
+                ->all();
+            foreach ($itemRates as $itemRate) {
+                $this->registerRateValue($rateMap, $itemRate);
+            }
+        }
+
+        if (count($rateMap) === 0) {
+            foreach ($defaultRates as $defaultRate) {
+                $this->registerRateValue($rateMap, $defaultRate);
+            }
+        }
+
+        uksort($rateMap, function ($left, $right) {
+            return ((float) $left) <=> ((float) $right);
+        });
+
+        $rateColumns = [];
+        foreach ($rateMap as $rateKey => $rateValue) {
+            $rateColumns[] = [
+                'key' => $this->toRateColumnKey($rateValue),
+                'label' => $this->toRateLabel($rateValue),
+                'value' => (float) $rateValue,
+                'value_key' => $rateKey,
+            ];
+        }
+
+        return $rateColumns;
+    }
+
+    private function getMatrixInventoryStatuses()
+    {
+        return InventoryStatus::query()
+            ->orderByRaw("CASE WHEN LOWER(description) = 'general' THEN 0 ELSE 1 END")
+            ->orderBy('description', 'asc')
+            ->get();
+    }
+
+    private function getMatrixDefaults($inventoryStatuses, $rateColumns, $selectedPriceDate)
+    {
+        $matrix = $this->buildEmptyMatrix($inventoryStatuses, $rateColumns);
+        $hasPriceDateColumn = Schema::hasColumn('gold_prices', 'price_date');
+        $hasGoldRateColumn = Schema::hasColumn('gold_prices', 'gold_rate');
+        $hasInventoryStatusColumn = Schema::hasColumn('gold_prices', 'inventory_status_id');
+        if (!$hasGoldRateColumn || !$hasInventoryStatusColumn) {
+            return $matrix;
+        }
+
+        foreach ($inventoryStatuses as $inventoryStatus) {
+            foreach ($rateColumns as $rateColumn) {
+                $goldPriceQuery = GoldPrice::query();
+                if ($hasPriceDateColumn) {
+                    $goldPriceQuery = $goldPriceQuery
+                        ->whereDate('price_date', '=', $selectedPriceDate)
+                        ->orderBy('price_date', 'desc');
+                } else {
+                    $goldPriceQuery = $goldPriceQuery
+                        ->whereDate('created_at', '=', $selectedPriceDate)
+                        ->orderBy('created_at', 'desc');
+                }
+
+                $goldPriceQuery = $goldPriceQuery->where('gold_rate', (float) $rateColumn['value']);
+                $goldPriceQuery = $goldPriceQuery->where('inventory_status_id', (int) $inventoryStatus->id);
+
+                $goldPrice = $goldPriceQuery->orderBy('id', 'desc')->first();
+                if (!$goldPrice) {
+                    continue;
+                }
+
+                $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
+                $matrix[$inventoryStatus->id][$rateColumn['key']] = [
+                    'base_price' => $displayBasePrice !== null ? (float) $displayBasePrice : null,
+                    'service_fee' => $goldPrice->service_fee !== null ? (float) $goldPrice->service_fee : null,
+                ];
+            }
+        }
+
+        return $matrix;
+    }
+
+    private function getHistoryMatrices($inventoryStatuses, $rateColumns)
+    {
+        $hasPriceDateColumn = Schema::hasColumn('gold_prices', 'price_date');
+        $hasGoldRateColumn = Schema::hasColumn('gold_prices', 'gold_rate');
+        $hasInventoryStatusColumn = Schema::hasColumn('gold_prices', 'inventory_status_id');
+        if (!$hasGoldRateColumn || !$hasInventoryStatusColumn) {
+            $emptyPaginator = GoldPrice::query()->whereRaw('1 = 0')->paginate(10, ['*'], 'history_page');
+            return [[], $emptyPaginator];
+        }
+
+        $historyDateExpression = $hasPriceDateColumn ? 'price_date' : 'DATE(created_at)';
+        $historyDatePaginator = GoldPrice::query()
+            ->selectRaw($historyDateExpression . ' as history_date')
+            ->whereNotNull($hasPriceDateColumn ? 'price_date' : 'created_at')
+            ->groupBy(DB::raw($historyDateExpression))
+            ->orderBy(DB::raw($historyDateExpression), 'desc')
+            ->paginate(10, ['*'], 'history_page');
+
+        $historyDates = collect($historyDatePaginator->items())
+            ->pluck('history_date')
+            ->filter()
+            ->values()
+            ->all();
+
+        if (count($historyDates) === 0) {
+            return [[], $historyDatePaginator];
+        }
+
+        $historyRowsQuery = GoldPrice::query();
+        if (Schema::hasColumn('gold_prices', 'inventory_status_id')) {
+            $historyRowsQuery = $historyRowsQuery->with('inventoryStatus');
+        }
+        if ($hasPriceDateColumn) {
+            $historyRowsQuery = $historyRowsQuery->whereIn('price_date', $historyDates);
+        } else {
+            $historyRowsQuery = $historyRowsQuery->whereIn(DB::raw('DATE(created_at)'), $historyDates);
+        }
+
+        $historyRows = $historyRowsQuery
+            ->orderBy($hasPriceDateColumn ? 'price_date' : 'created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $rateKeyMap = [];
+        foreach ($rateColumns as $rateColumn) {
+            $rateKeyMap[$rateColumn['value_key']] = $rateColumn['key'];
+        }
+
+        $historyMatrices = [];
+        foreach ($historyRows as $historyRow) {
+            $dateKey = $hasPriceDateColumn
+                ? (string) $historyRow->price_date
+                : optional($historyRow->created_at)->toDateString();
+            if ($dateKey === null) {
+                continue;
+            }
+
+            if (!isset($historyMatrices[$dateKey])) {
+                $historyMatrices[$dateKey] = [
+                    'price_date' => $dateKey,
+                    'matrix' => $this->buildEmptyMatrix($inventoryStatuses, $rateColumns),
+                    'notes' => $historyRow->notes,
+                    'created_by' => $historyRow->created_by,
+                    'created_at' => $historyRow->created_at,
+                ];
+            }
+
+            $statusId = $historyRow->inventory_status_id;
+            $rateKey = $rateKeyMap[$this->toRateValueKey($historyRow->gold_rate)] ?? null;
+            if ($statusId === null || $rateKey === null || !isset($historyMatrices[$dateKey]['matrix'][$statusId])) {
+                continue;
+            }
+
+            $existingCell = $historyMatrices[$dateKey]['matrix'][$statusId][$rateKey] ?? null;
+            if ($existingCell && ($existingCell['base_price'] !== null || $existingCell['service_fee'] !== null)) {
+                // Rows are already ordered newest-first; keep first value per status+rate.
+                continue;
+            }
+
+            $displayBasePrice = $historyRow->base_price ?? $historyRow->max_price ?? $historyRow->min_price;
+            $historyMatrices[$dateKey]['matrix'][$statusId][$rateKey] = [
+                'base_price' => $displayBasePrice !== null ? (float) $displayBasePrice : null,
+                'service_fee' => $historyRow->service_fee !== null ? (float) $historyRow->service_fee : null,
+            ];
+        }
+
+        $orderedHistoryMatrices = [];
+        foreach ($historyDates as $historyDate) {
+            if (isset($historyMatrices[$historyDate])) {
+                $orderedHistoryMatrices[] = $historyMatrices[$historyDate];
+            }
+        }
+
+        return [$orderedHistoryMatrices, $historyDatePaginator];
+    }
+
+    private function buildEmptyMatrix($inventoryStatuses, $rateColumns)
+    {
+        $matrix = [];
+        foreach ($inventoryStatuses as $inventoryStatus) {
+            $matrix[(int) $inventoryStatus->id] = [];
+            foreach ($rateColumns as $rateColumn) {
+                $matrix[(int) $inventoryStatus->id][$rateColumn['key']] = [
+                    'base_price' => null,
+                    'service_fee' => null,
+                ];
+            }
+        }
+
+        return $matrix;
+    }
+
+    private function toRateValueKey($value)
+    {
+        return number_format((float) $value, 2, '.', '');
+    }
+
+    private function registerRateValue(&$rateMap, $value)
+    {
+        if ($value === null || !is_numeric($value)) {
+            return;
+        }
+
+        $normalizedValue = round((float) $value, 2);
+        if ($normalizedValue <= 0) {
+            return;
+        }
+
+        $rateMap[$this->toRateValueKey($normalizedValue)] = $normalizedValue;
+    }
+
+    private function toRateColumnKey($value)
+    {
+        return 'rate_' . str_replace('.', '_', $this->toRateValueKey($value));
+    }
+
+    private function toRateLabel($value)
+    {
+        return rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.');
     }
 }
