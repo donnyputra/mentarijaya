@@ -110,7 +110,10 @@
                                         @php
                                             $recommendedSalesPrice = null;
                                             if ($detail->item && $detail->item->base_gold_price !== null && $detail->item_weight !== null) {
-                                                $recommendedSalesPrice = (float) $detail->item->base_gold_price * (float) $detail->item_weight;
+                                                $recommendedServiceFeePerGram = (float) ($detail->item->base_service_fee ?? 0);
+                                                $recommendedSalesPrice = max(0, (
+                                                    ((float) $detail->item->base_gold_price - $recommendedServiceFeePerGram) * (float) $detail->item_weight
+                                                ));
                                             }
 
                                             $averageSalesPrice = null;

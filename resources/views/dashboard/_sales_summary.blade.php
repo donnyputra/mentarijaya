@@ -17,7 +17,7 @@
 
     .sales-summary-date {
         display: block;
-        font-size: clamp(2.25rem, 5vw, 4rem);
+        font-size: clamp(1.125rem, 3.75vw, 0.75rem);
         font-weight: 300;
         letter-spacing: -0.06em;
         color: #101010;
@@ -25,7 +25,7 @@
 
     .sales-summary-heading {
         display: block;
-        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-size: clamp(1.125rem, 4.5vw, 1.125rem);
         font-weight: 300;
         letter-spacing: -0.07em;
         color: #101010;
@@ -58,7 +58,7 @@
 
     .sales-summary-card-title {
         margin-bottom: 0.7rem;
-        font-size: 1rem;
+        font-size: 0.75rem;
         font-weight: 700;
         text-align: right;
         color: #111;
@@ -82,14 +82,14 @@
     }
 
     .sales-summary-type-code {
-        font-size: 1.45rem;
+        font-size: 1.0875rem;
         font-weight: 700;
         letter-spacing: -0.03em;
         color: #111;
     }
 
     .sales-summary-type-count {
-        font-size: 1.3rem;
+        font-size: 0.975rem;
         font-weight: 500;
         color: #111;
     }
@@ -97,7 +97,7 @@
     .sales-summary-metric-label {
         display: block;
         margin-bottom: 0.1rem;
-        font-size: 0.72rem;
+        font-size: 0.54rem;
         font-weight: 500;
         text-align: right;
         color: #444;
@@ -106,7 +106,7 @@
     .sales-summary-metric-value {
         display: block;
         width: 100%;
-        font-size: 1.9rem;
+        font-size: 1.425rem;
         line-height: 1;
         font-weight: 500;
         letter-spacing: -0.04em;
@@ -117,7 +117,7 @@
     .sales-summary-metric-row.total .sales-summary-metric-value {
         border-bottom: 2px solid var(--summary-accent);
         padding-bottom: 0.35rem;
-        font-size: 2.35rem;
+        font-size: 1.7625rem;
         font-weight: 800;
     }
 
@@ -153,7 +153,6 @@
 
     <div class="sales-summary-grid">
         <div class="sales-summary-card">
-            <div class="sales-summary-card-title left">Item Types</div>
             @foreach($salesSummary['category_counts'] as $categoryCount)
             <div class="sales-summary-type-row">
                 <span class="sales-summary-type-code">{{ $categoryCount['code'] }}</span>
@@ -163,7 +162,7 @@
         </div>
 
         <div class="sales-summary-card">
-            <div class="sales-summary-card-title">Sales Weight</div>
+            <div class="sales-summary-card-title">Sales W</div>
             @foreach($salesSummary['metric_rows'] as $metricRow)
             <div class="sales-summary-metric-row {{ $loop->first ? 'total' : '' }}">
                 <div class="w-100">
@@ -187,7 +186,7 @@
         </div>
 
         <div class="sales-summary-card">
-            <div class="sales-summary-card-title">Sales Average</div>
+            <div class="sales-summary-card-title">Sales Avg</div>
             @foreach($salesSummary['metric_rows'] as $metricRow)
             <div class="sales-summary-metric-row {{ $loop->first ? 'total' : '' }}">
                 <div class="w-100">

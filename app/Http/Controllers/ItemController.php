@@ -1143,10 +1143,11 @@ class ItemController extends Controller
             $recommendedSalesPrice = null;
             $recommendedServiceFee = 0;
             if (($todayGoldPriceSetting['base_price'] ?? null) !== null && $item->item_weight !== null) {
-                $recommendedSalesPrice = round((float) $todayGoldPriceSetting['base_price'] * (float) $item->item_weight, 2);
-            }
-            if (($todayGoldPriceSetting['service_fee'] ?? null) !== null && $item->item_weight !== null) {
                 $recommendedServiceFee = round((float) $todayGoldPriceSetting['service_fee'] * (float) $item->item_weight, 2);
+                $recommendedSalesPrice = max(0, round(
+                    ((float) $todayGoldPriceSetting['base_price'] * (float) $item->item_weight) - $recommendedServiceFee,
+                    2
+                ));
             }
 
             return [
