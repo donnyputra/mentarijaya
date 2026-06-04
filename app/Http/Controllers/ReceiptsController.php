@@ -261,7 +261,7 @@ class ReceiptsController extends Controller
             'receiptQrUrl' => $this->makeReceiptQrUrl($receiptDetailUrl, 90),
         ]);
 
-        return $pdf->setPaper([0, 0, 419.53, 283.46], 'landscape')->stream('receipt-' . $receipt->uuid . '.pdf');
+        return $pdf->setPaper([0, 0, 439.37, 297.64], 'landscape')->stream('receipt-' . $receipt->uuid . '.pdf');
     }
 
     private function findReceipt($id)

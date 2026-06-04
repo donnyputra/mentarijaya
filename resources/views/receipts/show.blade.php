@@ -25,12 +25,13 @@
     .receipt-detail-table .col-sales-price,
     .receipt-detail-table .col-notes,
     .receipt-detail-table .col-service-fee,
-    .receipt-detail-table .col-line-total {
+    .receipt-detail-table .col-line-total,
+    .receipt-detail-table .col-action {
         min-width: 150px;
     }
 
     .receipt-detail-table .col-notes {
-        min-width: 220px;
+        min-width: 100px;
         white-space: normal;
     }
 
@@ -101,6 +102,7 @@
                                             <th class="text-right col-service-fee">Service Fee</th>
                                             @endif
                                             <th class="text-right col-line-total">Line Total</th>
+                                            <th class="col-action">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -129,12 +131,21 @@
                                             <td class="text-right money-cell">{{ $detail->service_fee !== null ? ('Rp ' . number_format($detail->service_fee, 2, ',', '.')) : '-' }}</td>
                                             @endif
                                             <td class="text-right money-cell">{{ $detail->line_total !== null ? ('Rp ' . number_format($detail->line_total, 2, ',', '.')) : '-' }}</td>
+                                            <td>
+                                                @if($detail->item)
+                                                <a class="btn btn-sm btn-light" href="{{ route('items.show', $detail->item->id) }}" role="button">
+                                                    <span><i class="fa fa-eye"></i></span>
+                                                </a>
+                                                @else
+                                                -
+                                                @endif
+                                            </td>
                                         </tr>
                                         @endforeach
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <th colspan="{{ $showServiceFee ? 9 : 8 }}" class="text-right">Grand Total</th>
+                                            <th colspan="{{ $showServiceFee ? 10 : 9 }}" class="text-right">Grand Total</th>
                                             <th class="text-right">Rp {{ number_format($receipt->receipt_total, 2, ',', '.') }}</th>
                                         </tr>
                                     </tfoot>

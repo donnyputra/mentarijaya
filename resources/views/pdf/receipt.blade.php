@@ -6,20 +6,20 @@
     <style>
         @page {
             margin: 0;
-            size: 148mm 100mm;
+            size: 155mm 105mm;
         }
 
         body {
             margin: 0;
             font-family: DejaVu Sans, sans-serif;
             color: #000;
-            font-size: 9px;
+            font-size: 18px;
         }
 
         .page {
             position: relative;
-            width: 148mm;
-            height: 100mm;
+            width: 155mm;
+            height: 105mm;
             page-break-after: always;
             overflow: hidden;
         }
@@ -40,72 +40,72 @@
         }
 
         .date {
-            top: 8.5mm;
-            left: 105mm;
-            width: 24mm;
-            font-size: 10px;
+            top: 5.5mm;
+            left: 108mm;
+            width: 28mm;
+            font-size: 20px;
             letter-spacing: 0.05em;
         }
 
         .customer-name {
-            top: 15.5mm;
-            left: 101mm;
-            width: 30mm;
-            font-size: 9px;
+            top: 10.5mm;
+            left: 105mm;
+            width: 32mm;
+            font-size: 18px;
         }
 
         .customer-address {
-            top: 22.5mm;
-            left: 101mm;
-            width: 30mm;
-            font-size: 9px;
-            min-height: 12mm;
+            top: 16.5mm;
+            left: 105mm;
+            width: 32mm;
+            font-size: 18px;
+            min-height: 10mm;
         }
 
         .row {
             position: absolute;
             left: 0;
-            width: 148mm;
+            width: 155mm;
             height: 9.8mm;
-            font-size: 8px;
+            font-size: 16px;
         }
 
         .item-name {
             left: 33mm;
             width: 38mm;
-            top: 1.2mm;
+            top: 0.6mm;
             min-height: 8mm;
-            line-height: 1.1;
+            line-height: 1.0;
         }
 
         .gold-rate {
             left: 79mm;
             width: 10mm;
-            top: 2.2mm;
+            top: 1.4mm;
             text-align: center;
         }
 
         .weight {
             left: 92mm;
             width: 12mm;
-            top: 2.2mm;
+            top: 1.4mm;
             text-align: center;
         }
 
         .service-fee {
             left: 106mm;
             width: 14mm;
-            top: 2.2mm;
+            top: 1.4mm;
             text-align: center;
         }
 
         .notes {
             left: 121mm;
             width: 10mm;
-            top: 2.5mm;
+            top: 1.4mm;
             text-align: center;
-            font-size: 7px;
-            line-height: 1.05;
+            font-size: 14px;
+            line-height: 1.0;
         }
 
         .total-in-words {
@@ -113,16 +113,16 @@
             top: 80mm;
             width: 64mm;
             min-height: 10mm;
-            font-size: 8px;
-            line-height: 1.15;
+            font-size: 16px;
+            line-height: 1.1;
         }
 
         .grand-total {
-            left: 116mm;
-            top: 75.5mm;
-            width: 18mm;
-            text-align: center;
-            font-size: 10px;
+            left: 120mm;
+            top: 75mm;
+            width: 16mm;
+            text-align: right;
+            font-size: 20px;
             font-weight: 700;
         }
 
