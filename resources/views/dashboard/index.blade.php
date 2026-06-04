@@ -23,6 +23,14 @@
 
             <div class="content">
                 <div class="container-fluid">
+                    @isset($salesSummary)
+                    <div class="row">
+                        <div class="col-12">
+                            @include('dashboard._sales_summary', ['salesSummary' => $salesSummary])
+                        </div>
+                    </div>
+                    @endisset
+
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="alert alert-info mb-0">

@@ -1141,8 +1141,12 @@ class ItemController extends Controller
                 'service_fee' => 0,
             ];
             $recommendedSalesPrice = null;
+            $recommendedServiceFee = 0;
             if (($todayGoldPriceSetting['base_price'] ?? null) !== null && $item->item_weight !== null) {
                 $recommendedSalesPrice = round((float) $todayGoldPriceSetting['base_price'] * (float) $item->item_weight, 2);
+            }
+            if (($todayGoldPriceSetting['service_fee'] ?? null) !== null && $item->item_weight !== null) {
+                $recommendedServiceFee = round((float) $todayGoldPriceSetting['service_fee'] * (float) $item->item_weight, 2);
             }
 
             return [
@@ -1154,7 +1158,7 @@ class ItemController extends Controller
                 'item_gold_rate' => $item->item_gold_rate,
                 'store_id' => $item->store_id,
                 'recommended_sales_price' => $recommendedSalesPrice,
-                'service_fee' => $todayGoldPriceSetting['service_fee'] ?? 0,
+                'service_fee' => $recommendedServiceFee,
             ];
         })->values();
 

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Item;
 use App\GoldPrice;
+use App\Category;
 
 class DashboardController extends Controller
 {
@@ -38,13 +39,16 @@ class DashboardController extends Controller
             $totalWeightSummaryCollection = $this->getInStockTotalItemWeightByCategory();
     
             return view('dashboard.index', [
+                'salesSummary' => $this->buildTodaySalesSummary(),
                 'summaryCollection' => $summaryCollection,
                 'totalWeightSummaryCollection' => $totalWeightSummaryCollection,
                 'itemsCount' => $categorySummaryCollection,
                 'todayBaseGoldPriceList' => $this->getTodayBaseGoldPriceList(),
             ]);
         }else{
-            return view('home');
+            return view('home', [
+                'salesSummary' => $this->buildTodaySalesSummary(Auth::id()),
+            ]);
         }
     }
 
@@ -259,6 +263,88 @@ class DashboardController extends Controller
         unset($row);
 
         return $result;
+    }
+
+    private function buildTodaySalesSummary($userId = null)
+    {
+        $today = Carbon::today();
+        $rateLabels = [
+            '30.00' => '30%',
+            '37.50' => '37.5%',
+            '42.00' => '42%',
+        ];
+        $categories = Category::query()
+            ->orderBy('id', 'asc')
+            ->get(['code']);
+
+        $baseQuery = DB::table('item')
+            ->leftJoin('category', 'item.category_id', '=', 'category.id')
+            ->whereNull('item.deleted_at')
+            ->whereNotNull('item.sales_at')
+            ->whereDate('item.sales_at', $today->format('Y-m-d'));
+
+        if ($userId !== null) {
+            $baseQuery->where('item.sales_by', $userId)
+                ->whereNull('item.sales_approved_at');
+        }
+
+        $categoryRows = (clone $baseQuery)
+            ->selectRaw('category.code as category_code, COUNT(item.id) as item_count')
+            ->groupBy('category.code')
+            ->get()
+            ->keyBy('category_code');
+
+        $rateRows = (clone $baseQuery)
+            ->selectRaw('ROUND(item.item_gold_rate, 2) as item_gold_rate, SUM(item.item_weight) as total_weight, SUM(item.sales_price) as total_sales')
+            ->groupBy(DB::raw('ROUND(item.item_gold_rate, 2)'))
+            ->get()
+            ->keyBy(function ($row) {
+                return number_format((float) $row->item_gold_rate, 2, '.', '');
+            });
+
+        $totals = (clone $baseQuery)
+            ->selectRaw('SUM(item.item_weight) as total_weight, SUM(item.sales_price) as total_sales')
+            ->first();
+
+        $formatMetricRow = function ($label, $weight, $sales) {
+            $weight = (float) ($weight ?? 0);
+            $sales = (float) ($sales ?? 0);
+            $average = $weight > 0 ? round($sales / $weight, 2) : 0;
+
+            return [
+                'label' => $label,
+                'weight' => $weight,
+                'sales' => $sales,
+                'average' => $average,
+            ];
+        };
+
+        $metricRows = [
+            $formatMetricRow('Total', $totals->total_weight ?? 0, $totals->total_sales ?? 0),
+        ];
+
+        foreach ($rateLabels as $rateKey => $label) {
+            $row = $rateRows->get($rateKey);
+            $metricRows[] = $formatMetricRow(
+                $label,
+                optional($row)->total_weight,
+                optional($row)->total_sales
+            );
+        }
+
+        $categoryCounts = [];
+        foreach ($categories as $category) {
+            $categoryCounts[] = [
+                'code' => $category->code,
+                'count' => (int) (optional($categoryRows->get($category->code))->item_count ?? 0),
+            ];
+        }
+
+        return [
+            'display_date' => $today->locale('id')->translatedFormat('j F Y'),
+            'category_counts' => $categoryCounts,
+            'metric_rows' => $metricRows,
+        ];
     }
 
 }
