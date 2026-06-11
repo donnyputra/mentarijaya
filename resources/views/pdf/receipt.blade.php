@@ -40,24 +40,24 @@
         }
 
         .date {
-            top: 5.5mm;
-            left: 108mm;
-            width: 28mm;
+            top: 4.8mm;
+            left: 114mm;
+            width: 30mm;
             font-size: 20px;
             letter-spacing: 0.05em;
         }
 
         .customer-name {
-            top: 10.5mm;
-            left: 105mm;
-            width: 32mm;
+            top: 9.4mm;
+            left: 111mm;
+            width: 34mm;
             font-size: 18px;
         }
 
         .customer-address {
-            top: 16.5mm;
-            left: 105mm;
-            width: 32mm;
+            top: 15mm;
+            left: 111mm;
+            width: 34mm;
             font-size: 18px;
             min-height: 10mm;
         }
@@ -80,30 +80,30 @@
 
         .gold-rate {
             left: 79mm;
-            width: 10mm;
+            width: 11mm;
             top: 1.4mm;
             text-align: center;
         }
 
         .weight {
-            left: 92mm;
+            left: 98mm;
             width: 12mm;
             top: 1.4mm;
             text-align: center;
         }
 
         .service-fee {
-            left: 106mm;
+            left: 114mm;
             width: 14mm;
             top: 1.4mm;
             text-align: center;
         }
 
         .notes {
-            left: 121mm;
+            left: 133mm;
             width: 10mm;
             top: 1.4mm;
-            text-align: center;
+            text-align: left;
             font-size: 14px;
             line-height: 1.0;
         }
@@ -118,9 +118,9 @@
         }
 
         .grand-total {
-            left: 120mm;
-            top: 75mm;
-            width: 16mm;
+            left: 126mm;
+            top: 76.5mm;
+            width: 22mm;
             text-align: right;
             font-size: 20px;
             font-weight: 700;
@@ -128,8 +128,8 @@
 
         .receipt-qr {
             position: absolute;
-            left: 132mm;
-            top: 81.5mm;
+            left: 133mm;
+            top: 86mm;
             width: 12mm;
             height: 12mm;
         }
@@ -147,16 +147,25 @@
 
         @foreach($detailPage as $detail)
             @php
-                $itemTop = 48 + ($loop->index * 10.3);
+                $itemTop = 43 + ($loop->index * 10.3);
+                $inventoryStatus = optional(optional($detail->item)->inventoryStatus)->description
+                    ?: optional(optional($detail->item)->inventoryStatus)->code
+                    ?: '';
+                if (strtolower(trim($inventoryStatus)) === 'general') {
+                    $inventoryStatus = 'gen';
+                }
                 $itemName = trim($detail->item_name . ' - ' . ($detail->item_no ?: optional($detail->item)->item_no ?: '-'));
+                if ($inventoryStatus !== '') {
+                    $itemName .= ' (' . $inventoryStatus . ')';
+                }
                 $serviceFee = $showServiceFee && $detail->service_fee !== null
                     ? number_format((float) $detail->service_fee, 0, ',', '.')
                     : '';
             @endphp
             <div class="row" style="top: {{ $itemTop }}mm;">
                 <div class="field-block item-name">{{ $itemName }}</div>
-                <div class="field gold-rate">{{ number_format((float) $detail->item_gold_rate, 2, ',', '.') }}%</div>
-                <div class="field weight">{{ number_format((float) $detail->item_weight, 3, ',', '.') }}</div>
+                <div class="field gold-rate">{{ number_format((float) $detail->item_gold_rate, 1, ',', '.') }}%</div>
+                <div class="field weight">{{ number_format((float) $detail->item_weight, 2, ',', '.') }}</div>
                 <div class="field service-fee">{{ $serviceFee }}</div>
                 <div class="field-block notes">{{ $detail->notes ?: '' }}</div>
             </div>

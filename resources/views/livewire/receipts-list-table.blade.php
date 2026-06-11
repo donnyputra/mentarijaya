@@ -36,7 +36,7 @@
                         $receiptApproved = $receipt->isApproved();
                     @endphp
                     <tr>
-                        <td class="text-center">{{ $receipt->uuid }}</td>
+                        <td class="text-center">{{ $receipt->short_uuid }}</td>
                         <td class="text-center">{{ optional($receipt->receipt_date)->format('d-M-Y H:i') }}</td>
                         <td class="text-center">{{ $receipt->customer_name ?: '-' }}</td>
                         <td class="text-center">

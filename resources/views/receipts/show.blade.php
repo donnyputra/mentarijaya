@@ -15,6 +15,10 @@
         min-width: 120px;
     }
 
+    .receipt-detail-table .col-inventory-status {
+        min-width: 90px;
+    }
+
     .receipt-detail-table .col-weight,
     .receipt-detail-table .col-gold-rate {
         min-width: 90px;
@@ -67,7 +71,7 @@
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <h5>{{ $receipt->store ? $receipt->store->name : config('app.name') }}</h5>
-                                    <div><strong>Receipt ID:</strong> {{ $receipt->uuid }}</div>
+                                    <div><strong>Receipt ID:</strong> {{ $receipt->short_uuid }}</div>
                                     <div><strong>Date:</strong> {{ optional($receipt->receipt_date)->format('d M Y H:i') }}</div>
                                     <div><strong>Sales By:</strong> {{ optional($receipt->salesUser)->name ?: '-' }}</div>
                                 </div>
@@ -92,6 +96,7 @@
                                         <tr>
                                             <th class="col-item-no">Item No</th>
                                             <th class="col-item-name">Name</th>
+                                            <th class="col-inventory-status">Inventory</th>
                                             <th class="text-right col-weight">Weight</th>
                                             <th class="text-right col-gold-rate">Rate</th>
                                             <th class="text-right col-recommended">Reco</th>
@@ -120,12 +125,20 @@
                                             if ($detail->sales_price !== null && (float) $detail->item_weight > 0) {
                                                 $averageSalesPrice = (float) $detail->sales_price / (float) $detail->item_weight;
                                             }
+
+                                            $inventoryStatus = optional(optional($detail->item)->inventoryStatus)->description
+                                                ?: optional(optional($detail->item)->inventoryStatus)->code
+                                                ?: '-';
+                                            if (strtolower(trim($inventoryStatus)) === 'general') {
+                                                $inventoryStatus = 'gen';
+                                            }
                                         @endphp
                                         <tr>
                                             <td>{{ $detail->item_no ?: optional($detail->item)->item_no ?: '-' }}</td>
                                             <td>{{ $detail->item_name }}</td>
+                                            <td>{{ $inventoryStatus }}</td>
                                             <td class="text-right">{{ number_format($detail->item_weight, 2, ',', '.') }} gr</td>
-                                            <td class="text-right">{{ number_format($detail->item_gold_rate, 2, ',', '.') }}%</td>
+                                            <td class="text-right">{{ number_format((float) $detail->item_gold_rate, 1, ',', '.') }}%</td>
                                             <td class="text-right money-cell">{{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 2, ',', '.')) : '-' }}</td>
                                             <td class="text-right money-cell">{{ $averageSalesPrice !== null ? ('Rp ' . number_format($averageSalesPrice, 2, ',', '.') . ' / gr') : '-' }}</td>
                                             <td class="text-right money-cell">{{ $detail->sales_price !== null ? ('Rp ' . number_format($detail->sales_price, 2, ',', '.')) : '-' }}</td>
@@ -148,7 +161,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <th colspan="{{ $showServiceFee ? 10 : 9 }}" class="text-right">Grand Total</th>
+                                            <th colspan="{{ $showServiceFee ? 11 : 10 }}" class="text-right">Grand Total</th>
                                             <th class="text-right">Rp {{ number_format($receipt->receipt_total, 2, ',', '.') }}</th>
                                         </tr>
                                     </tfoot>

@@ -1,7 +1,7 @@
 @once
 <style>
     .sales-summary {
-        --summary-accent: #b8af3c;
+        --summary-accent: #8a8f98;
         --summary-bg: #efefef;
         --summary-card-bg: #ffffff;
         background: linear-gradient(180deg, #f3f3f3 0%, #ededed 100%);

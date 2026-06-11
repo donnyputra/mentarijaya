@@ -64,4 +64,13 @@ class Receipts extends Model
             return !$detail->item || $detail->item->sales_approved_at === null;
         });
     }
+
+    public function getShortUuidAttribute()
+    {
+        if (!$this->uuid) {
+            return (string) $this->id;
+        }
+
+        return strtoupper(substr(str_replace('-', '', $this->uuid), 0, 8));
+    }
 }

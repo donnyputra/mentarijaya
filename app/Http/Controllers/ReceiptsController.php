@@ -268,6 +268,7 @@ class ReceiptsController extends Controller
     {
         return Receipts::with([
             'details.item.store',
+            'details.item.inventoryStatus',
             'store',
             'salesUser',
         ])->findOrFail($id);

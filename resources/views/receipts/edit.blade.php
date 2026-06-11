@@ -40,7 +40,7 @@
                                 <div class="form-group row">
                                     <label class="col-3 col-form-label">Receipt ID</label>
                                     <div class="col-9 pt-2">
-                                        {{ $receipt->uuid }}
+                                        {{ $receipt->short_uuid }}
                                     </div>
                                 </div>
                                 <div class="form-group row">
