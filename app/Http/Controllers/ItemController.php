@@ -395,10 +395,10 @@ class ItemController extends Controller
         
 
         if(Auth::user()->authRole()->name == 'employee') {
-            return redirect('/employee/items/index')->with('success', __('Item has been created.'));
+            return redirect('/employee/sales/form/' . $item->id)->with('success', __('Item has been created.'));
         }
         
-        return redirect('/items')->with('success', __('Item has been created.'));
+        return redirect('/admin/sales/form/' . $item->id)->with('success', __('Item has been created.'));
     }
 
     /**

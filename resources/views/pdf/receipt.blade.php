@@ -13,7 +13,7 @@
             margin: 0;
             font-family: DejaVu Sans, sans-serif;
             color: #000;
-            font-size: 18px;
+            font-size: 14px;
         }
 
         .page {
@@ -40,7 +40,7 @@
         }
 
         .date {
-            top: 4.8mm;
+            top: 3mm;
             left: 114mm;
             width: 30mm;
             font-size: 20px;
@@ -71,7 +71,7 @@
         }
 
         .item-name {
-            left: 33mm;
+            left: 25mm;
             width: 38mm;
             top: 0.6mm;
             min-height: 8mm;
@@ -79,14 +79,14 @@
         }
 
         .gold-rate {
-            left: 79mm;
+            left: 75mm;
             width: 11mm;
             top: 1.4mm;
             text-align: center;
         }
 
         .weight {
-            left: 98mm;
+            left: 89mm;
             width: 12mm;
             top: 1.4mm;
             text-align: center;
@@ -118,11 +118,11 @@
         }
 
         .grand-total {
-            left: 126mm;
+            left: 135mm;
             top: 76.5mm;
             width: 22mm;
             text-align: right;
-            font-size: 20px;
+            font-size: 15px;
             font-weight: 700;
         }
 
@@ -147,7 +147,7 @@
 
         @foreach($detailPage as $detail)
             @php
-                $itemTop = 43 + ($loop->index * 10.3);
+                $itemTop = 35 + ($loop->index * 10.3);
                 $inventoryStatus = optional(optional($detail->item)->inventoryStatus)->description
                     ?: optional(optional($detail->item)->inventoryStatus)->code
                     ?: '';
