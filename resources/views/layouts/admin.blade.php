@@ -529,6 +529,67 @@ scratch. This page gets rid of all links and provides the needed markup only.
             var $count = $('#admin-notification-count');
             var $header = $('#admin-notification-header');
             var $list = $('#admin-notification-list');
+            var audioContext = null;
+            var audioUnlocked = false;
+
+            function getAudioContext() {
+                if (!audioContext) {
+                    var Context = window.AudioContext || window.webkitAudioContext;
+                    if (!Context) {
+                        return null;
+                    }
+
+                    audioContext = new Context();
+                }
+
+                return audioContext;
+            }
+
+            function unlockNotificationSound() {
+                var context = getAudioContext();
+                if (!context) {
+                    return;
+                }
+
+                if (context.state === 'suspended') {
+                    context.resume().then(function () {
+                        audioUnlocked = true;
+                    }).catch(function () {
+                        audioUnlocked = false;
+                    });
+                    return;
+                }
+
+                audioUnlocked = true;
+            }
+
+            function scheduleBeep(context, startTime, duration, frequency) {
+                var oscillator = context.createOscillator();
+                var gainNode = context.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequency, startTime);
+
+                gainNode.gain.setValueAtTime(0.0001, startTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.12, startTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                oscillator.start(startTime);
+                oscillator.stop(startTime + duration);
+            }
+
+            function playNotificationSound() {
+                var context = getAudioContext();
+                if (!context || !audioUnlocked) {
+                    return;
+                }
+
+                var startTime = context.currentTime + 0.02;
+                scheduleBeep(context, startTime, 0.12, 880);
+                scheduleBeep(context, startTime + 0.18, 0.12, 880);
+            }
 
             function escapeHtml(value) {
                 return $('<div>').text(value || '').html();
@@ -582,6 +643,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
             syncNotificationCount();
 
+            $(document).on('click keydown touchstart', function () {
+                unlockNotificationSound();
+            });
+
             var pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
                 cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
                 forceTLS: true,
@@ -597,6 +662,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             var channel = pusher.subscribe('private-App.User.{{ Auth::id() }}');
             channel.bind('admin.transaction.created', function (notification) {
                 prependNotification(notification);
+                playNotificationSound();
             });
         });
     </script>
