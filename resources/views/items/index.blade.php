@@ -108,6 +108,7 @@
                                                         <th>Item Name</th>
                                                         <th>Item Weight</th>
                                                         <th>Sales Price</th>
+                                                        <th>Service Fee</th>
                                                         <th>Sales At</th>
                                                         <th>Gold Rate</th>
                                                         <th>Inventory Status</th>
@@ -149,6 +150,8 @@
                                                         <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->item_name }}</td>
                                                         <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ StringHelper::formatDecimalDisplay($item->item_weight) . " gr" }}</td>
                                                         <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->sales_price == null ? "-" : ("Rp " . StringHelper::formatDecimalDisplay($item->sales_price)) }}
+                                                        </td>
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ isset($item->service_fee) && $item->service_fee !== null ? ("Rp " . StringHelper::formatDecimalDisplay($item->service_fee)) : "-" }}
                                                         </td>
                                                         <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('d-M-Y') }}
                                                         </td>
@@ -338,6 +341,22 @@
                             $salesstatus)
                             <option value="{{ $salesstatus->id }}">
                                 {{ $salesstatus->description }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        Filter by Gold Rate
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <select class="form-control" id="filterGoldRates" multiple>
+                            @foreach ($availableGoldRates as $goldRate)
+                            <option value="{{ $goldRate }}">
+                                {{ StringHelper::formatDecimalDisplay($goldRate) }}%
                             </option>
                             @endforeach
                         </select>
@@ -581,6 +600,83 @@
 @endsection
 
 @section('custom-script')
+<style>
+    #filterGoldRates + .select2-container .select2-selection--multiple {
+        min-height: calc(2.25rem + 2px);
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+        padding: .125rem .375rem .125rem .5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    #filterGoldRates + .select2-container.select2-container--focus .select2-selection--multiple {
+        border-color: #ced4da !important;
+        box-shadow: none !important;
+    }
+
+    #filterGoldRates + .select2-container .select2-selection__rendered {
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: .25rem;
+        width: 100%;
+    }
+
+    #filterGoldRates + .select2-container .select2-selection__choice {
+        color: #212529 !important;
+        background: #e9ecef !important;
+        border-color: #ced4da !important;
+        line-height: 1.4 !important;
+        padding: .1rem .5rem !important;
+        margin-top: 0 !important;
+        margin-left: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+    }
+
+    #filterGoldRates + .select2-container .select2-selection__choice__remove {
+        color: #495057 !important;
+        position: static !important;
+        transform: none !important;
+        margin-right: .35rem !important;
+        font-weight: 700;
+        border: 0 !important;
+        background: transparent !important;
+        padding: 0 !important;
+        width: auto !important;
+        line-height: 1 !important;
+    }
+
+    #filterGoldRates + .select2-container .select2-selection__choice__remove span {
+        color: #495057 !important;
+    }
+
+    #filterGoldRates + .select2-container .select2-selection__choice__remove:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    #filterGoldRates + .select2-container .select2-selection__choice__display {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    #filterGoldRates + .select2-container .select2-search--inline {
+        display: none !important;
+    }
+
+    #filterGoldRates + .select2-container:not(.has-selection) .select2-selection__rendered::before {
+        content: '- All Gold Rates -';
+        color: #6c757d !important;
+        opacity: 1 !important;
+        font-size: 1rem !important;
+        font-weight: 400 !important;
+        line-height: 1.5;
+    }
+</style>
 <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script type="text/javascript" src="//cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
@@ -599,6 +695,19 @@
 </script>
 <script type="text/javascript">
 $(function() {
+    $('#filterGoldRates').select2({
+        width: '100%',
+        dropdownParent: $('#advanceFilter'),
+        placeholder: '',
+        closeOnSelect: false
+    });
+
+    function syncGoldRateSelectionClass() {
+        var selectedValues = $('#filterGoldRates').val() || [];
+        var hasSelection = selectedValues.length > 0;
+        $('#filterGoldRates').next('.select2-container').toggleClass('has-selection', hasSelection);
+    }
+
     //Init Modal Advance Filter
     $('#filterStore').val("{{ Session::get('filter.store') }}");
     $('#filterCategory').val("{{ Session::get('filter.category') }}");
@@ -606,6 +715,23 @@ $(function() {
     $('#filterItemStatus').val("{{ Session::get('filter.item_status') }}");
     $('#filterInventoryStatus').val("{{ Session::get('filter.inventory_status') }}");
     $('#filterSalesStatus').val("{{ Session::get('filter.sales_status') }}");
+    var selectedGoldRates = @json(Session::get('filter.gold_rates', []));
+    if (!Array.isArray(selectedGoldRates)) {
+        selectedGoldRates = [selectedGoldRates];
+    }
+    selectedGoldRates = selectedGoldRates
+        .filter(function(rate) { return rate !== null && rate !== ''; })
+        .map(function(rate) {
+            var numericRate = Number(rate);
+            return isFinite(numericRate) ? numericRate.toFixed(2) : null;
+        })
+        .filter(function(rate) { return rate !== null; });
+    $('#filterGoldRates').val(selectedGoldRates).trigger('change');
+    syncGoldRateSelectionClass();
+
+    $('#filterGoldRates').on('change', function() {
+        syncGoldRateSelectionClass();
+    });
     $('#txtSearch').val("{{ Session::get('filter.item_name') }}")
     $('#txtSearchItemNo').val("{{ Session::get('filter.item_no') }}")
 
@@ -673,9 +799,14 @@ $(function() {
         var filterItemStatus = $('#filterItemStatus').val();
         var filterInventoryStatus = $('#filterInventoryStatus').val();
         var filterSalesStatus = $('#filterSalesStatus').val();
+        var filterGoldRates = $('#filterGoldRates').val() || [];
         var itemPerPage = $('#itemperpage').val();
         var search = $("#txtSearch").val();
         var searchItemNo = $("#txtSearchItemNo").val();
+        var goldRatesQuery = '';
+        for (var i = 0; i < filterGoldRates.length; i++) {
+            goldRatesQuery += "&gold_rates[]=" + encodeURIComponent(filterGoldRates[i]);
+        }
 
         window.location = "{{ route('items.applyfilter') }}" +
             "?rangedate=" + rangeDate +
@@ -688,7 +819,8 @@ $(function() {
             "&sales_status=" + filterSalesStatus +
             "&itemperpage=" + itemPerPage +
             "&item_name=" + search +
-            "&item_no=" + searchItemNo;
+            "&item_no=" + searchItemNo +
+            goldRatesQuery;
     });
 
     $('#btnPrint').on('click', function(e) {
@@ -700,12 +832,17 @@ $(function() {
         var filterItemStatus = $('#filterItemStatus').val();
         var filterInventoryStatus = $('#filterInventoryStatus').val();
         var filterSalesStatus = $('#filterSalesStatus').val();
+        var filterGoldRates = $('#filterGoldRates').val() || [];
         var itemPerPage = $('#itemperpage').val();
         var search = $("#txtSearch").val();
         var searchItemNo = $("#txtSearchItemNo").val();
         var printed = $.map($(':checkbox[name=printed\\[\\]]:checked'), function(n, i){
             return n.value;
         }).join(',');
+        var goldRatesQuery = '';
+        for (var i = 0; i < filterGoldRates.length; i++) {
+            goldRatesQuery += "&gold_rates[]=" + encodeURIComponent(filterGoldRates[i]);
+        }
 
         window.location = "{{ route('pdf.items') }}" +
             "?rangedate=" + rangeDate +
@@ -720,7 +857,8 @@ $(function() {
             "&search=" + search +
             "&printed=" + printed +
             "&searchitemno=" + searchItemNo +
-            "&page={{Request::get('page')}}";
+            "&page={{Request::get('page')}}" +
+            goldRatesQuery;
     });
 
     $("#btnClearAllFilter").on('click', function(e) {

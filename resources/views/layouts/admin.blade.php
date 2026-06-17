@@ -9,6 +9,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
@@ -27,9 +28,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Datatable -->
     <link rel="stylesheet" href="//cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.4.0/css/responsive.dataTables.min.css">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 
     <livewire:styles>
 </head>
+
+@php
+    $showAdminNotifications = Auth::check() && Auth::user()->authRole()->name === 'admin';
+    $notificationTableReady = $showAdminNotifications && \Illuminate\Support\Facades\Schema::hasTable('notifications');
+    $adminNotifications = $notificationTableReady ? Auth::user()->notifications()->latest()->limit(5)->get() : collect();
+    $adminUnreadNotificationsCount = $notificationTableReady ? Auth::user()->unreadNotifications()->count() : 0;
+@endphp
 
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
@@ -43,6 +53,38 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
+                @if($showAdminNotifications)
+                <li class="nav-item dropdown" id="admin-notification-wrapper">
+                    <a class="nav-link" data-toggle="dropdown" href="#" id="admin-notification-toggle">
+                        <i class="far fa-bell"></i>
+                        <span
+                            id="admin-notification-count"
+                            class="badge badge-warning navbar-badge {{ $adminUnreadNotificationsCount > 0 ? '' : 'd-none' }}"
+                        >{{ $adminUnreadNotificationsCount }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" id="admin-notification-dropdown">
+                        <span class="dropdown-header" id="admin-notification-header">
+                            {{ $adminUnreadNotificationsCount }} {{ __('Unread Notifications') }}
+                        </span>
+                        <div class="dropdown-divider"></div>
+                        <div id="admin-notification-list">
+                            @forelse($adminNotifications as $notification)
+                            <a
+                                href="{{ $notification->data['url'] ?? '#' }}"
+                                class="dropdown-item admin-notification-item {{ $notification->read_at ? '' : 'bg-light' }}"
+                            >
+                                <div class="font-weight-bold">{{ $notification->data['title'] ?? __('Notification') }}</div>
+                                <div class="text-sm">{{ $notification->data['message'] ?? '' }}</div>
+                                <div class="text-muted text-sm">{{ optional($notification->created_at)->diffForHumans() }}</div>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            @empty
+                            <div class="dropdown-item text-muted" id="admin-notification-empty">{{ __('No notifications yet.') }}</div>
+                            @endforelse
+                        </div>
+                    </div>
+                </li>
+                @endif
                 <li class="nav-item">
                     <a href="{{ route('profile') }}" class="nav-link"><i class="fas fa-user"></i></a>
                 </li>
@@ -249,6 +291,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 <span class="badge badge-danger navbar-badge">Under Dev</span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gold-prices.index') }}"
+                                class="nav-link @if(strpos(Route::currentRouteName(), 'gold-prices.') !== false) active @endif">
+                                <i class="fas fa-coins nav-icon"></i>
+                                <p>{{ __("Gold Price History") }}</p>
+                            </a>
+                        </li>
                         @endif
                         
                         <li class="nav-header">{{ __('OPERATION') }}</li>
@@ -266,15 +315,47 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 <p>{{ __('Item Book') }}</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('sales.admin.entry') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'sales.admin.') !== false) active @endif">
+                                <i class="nav-icon fas fa-dollar-sign"></i>
+                                <p>{{ __('Sales') }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('checkout.admin.entry') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'checkout.admin.') !== false) active @endif">
+                                <i class="nav-icon fas fa-shopping-cart"></i>
+                                <p>{{ __('Checkout') }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('receipts.index') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'receipts.') !== false) active @endif">
+                                <i class="nav-icon fas fa-receipt"></i>
+                                <p>{{ __('Receipts') }}</p>
+                            </a>
+                        </li>
                         @else
                         <li class="nav-item">
                             <a href="{{ route('items.employee.index') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'items.employee.') !== false) active @endif">
                                 <i class="nav-icon fas fa-th-list"></i>
                                 <p>{{ __('Item') }}</p>
                             </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('sales.employee.entry') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'sales.employee.') !== false) active @endif">
-                                <i class="nav-icon fas fa-th-list"></i>
+                                <i class="nav-icon fas fa-dollar-sign"></i>
                                 <p>{{ __('Sales') }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('checkout.employee.entry') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'checkout.employee.') !== false) active @endif">
+                                <i class="nav-icon fas fa-shopping-cart"></i>
+                                <p>{{ __('Checkout') }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('receipts.index') }}" class="nav-link @if(strpos(Route::currentRouteName(), 'receipts.') !== false) active @endif">
+                                <i class="nav-icon fas fa-receipt"></i>
+                                <p>{{ __('Receipts') }}</p>
                             </a>
                         </li>
                         @endif
@@ -437,6 +518,89 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Datatable Jquery -->
     <script src="//cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
     <script src="//cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
+    <!-- Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    @if($showAdminNotifications && config('broadcasting.connections.pusher.key'))
+    <script src="https://js.pusher.com/8.3.0/pusher.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+            var notificationCount = {{ $adminUnreadNotificationsCount }};
+            var $count = $('#admin-notification-count');
+            var $header = $('#admin-notification-header');
+            var $list = $('#admin-notification-list');
+
+            function escapeHtml(value) {
+                return $('<div>').text(value || '').html();
+            }
+
+            function syncNotificationCount() {
+                if (notificationCount > 0) {
+                    $count.removeClass('d-none').text(notificationCount);
+                } else {
+                    $count.addClass('d-none').text('0');
+                }
+
+                $header.text(notificationCount + ' {{ __("Unread Notifications") }}');
+            }
+
+            function buildNotificationItem(notification) {
+                return '' +
+                    '<a href="' + escapeHtml(notification.url || '#') + '" class="dropdown-item admin-notification-item bg-light">' +
+                        '<div class="font-weight-bold">' + escapeHtml(notification.title || '{{ __("Notification") }}') + '</div>' +
+                        '<div class="text-sm">' + escapeHtml(notification.message || '') + '</div>' +
+                        '<div class="text-muted text-sm">{{ __("Just now") }}</div>' +
+                    '</a>' +
+                    '<div class="dropdown-divider"></div>';
+            }
+
+            function prependNotification(notification) {
+                $('#admin-notification-empty').remove();
+                $list.prepend(buildNotificationItem(notification));
+                notificationCount += 1;
+                syncNotificationCount();
+                toastr.info(notification.message || '', notification.title || '{{ __("Notification") }}');
+            }
+
+            $('#admin-notification-wrapper').on('shown.bs.dropdown', function () {
+                if (notificationCount <= 0) {
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ route("notifications.read-all") }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                }).always(function () {
+                    notificationCount = 0;
+                    syncNotificationCount();
+                    $('.admin-notification-item').removeClass('bg-light');
+                });
+            });
+
+            syncNotificationCount();
+
+            var pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
+                cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
+                forceTLS: true,
+                channelAuthorization: {
+                    endpoint: '/broadcasting/auth',
+                    transport: 'ajax',
+                    headers: {
+                        'X-CSRF-Token': csrfToken
+                    }
+                }
+            });
+
+            var channel = pusher.subscribe('private-App.User.{{ Auth::id() }}');
+            channel.bind('admin.transaction.created', function (notification) {
+                prependNotification(notification);
+            });
+        });
+    </script>
+    @endif
 
     @if ($message = Session::get('success'))
     <script type="text/javascript">

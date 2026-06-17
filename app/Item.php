@@ -19,11 +19,11 @@ class Item extends Model
      * @var array
      */
     protected $fillable = [
-        'item_no', 'item_name', 'item_weight', 'item_gold_rate', 'sales_price', 'sales_at', 'item_status_id', 'inventory_status_id', 'category_id', 'allocation_id', 'sales_status_id', 'sales_by', 'store_id', 'created_by',
+        'item_no', 'item_name', 'item_weight', 'item_gold_rate', 'sales_price', 'base_gold_price', 'base_service_fee', 'service_fee', 'sales_at', 'item_status_id', 'inventory_status_id', 'category_id', 'allocation_id', 'sales_status_id', 'sales_by', 'store_id', 'created_by',
     ];
 
     public $sortable = [
-        'item_no', 'item_name', 'item_weight', 'item_gold_rate', 'sales_price', 'sales_at', 'item_status_id', 'inventory_status_id', 'category_id', 'allocation_id', 'sales_status_id', 'sales_by', 'store_id', 'created_at', 'updated_at', 'created_by',
+        'item_no', 'item_name', 'item_weight', 'item_gold_rate', 'sales_price', 'base_gold_price', 'base_service_fee', 'service_fee', 'sales_at', 'item_status_id', 'inventory_status_id', 'category_id', 'allocation_id', 'sales_status_id', 'sales_by', 'store_id', 'created_at', 'updated_at', 'created_by',
     ];
 
     public static function search($query)
@@ -63,5 +63,10 @@ class Item extends Model
 
     public function salesBy() {
         return $this->belongsTo('App\User', 'sales_by');
+    }
+
+    public function receiptDetails()
+    {
+        return $this->hasMany(ReceiptDetails::class, 'item_id');
     }
 }

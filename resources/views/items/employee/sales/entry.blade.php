@@ -1,6 +1,32 @@
 @extends('layouts.admin')
 
 @section('content')
+<style>
+    #item_no + .select2-container {
+        width: 100% !important;
+    }
+
+    #item_no + .select2-container .select2-selection--single {
+        height: calc(2.25rem + 2px) !important;
+        border: 1px solid #ced4da !important;
+        border-radius: .25rem !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    #item_no + .select2-container .select2-selection__rendered {
+        line-height: normal !important;
+        padding-left: .75rem !important;
+        padding-right: 2rem !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    #item_no + .select2-container .select2-selection__arrow {
+        height: 100% !important;
+        right: .45rem !important;
+    }
+</style>
 <?php 
     $totalWeight = 0;
     $totalSales = 0;
@@ -27,6 +53,40 @@
 
             <div class="content">
                 <div class="container-fluid">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">
+                                <strong>Today's Gold Price List:</strong>
+                                @if(count($todayGoldPriceList) > 0)
+                                    @php
+                                        $groupedTodayGoldPriceList = collect($todayGoldPriceList)->groupBy(function ($todayGoldPrice) {
+                                            return $todayGoldPrice['gold_rate'] !== null
+                                                ? number_format((float) $todayGoldPrice['gold_rate'], 2, '.', '')
+                                                : 'unknown';
+                                        });
+                                    @endphp
+                                    @foreach($groupedTodayGoldPriceList as $goldRateKey => $todayGoldPriceRows)
+                                        <div class="mb-1">
+                                            <span class="badge badge-secondary mr-1 mb-1">
+                                                {{ $goldRateKey !== 'unknown' ? number_format((float) $goldRateKey, 2, ',', '.') . '%' : '-' }}
+                                            </span>
+                                            @foreach($todayGoldPriceRows as $todayGoldPrice)
+                                                <span class="badge badge-light mr-1 mb-1">
+                                                    {{ $todayGoldPrice['inventory_status'] ?? '-' }}
+                                                    :
+                                                    Rp {{ number_format($todayGoldPrice['base_price'], 2, ',', '.') }}
+                                                    + Fee Rp {{ number_format($todayGoldPrice['service_fee'] ?? 0, 2, ',', '.') }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+                                @else
+                                    -
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-12">
                             <div class="float-right">
@@ -45,12 +105,16 @@
                                             <div class="card-title">{{ __("Find Item") }}</div>
                                         </div>
                                         <div class="card-body">
-                                            <form method="POST" action="{{ route('items.employee.find') }}">
+                                            <form method="POST" action="{{ route($salesFindRouteName) }}">
                                                 <div class="form-group row">
                                                     @csrf
                                                     <label for="item_no" class="col-3 col-form-label">Item No <span style="color: red">*</span></label>
                                                     <div class="col-6">
-                                                        <input type="text" id="item_no" class="form-control" name="item_no" placeholder="Search Item No here.." value="{{ old('item_no') }}" required />
+                                                        <select id="item_no" class="form-control" name="item_no" required>
+                                                            @if(old('item_no'))
+                                                            <option value="{{ old('item_no') }}" selected>{{ old('item_no') }}</option>
+                                                            @endif
+                                                        </select>
                                                     </div>
                                                     <div class="col-3">
                                                         <button type="submit" class="btn btn-primary">{{ __("Find") }}</button>
@@ -162,18 +226,27 @@
 </div>
 @endsection
 
-{{-- @section('custom-script')
+@section('custom-script')
 <script type="text/javascript">
-    $('#card-detail').hide();
-
-    function updateDetailForm() {
-        // console.log($('#item_no').val());
-        if($('#item_no').val() == '') {
-            alert('Item No must be filled.');
-            $('#card-detail').hide();
-        } else {
-            $('#card-detail').show();
-        }
-    }
+    $(function() {
+        $('#item_no').select2({
+            width: '100%',
+            placeholder: 'Search Item No here..',
+            minimumInputLength: 1,
+            ajax: {
+                url: '{{ route($salesSearchItemsRouteName) }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        term: params.term || ''
+                    };
+                },
+                processResults: function (data) {
+                    return data;
+                }
+            }
+        });
+    });
 </script>
-@endsection --}}
+@endsection

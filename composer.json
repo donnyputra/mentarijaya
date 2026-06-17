@@ -19,6 +19,7 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "^2.0",
         "livewire/livewire": "^1.0",
+        "pusher/pusher-php-server": "~4.0",
         "yajra/laravel-datatables-oracle": "^9.0"
     },
     "require-dev": {

@@ -9,11 +9,14 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0 text-dark">{{ __("Home") }}</h1>
+                            <h1 class="m-0 text-dark">{{ isset($salesSummary) ? __("Dashboard") : __("Home") }}</h1>
                         </div><!-- /.col -->
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="/">{{ __("Home") }}</a></li>
+                                @if(isset($salesSummary))
+                                <li class="breadcrumb-item active">{{ __("Dashboard") }}</li>
+                                @endif
                             </ol>
                         </div><!-- /.col -->
                     </div><!-- /.row -->
@@ -24,13 +27,17 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-12">
-                            <div class="table-responsive">
-                                <div class="card">
-                                    <div class="card-body">
-                                        You are logged in!
+                            @isset($salesSummary)
+                                @include('dashboard._sales_summary', ['salesSummary' => $salesSummary])
+                            @else
+                                <div class="table-responsive">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            You are logged in!
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endisset
                         </div>
                     </div>
                     <!-- /.row -->

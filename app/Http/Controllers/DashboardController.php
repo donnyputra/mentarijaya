@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use DataTables;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Item;
+use App\GoldPrice;
+use App\Category;
 
 class DashboardController extends Controller
 {
@@ -36,12 +39,16 @@ class DashboardController extends Controller
             $totalWeightSummaryCollection = $this->getInStockTotalItemWeightByCategory();
     
             return view('dashboard.index', [
+                'salesSummary' => $this->buildTodaySalesSummary(),
                 'summaryCollection' => $summaryCollection,
                 'totalWeightSummaryCollection' => $totalWeightSummaryCollection,
-                'itemsCount' => $categorySummaryCollection
+                'itemsCount' => $categorySummaryCollection,
+                'todayBaseGoldPriceList' => $this->getTodayBaseGoldPriceList(),
             ]);
         }else{
-            return view('home');
+            return view('home', [
+                'salesSummary' => $this->buildTodaySalesSummary(Auth::id()),
+            ]);
         }
     }
 
@@ -160,6 +167,184 @@ class DashboardController extends Controller
                     ");
 
         return $instockItem;
+    }
+
+    private function getTodayBaseGoldPriceList()
+    {
+        $today = Carbon::today()->format('Y-m-d');
+        $hasGoldRateColumn = Schema::hasColumn('gold_prices', 'gold_rate');
+        $hasInventoryStatusColumn = Schema::hasColumn('gold_prices', 'inventory_status_id');
+        $inventoryStatusMap = [];
+        $inventoryStatusOrderMap = [];
+
+        $goldPriceQuery = GoldPrice::query();
+        if ($hasInventoryStatusColumn) {
+            $goldPriceQuery = $goldPriceQuery->with('inventoryStatus');
+            $inventoryStatuses = \App\InventoryStatus::withTrashed()
+                ->orderBy('id', 'asc')
+                ->get(['id', 'description']);
+            foreach ($inventoryStatuses as $index => $inventoryStatus) {
+                $inventoryStatusMap[$inventoryStatus->id] = $inventoryStatus->description;
+                $inventoryStatusOrderMap[$inventoryStatus->id] = $index;
+            }
+        }
+        if (Schema::hasColumn('gold_prices', 'price_date')) {
+            $goldPriceQuery = $goldPriceQuery
+                ->whereDate('price_date', '<=', $today)
+                ->orderBy('price_date', 'desc');
+        } else {
+            $goldPriceQuery = $goldPriceQuery
+                ->whereDate('created_at', '<=', $today)
+                ->orderBy('created_at', 'desc');
+        }
+
+        $goldPrices = $goldPriceQuery
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $result = [];
+        $seenPairs = [];
+        foreach ($goldPrices as $goldPrice) {
+            $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
+            if ($displayBasePrice === null) {
+                continue;
+            }
+
+            $displayGoldRate = $hasGoldRateColumn ? $goldPrice->gold_rate : null;
+            $displayInventoryStatus = null;
+            if ($hasInventoryStatusColumn) {
+                $displayInventoryStatus = optional($goldPrice->inventoryStatus)->description;
+                if ($displayInventoryStatus === null && $goldPrice->inventory_status_id !== null) {
+                    $displayInventoryStatus = $inventoryStatusMap[$goldPrice->inventory_status_id] ?? null;
+                }
+            }
+
+            if ($hasGoldRateColumn && $displayGoldRate === null) {
+                continue;
+            }
+            if ($hasInventoryStatusColumn && $displayInventoryStatus === null) {
+                continue;
+            }
+
+            $pairKey = ($hasGoldRateColumn && $displayGoldRate !== null
+                    ? number_format((float) $displayGoldRate, 2, '.', '')
+                    : 'no_rate')
+                . '|' . ($hasInventoryStatusColumn ? (string) ($goldPrice->inventory_status_id ?? 'no_status') : 'no_status');
+            if (isset($seenPairs[$pairKey])) {
+                continue;
+            }
+            $seenPairs[$pairKey] = true;
+
+            $result[] = [
+                'base_price' => $displayBasePrice,
+                'service_fee' => $goldPrice->service_fee ?? 0,
+                'gold_rate' => $displayGoldRate,
+                'inventory_status' => $displayInventoryStatus,
+                'inventory_status_id' => $goldPrice->inventory_status_id,
+            ];
+        }
+
+        usort($result, function ($left, $right) use ($inventoryStatusOrderMap) {
+            $leftRate = $left['gold_rate'] !== null ? (float) $left['gold_rate'] : INF;
+            $rightRate = $right['gold_rate'] !== null ? (float) $right['gold_rate'] : INF;
+            if ($leftRate !== $rightRate) {
+                return $leftRate <=> $rightRate;
+            }
+
+            $leftOrder = $inventoryStatusOrderMap[$left['inventory_status_id']] ?? PHP_INT_MAX;
+            $rightOrder = $inventoryStatusOrderMap[$right['inventory_status_id']] ?? PHP_INT_MAX;
+
+            return $leftOrder <=> $rightOrder;
+        });
+
+        foreach ($result as &$row) {
+            unset($row['inventory_status_id']);
+        }
+        unset($row);
+
+        return $result;
+    }
+
+    private function buildTodaySalesSummary($userId = null)
+    {
+        $today = Carbon::today();
+        $rateLabels = [
+            '30.00' => '30%',
+            '37.50' => '37.5%',
+            '42.00' => '42%',
+        ];
+        $categories = Category::query()
+            ->orderBy('id', 'asc')
+            ->get(['code']);
+
+        $baseQuery = DB::table('item')
+            ->leftJoin('category', 'item.category_id', '=', 'category.id')
+            ->whereNull('item.deleted_at')
+            ->whereNotNull('item.sales_at')
+            ->whereDate('item.sales_at', $today->format('Y-m-d'));
+
+        if ($userId !== null) {
+            $baseQuery->where('item.sales_by', $userId)
+                ->whereNull('item.sales_approved_at');
+        }
+
+        $categoryRows = (clone $baseQuery)
+            ->selectRaw('category.code as category_code, COUNT(item.id) as item_count')
+            ->groupBy('category.code')
+            ->get()
+            ->keyBy('category_code');
+
+        $rateRows = (clone $baseQuery)
+            ->selectRaw('ROUND(item.item_gold_rate, 2) as item_gold_rate, SUM(item.item_weight) as total_weight, SUM(item.sales_price) as total_sales')
+            ->groupBy(DB::raw('ROUND(item.item_gold_rate, 2)'))
+            ->get()
+            ->keyBy(function ($row) {
+                return number_format((float) $row->item_gold_rate, 2, '.', '');
+            });
+
+        $totals = (clone $baseQuery)
+            ->selectRaw('SUM(item.item_weight) as total_weight, SUM(item.sales_price) as total_sales')
+            ->first();
+
+        $formatMetricRow = function ($label, $weight, $sales) {
+            $weight = (float) ($weight ?? 0);
+            $sales = (float) ($sales ?? 0);
+            $average = $weight > 0 ? round($sales / $weight, 2) : 0;
+
+            return [
+                'label' => $label,
+                'weight' => $weight,
+                'sales' => $sales,
+                'average' => $average,
+            ];
+        };
+
+        $metricRows = [
+            $formatMetricRow('Total', $totals->total_weight ?? 0, $totals->total_sales ?? 0),
+        ];
+
+        foreach ($rateLabels as $rateKey => $label) {
+            $row = $rateRows->get($rateKey);
+            $metricRows[] = $formatMetricRow(
+                $label,
+                optional($row)->total_weight,
+                optional($row)->total_sales
+            );
+        }
+
+        $categoryCounts = [];
+        foreach ($categories as $category) {
+            $categoryCounts[] = [
+                'code' => $category->code,
+                'count' => (int) (optional($categoryRows->get($category->code))->item_count ?? 0),
+            ];
+        }
+
+        return [
+            'display_date' => $today->locale('id')->translatedFormat('j F Y'),
+            'category_counts' => $categoryCounts,
+            'metric_rows' => $metricRows,
+        ];
     }
 
 }

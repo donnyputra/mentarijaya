@@ -69,6 +69,9 @@ Route::resource('buybackstatuses', 'BuybackStatusController')->only('index', 'cr
 Route::post('buybackstatus/{buybackstatus}/update', 'BuybackStatusController@update')->name('buybackstatuses.update');
 Route::post('buybackstatus/{buybackstatus}/delete', 'BuybackStatusController@delete')->name('buybackstatuses.delete');
 
+// System Configuration > Gold Price History
+Route::resource('gold-prices', 'GoldPriceController')->only('index', 'store');
+
 // System Configuration > Users
 Route::resource('users', 'UserController')->only('index', 'create', 'store', 'edit');
 Route::get('users/{user}/changepassword', 'UserController@changepassword')->name('users.changepassword');
@@ -97,9 +100,22 @@ Route::get('employee/items/index', 'ItemController@employeeItemIndex')->name('it
 Route::get('employee/items/create', 'ItemController@employeeItemCreate')->name('items.employee.create');
 Route::post('employee/items/store', 'ItemController@employeeItemStore')->name('items.employee.store');
 Route::post('employee/items/find', 'ItemController@employeeItemFind')->name('items.employee.find');
+Route::post('employee/sales/find', 'ItemController@employeeItemFind')->name('sales.employee.find');
 Route::get('employee/sales/entry', 'ItemController@employeeSalesEntry')->name('sales.employee.entry');
+Route::get('employee/sales/search-items', 'ItemController@employeeSearchAvailableItems')->name('sales.employee.search-items');
+Route::get('employee/checkout/items', 'ItemController@getItemsPagination')->name('item.simplelist');
 Route::get('employee/sales/form/{itemId}', 'ItemController@employeeSalesForm')->name('sales.employee.form');
 Route::post('employee/sales/form/save', 'ItemController@employeeSalesFormSave')->name('sales.employee.form.save');
+Route::post('admin/sales/find', 'ItemController@employeeItemFind')->name('sales.admin.find');
+Route::get('admin/sales/entry', 'ItemController@employeeSalesEntry')->name('sales.admin.entry');
+Route::get('admin/sales/search-items', 'ItemController@employeeSearchAvailableItems')->name('sales.admin.search-items');
+Route::get('admin/sales/form/{itemId}', 'ItemController@employeeSalesForm')->name('sales.admin.form');
+Route::post('admin/sales/form/save', 'ItemController@employeeSalesFormSave')->name('sales.admin.form.save');
+Route::get('admin/checkout/entry', 'ItemController@checkoutEntry')->name('checkout.admin.entry');
+Route::post('admin/checkout/submit', 'ItemController@checkoutSubmit')->name('checkout.admin.submit');
+Route::get('employee/checkout/entry', 'ItemController@checkoutEntry')->name('checkout.employee.entry');
+Route::post('employee/checkout/submit', 'ItemController@checkoutSubmit')->name('checkout.employee.submit');
+Route::post('notifications/read-all', 'NotificationController@readAll')->name('notifications.read-all');
 
 // Dashboard
 Route::resource('dashboard', 'DashboardController')->only('index');
@@ -110,6 +126,10 @@ Route::get('/dashboard/summary', 'DashboardController@summaryDailyDatatable')->n
 Route::post('/profile/update', 'UserController@profileUpdate')->name('profile.update');
 
 Route::get('/pdf/items', 'PdfController@itemsPdf')->name('pdf.items');
+Route::resource('receipts', 'ReceiptsController')->only('index', 'show', 'edit');
+Route::post('receipts/{receipt}/update', 'ReceiptsController@update')->name('receipts.update');
+Route::post('receipts/{receipt}/approve', 'ReceiptsController@approve')->name('receipts.approve');
+Route::get('receipts/{receipt}/pdf', 'ReceiptsController@pdf')->name('receipts.pdf');
 
 Route::resource('photos', 'PhotosController')->only('store');
 Route::delete('photos', 'PhotosController@destroy')->name('photos.destroy');
