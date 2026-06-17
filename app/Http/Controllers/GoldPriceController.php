@@ -149,12 +149,6 @@ class GoldPriceController extends Controller
                 if (Schema::hasColumn('gold_prices', 'service_fee')) {
                     $goldPrice->service_fee = $entry['service_fee'];
                 }
-                if (Schema::hasColumn('gold_prices', 'min_price')) {
-                    $goldPrice->min_price = $entry['base_price'];
-                }
-                if (Schema::hasColumn('gold_prices', 'max_price')) {
-                    $goldPrice->max_price = $entry['base_price'];
-                }
                 if (Schema::hasColumn('gold_prices', 'notes')) {
                     $goldPrice->notes = $request->get('notes');
                 }
@@ -228,7 +222,7 @@ class GoldPriceController extends Controller
         $result = [];
         $seenPairs = [];
         foreach ($goldPrices as $goldPrice) {
-            $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
+            $displayBasePrice = $goldPrice->base_price;
             if ($displayBasePrice === null) {
                 continue;
             }
@@ -375,7 +369,7 @@ class GoldPriceController extends Controller
                     continue;
                 }
 
-                $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
+                $displayBasePrice = $goldPrice->base_price;
                 $matrix[$inventoryStatus->id][$rateColumn['key']] = [
                     'base_price' => $displayBasePrice !== null ? (float) $displayBasePrice : null,
                     'service_fee' => $goldPrice->service_fee !== null ? (float) $goldPrice->service_fee : null,
@@ -465,7 +459,7 @@ class GoldPriceController extends Controller
                 continue;
             }
 
-            $displayBasePrice = $historyRow->base_price ?? $historyRow->max_price ?? $historyRow->min_price;
+            $displayBasePrice = $historyRow->base_price;
             $historyMatrices[$dateKey]['matrix'][$statusId][$rateKey] = [
                 'base_price' => $displayBasePrice !== null ? (float) $displayBasePrice : null,
                 'service_fee' => $historyRow->service_fee !== null ? (float) $historyRow->service_fee : null,

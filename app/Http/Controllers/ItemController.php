@@ -1820,12 +1820,6 @@ class ItemController extends Controller
         if (Schema::hasColumn('gold_prices', 'base_price') && $goldPrice->base_price !== null) {
             $basePrice = $goldPrice->base_price;
         }
-        if ($basePrice === null && Schema::hasColumn('gold_prices', 'max_price') && $goldPrice->max_price !== null) {
-            $basePrice = $goldPrice->max_price;
-        }
-        if ($basePrice === null && Schema::hasColumn('gold_prices', 'min_price') && $goldPrice->min_price !== null) {
-            $basePrice = $goldPrice->min_price;
-        }
 
         $serviceFee = null;
         if (Schema::hasColumn('gold_prices', 'service_fee') && $goldPrice->service_fee !== null) {
@@ -1902,12 +1896,6 @@ class ItemController extends Controller
             $basePrice = null;
             if (Schema::hasColumn('gold_prices', 'base_price') && $goldPrice->base_price !== null) {
                 $basePrice = $goldPrice->base_price;
-            }
-            if ($basePrice === null && Schema::hasColumn('gold_prices', 'max_price') && $goldPrice->max_price !== null) {
-                $basePrice = $goldPrice->max_price;
-            }
-            if ($basePrice === null && Schema::hasColumn('gold_prices', 'min_price') && $goldPrice->min_price !== null) {
-                $basePrice = $goldPrice->min_price;
             }
 
             $settings[$cacheKey] = [
@@ -2041,7 +2029,7 @@ class ItemController extends Controller
         $result = [];
         $seenPairs = [];
         foreach ($goldPrices as $goldPrice) {
-            $displayBasePrice = $goldPrice->base_price ?? $goldPrice->max_price ?? $goldPrice->min_price;
+            $displayBasePrice = $goldPrice->base_price;
             if ($displayBasePrice === null) {
                 continue;
             }
