@@ -115,6 +115,7 @@ Route::get('admin/checkout/entry', 'ItemController@checkoutEntry')->name('checko
 Route::post('admin/checkout/submit', 'ItemController@checkoutSubmit')->name('checkout.admin.submit');
 Route::get('employee/checkout/entry', 'ItemController@checkoutEntry')->name('checkout.employee.entry');
 Route::post('employee/checkout/submit', 'ItemController@checkoutSubmit')->name('checkout.employee.submit');
+Route::get('notifications', 'NotificationController@index')->name('notifications.index');
 Route::post('notifications/read-all', 'NotificationController@readAll')->name('notifications.read-all');
 
 // Dashboard

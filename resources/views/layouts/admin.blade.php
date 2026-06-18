@@ -32,12 +32,46 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 
     <livewire:styles>
+    <style>
+        .admin-notification-item {
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .admin-notification-item.is-unread {
+            background-color: #f4f6f9;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .admin-notification-item.is-unread .admin-notification-title {
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .admin-notification-item.is-read {
+            background-color: #ffffff;
+            border-left: 4px solid transparent;
+            opacity: 0.8;
+        }
+
+        .admin-notification-item.is-read .admin-notification-title {
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .admin-notification-item .admin-notification-meta {
+            font-size: 0.8rem;
+        }
+
+        #admin-notification-list {
+            max-height: 360px;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 
 @php
     $showAdminNotifications = Auth::check() && Auth::user()->authRole()->name === 'admin';
     $notificationTableReady = $showAdminNotifications && \Illuminate\Support\Facades\Schema::hasTable('notifications');
-    $adminNotifications = $notificationTableReady ? Auth::user()->notifications()->latest()->limit(5)->get() : collect();
     $adminUnreadNotificationsCount = $notificationTableReady ? Auth::user()->unreadNotifications()->count() : 0;
 @endphp
 
@@ -67,20 +101,22 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             {{ $adminUnreadNotificationsCount }} {{ __('Unread Notifications') }}
                         </span>
                         <div class="dropdown-divider"></div>
+                        <div class="px-3 py-2 text-right">
+                            <button
+                                type="button"
+                                id="admin-notification-read-all"
+                                class="btn btn-link btn-sm p-0 {{ $adminUnreadNotificationsCount > 0 ? '' : 'd-none' }}"
+                            >{{ __('Mark all as read') }}</button>
+                        </div>
+                        <div class="dropdown-divider"></div>
                         <div id="admin-notification-list">
-                            @forelse($adminNotifications as $notification)
-                            <a
-                                href="{{ $notification->data['url'] ?? '#' }}"
-                                class="dropdown-item admin-notification-item {{ $notification->read_at ? '' : 'bg-light' }}"
-                            >
-                                <div class="font-weight-bold">{{ $notification->data['title'] ?? __('Notification') }}</div>
-                                <div class="text-sm">{{ $notification->data['message'] ?? '' }}</div>
-                                <div class="text-muted text-sm">{{ optional($notification->created_at)->diffForHumans() }}</div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            @empty
                             <div class="dropdown-item text-muted" id="admin-notification-empty">{{ __('No notifications yet.') }}</div>
-                            @endforelse
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="px-3 py-2 text-center">
+                            <button type="button" id="admin-notification-load-more" class="btn btn-outline-secondary btn-sm d-none">
+                                {{ __('Load more') }}
+                            </button>
                         </div>
                     </div>
                 </li>
@@ -529,6 +565,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
             var $count = $('#admin-notification-count');
             var $header = $('#admin-notification-header');
             var $list = $('#admin-notification-list');
+            var $readAllButton = $('#admin-notification-read-all');
+            var $loadMoreButton = $('#admin-notification-load-more');
+            var $emptyState = $('#admin-notification-empty');
+            var notificationOffset = 0;
+            var notificationLimit = 10;
+            var notificationsHasMore = false;
+            var isLoadingNotifications = false;
             var audioContext = null;
             var audioUnlocked = false;
 
@@ -589,6 +632,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 var startTime = context.currentTime + 0.02;
                 scheduleBeep(context, startTime, 0.12, 880);
                 scheduleBeep(context, startTime + 0.18, 0.12, 880);
+                scheduleBeep(context, startTime + 0.36, 0.12, 880);
             }
 
             function escapeHtml(value) {
@@ -598,32 +642,104 @@ scratch. This page gets rid of all links and provides the needed markup only.
             function syncNotificationCount() {
                 if (notificationCount > 0) {
                     $count.removeClass('d-none').text(notificationCount);
+                    $readAllButton.removeClass('d-none');
                 } else {
                     $count.addClass('d-none').text('0');
+                    $readAllButton.addClass('d-none');
                 }
 
                 $header.text(notificationCount + ' {{ __("Unread Notifications") }}');
             }
 
+            function setLoadMoreVisibility() {
+                if (notificationsHasMore) {
+                    $loadMoreButton.removeClass('d-none').prop('disabled', false);
+                } else {
+                    $loadMoreButton.addClass('d-none').prop('disabled', false);
+                }
+            }
+
             function buildNotificationItem(notification) {
+                var itemClass = notification.is_read ? 'is-read' : 'is-unread';
+
                 return '' +
-                    '<a href="' + escapeHtml(notification.url || '#') + '" class="dropdown-item admin-notification-item bg-light">' +
-                        '<div class="font-weight-bold">' + escapeHtml(notification.title || '{{ __("Notification") }}') + '</div>' +
+                    '<a href="' + escapeHtml(notification.url || '#') + '" class="dropdown-item admin-notification-item ' + itemClass + '">' +
+                        '<div class="admin-notification-title">' + escapeHtml(notification.title || '{{ __("Notification") }}') + '</div>' +
                         '<div class="text-sm">' + escapeHtml(notification.message || '') + '</div>' +
-                        '<div class="text-muted text-sm">{{ __("Just now") }}</div>' +
+                        '<div class="text-muted admin-notification-meta">' + escapeHtml(notification.created_at_human || '{{ __("Just now") }}') + '</div>' +
                     '</a>' +
                     '<div class="dropdown-divider"></div>';
+            }
+
+            function markNotificationItemsRead() {
+                $('.admin-notification-item')
+                    .removeClass('is-unread bg-light')
+                    .addClass('is-read');
+            }
+
+            function renderNotifications(notifications, resetList) {
+                var html = '';
+
+                $.each(notifications || [], function (_, notification) {
+                    html += buildNotificationItem(notification);
+                });
+
+                if (resetList) {
+                    $list.html(html);
+                } else {
+                    $list.append(html);
+                }
+
+                if ($list.children().length > 0) {
+                    $emptyState.remove();
+                } else if (!$('#admin-notification-empty').length) {
+                    $list.html('<div class="dropdown-item text-muted" id="admin-notification-empty">{{ __("No notifications yet.") }}</div>');
+                    $emptyState = $('#admin-notification-empty');
+                }
+            }
+
+            function loadNotifications(resetList) {
+                if (isLoadingNotifications) {
+                    return;
+                }
+
+                isLoadingNotifications = true;
+                if (resetList) {
+                    notificationOffset = 0;
+                }
+
+                $loadMoreButton.prop('disabled', true);
+
+                $.ajax({
+                    url: '{{ route("notifications.index") }}',
+                    method: 'GET',
+                    dataType: 'json',
+                    data: {
+                        limit: notificationLimit,
+                        offset: notificationOffset
+                    }
+                }).done(function (response) {
+                    var notifications = response.notifications || [];
+                    notificationsHasMore = !!response.has_more;
+                    renderNotifications(notifications, resetList);
+                    notificationOffset = response.next_offset || (notificationOffset + notifications.length);
+                    setLoadMoreVisibility();
+                }).always(function () {
+                    isLoadingNotifications = false;
+                    $loadMoreButton.prop('disabled', false);
+                });
             }
 
             function prependNotification(notification) {
                 $('#admin-notification-empty').remove();
                 $list.prepend(buildNotificationItem(notification));
                 notificationCount += 1;
+                notificationOffset += 1;
                 syncNotificationCount();
                 toastr.info(notification.message || '', notification.title || '{{ __("Notification") }}');
             }
 
-            $('#admin-notification-wrapper').on('shown.bs.dropdown', function () {
+            $readAllButton.on('click', function () {
                 if (notificationCount <= 0) {
                     return;
                 }
@@ -634,14 +750,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     headers: {
                         'X-CSRF-TOKEN': csrfToken
                     }
-                }).always(function () {
+                }).done(function () {
                     notificationCount = 0;
                     syncNotificationCount();
-                    $('.admin-notification-item').removeClass('bg-light');
+                    markNotificationItemsRead();
                 });
             });
 
+            $loadMoreButton.on('click', function () {
+                loadNotifications(false);
+            });
+
             syncNotificationCount();
+            setLoadMoreVisibility();
+            loadNotifications(true);
 
             $(document).on('click keydown touchstart', function () {
                 unlockNotificationSound();
