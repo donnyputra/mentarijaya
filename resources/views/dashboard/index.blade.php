@@ -168,7 +168,7 @@
                                                     <th>Date</th>
                                                     <th>Rate</th>
                                                     <th>W</th>
-                                                    <th>Sales</th>
+                                                    <th>Total Sales</th>
                                                     <th>Avg</th>
                                                     <th>Sold</th>
                                                 </tr>

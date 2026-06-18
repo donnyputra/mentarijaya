@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Item;
 use App\GoldPrice;
-use App\Category;
 
 class DashboardController extends Controller
 {
@@ -59,13 +58,15 @@ class DashboardController extends Controller
     }
 
     private function getSummaryCollection() {
+        $lineTotalExpression = $this->getSalesLineTotalExpression();
+
         $summaryCollection = DB::table('item')
                             ->select(DB::raw("
                                 DATE(item.sales_at) AS 'sales_date', 
                                 item.item_gold_rate as item_gold_rate,
                                 SUM(item.item_weight) AS total_weight,
-                                SUM(item.sales_price) AS total_sales,
-                                ROUND(SUM(item.sales_price) / SUM(item.item_weight)) AS average,
+                                SUM({$lineTotalExpression}) AS total_sales,
+                                ROUND(SUM({$lineTotalExpression}) / SUM(item.item_weight)) AS average,
                                 GROUP_CONCAT(category.CODE) AS item_category_list,
                                 MAX(item.id) AS max_item_id
                             "))
@@ -268,9 +269,8 @@ class DashboardController extends Controller
     private function buildTodaySalesSummary($userId = null)
     {
         $today = Carbon::today();
-        $categories = Category::query()
-            ->orderBy('id', 'asc')
-            ->get(['code']);
+        $lineTotalExpression = $this->getSalesLineTotalExpression();
+        $categoryOrder = ['A', 'CK', 'C', 'W', 'L', 'GL', 'K', 'O'];
 
         $baseQuery = DB::table('item')
             ->leftJoin('category', 'item.category_id', '=', 'category.id')
@@ -285,7 +285,7 @@ class DashboardController extends Controller
             ->keyBy('category_code');
 
         $rateRows = (clone $baseQuery)
-            ->selectRaw('ROUND(item.item_gold_rate, 2) as item_gold_rate, SUM(item.item_weight) as total_weight, SUM(item.sales_price) as total_sales')
+            ->selectRaw('ROUND(item.item_gold_rate, 2) as item_gold_rate, SUM(item.item_weight) as total_weight, SUM(' . $lineTotalExpression . ') as total_sales')
             ->groupBy(DB::raw('ROUND(item.item_gold_rate, 2)'))
             ->get()
             ->keyBy(function ($row) {
@@ -307,7 +307,7 @@ class DashboardController extends Controller
             ->all();
 
         $totals = (clone $baseQuery)
-            ->selectRaw('SUM(item.item_weight) as total_weight, SUM(item.sales_price) as total_sales')
+            ->selectRaw('SUM(item.item_weight) as total_weight, SUM(' . $lineTotalExpression . ') as total_sales')
             ->first();
 
         $formatMetricRow = function ($label, $weight, $sales) {
@@ -337,15 +337,16 @@ class DashboardController extends Controller
         }
 
         $categoryCounts = [];
-        foreach ($categories as $category) {
+        foreach ($categoryOrder as $categoryCode) {
             $categoryCounts[] = [
-                'code' => $category->code,
-                'count' => (int) (optional($categoryRows->get($category->code))->item_count ?? 0),
+                'code' => $categoryCode,
+                'count' => (int) (optional($categoryRows->get($categoryCode))->item_count ?? 0),
             ];
         }
 
         return [
             'display_date' => $today->locale('id')->translatedFormat('j F Y'),
+            'total_count' => array_sum(array_column($categoryCounts, 'count')),
             'category_counts' => $categoryCounts,
             'metric_rows' => $metricRows,
         ];
@@ -357,6 +358,15 @@ class DashboardController extends Controller
         $formattedRate = rtrim(rtrim($formattedRate, '0'), '.');
 
         return $formattedRate . '%';
+    }
+
+    private function getSalesLineTotalExpression()
+    {
+        if (Schema::hasColumn('item', 'service_fee')) {
+            return 'COALESCE(item.sales_price, 0) + COALESCE(item.service_fee, 0)';
+        }
+
+        return 'COALESCE(item.sales_price, 0)';
     }
 
 }

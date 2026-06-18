@@ -81,6 +81,18 @@
         margin-top: 0.55rem;
     }
 
+    .sales-summary-type-row.total {
+        border-bottom: 2px solid var(--summary-accent);
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.4rem;
+    }
+
+    .sales-summary-type-row.total .sales-summary-type-code,
+    .sales-summary-type-row.total .sales-summary-type-count {
+        font-size: 1.2rem;
+        font-weight: 800;
+    }
+
     .sales-summary-type-code {
         font-size: 1.0875rem;
         font-weight: 700;
@@ -153,6 +165,10 @@
 
     <div class="sales-summary-grid">
         <div class="sales-summary-card">
+            <div class="sales-summary-type-row total">
+                <span class="sales-summary-type-code">Total</span>
+                <span class="sales-summary-type-count">{{ $salesSummary['total_count'] }}</span>
+            </div>
             @foreach($salesSummary['category_counts'] as $categoryCount)
             <div class="sales-summary-type-row">
                 <span class="sales-summary-type-code">{{ $categoryCount['code'] }}</span>
