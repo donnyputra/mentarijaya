@@ -320,14 +320,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('buybackstatuses.index') }}"
-                                class="nav-link @if(strpos(Route::currentRouteName(), 'buybackstatuses.') !== false) active @endif">
-                                <i class="fas fa-bars nav-icon"></i>
-                                <p>{{ __("Buyback Status") }}</p>
-                                <span class="badge badge-danger navbar-badge">Under Dev</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a href="{{ route('gold-prices.index') }}"
                                 class="nav-link @if(strpos(Route::currentRouteName(), 'gold-prices.') !== false) active @endif">
                                 <i class="fas fa-coins nav-icon"></i>

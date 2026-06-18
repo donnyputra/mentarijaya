@@ -28,7 +28,7 @@
                             <div class="table-responsive">
                                 <div class="card">
                                     <div class="card-body">
-                                        @livewire('receipts-list-table')
+                                        @livewire(\App\Http\Livewire\ReceiptsListTable::class)
                                     </div>
                                 </div>
                             </div>

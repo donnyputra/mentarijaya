@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Receipts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use PDF;
 
 class ReceiptsController extends Controller
@@ -150,7 +151,7 @@ class ReceiptsController extends Controller
                     $lineTotal = $salesPrice + $serviceFee;
 
                     $item->sales_price = $salesPrice;
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('item', 'service_fee')) {
+                    if (Schema::hasColumn('item', 'service_fee')) {
                         $item->service_fee = $serviceFee;
                     }
                     $item->sales_at = $salesAt;
@@ -174,7 +175,7 @@ class ReceiptsController extends Controller
                     $detail->sales_price = $salesPrice;
                     $detail->service_fee = $serviceFee;
                     $detail->line_total = $lineTotal;
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('receipt_details', 'notes')) {
+                    if (Schema::hasColumn('receipt_details', 'notes')) {
                         $detail->notes = $note !== '' ? $note : null;
                     }
                     $detail->save();
@@ -233,6 +234,42 @@ class ReceiptsController extends Controller
         }
 
         return redirect()->route('receipts.show', $receipt->id)->with('success', __('Receipt has been approved.'));
+    }
+
+    public function cancel($id)
+    {
+        $this->ensureAdminAccess();
+
+        try {
+            DB::transaction(function () use ($id) {
+                $receipt = Receipts::with('details.item')->lockForUpdate()->findOrFail($id);
+
+                foreach ($receipt->details as $detail) {
+                    if (!$detail->item) {
+                        continue;
+                    }
+
+                    $item = \App\Item::where('id', $detail->item->id)->lockForUpdate()->firstOrFail();
+                    $item->sales_status_id = null;
+                    $item->sales_by = null;
+                    $item->sales_price = null;
+                    $item->sales_at = null;
+                    $item->sales_approved_at = null;
+                    $item->item_status_id = 2;
+                    $item->save();
+                }
+
+                foreach ($receipt->details as $detail) {
+                    $detail->delete();
+                }
+
+                $receipt->delete();
+            });
+        } catch (\Throwable $exception) {
+            return redirect()->route('receipts.show', $id)->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('receipts.index')->with('success', __('Receipt has been cancelled and items are available again.'));
     }
 
     /**

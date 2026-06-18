@@ -33,7 +33,7 @@
                             <div class="table-responsive">
                                 <div class="card">
                                     <div class="card-body">
-                                        @livewire('buybackstatuses-table')
+                                        @livewire(\App\Http\Livewire\BuybackStatusesTable::class)
                                     </div>
                                 </div>
                             </div>

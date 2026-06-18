@@ -80,7 +80,6 @@
                                     <div><strong>Customer Address:</strong> {{ $receipt->customer_address ?: '-' }}</div>
                                     <div><strong>Total:</strong> Rp {{ number_format($receipt->receipt_total, 2, ',', '.') }}</div>
                                     <div><strong>Status:</strong> {{ $receiptApproved ? 'Approved' : 'Submitted - waiting for admin approval' }}</div>
-                                    <div><strong>Service Fee:</strong> {{ $showServiceFee ? 'Shown automatically' : 'Hidden automatically' }}</div>
                                 </div>
                             </div>
 
@@ -178,6 +177,10 @@
                                     <button type="submit" class="btn btn-success">{{ __("Approve Receipt") }}</button>
                                 </form>
                                 @endif
+                                <form method="POST" action="{{ route('receipts.cancel', $receipt->id) }}" class="d-inline" onsubmit="return confirm('{{ __('Cancel this receipt and revert all items to available?') }}')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-danger">{{ __("Cancel Receipt") }}</button>
+                                </form>
                                 @endif
                                 @if($receiptApproved)
                                 <a class="btn btn-dark" href="{{ route('receipts.pdf', ['receipt' => $receipt->id]) }}" target="_blank" role="button">{{ __("Print Receipt") }}</a>

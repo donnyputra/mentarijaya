@@ -33,7 +33,7 @@
                             <div class="table-responsive">
                                 <div class="card">
                                     <div class="card-body">
-                                        @livewire('gold-price-table')
+                                        @livewire(\App\Http\Livewire\GoldPriceTable::class)
                                     </div>
                                 </div>
                             </div>
