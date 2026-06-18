@@ -1698,19 +1698,27 @@ class ItemController extends Controller
             ]);
         }
 
-        try {
-            if ($notificationsTableReady) {
+        if ($notificationsTableReady) {
+            try {
                 Notification::send($admins, new EmployeeTransactionSubmittedNotification($payload));
+            } catch (\Throwable $exception) {
+                \Log::warning('Unable to persist admin transaction notification.', [
+                    'receipt_id' => $receipt->id,
+                    'message' => $exception->getMessage(),
+                    'notifications_table_ready' => $notificationsTableReady,
+                ]);
             }
+        }
 
-            broadcast(new AdminTransactionCreated($admins->pluck('id')->all(), $payload));
+        try {
+            event(new AdminTransactionCreated($admins->pluck('id')->all(), $payload));
         } catch (\Throwable $exception) {
-            \Log::warning('Unable to send admin transaction notification.', [
+            \Log::warning('Unable to broadcast admin transaction notification.', [
                 'receipt_id' => $receipt->id,
                 'message' => $exception->getMessage(),
                 'broadcast_driver' => config('broadcasting.default'),
                 'pusher_key_configured' => !empty(config('broadcasting.connections.pusher.key')),
-                'notifications_table_ready' => $notificationsTableReady,
+                'admin_user_ids' => $admins->pluck('id')->all(),
             ]);
         }
     }
