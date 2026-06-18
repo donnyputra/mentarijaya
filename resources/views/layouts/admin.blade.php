@@ -548,8 +548,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="//cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
     <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    @if($showAdminNotifications && config('broadcasting.connections.pusher.key'))
+    @if($showAdminNotifications && $notificationTableReady && config('broadcasting.connections.pusher.key'))
     <script src="https://js.pusher.com/8.3.0/pusher.min.js"></script>
+    @endif
+    @if($showAdminNotifications && $notificationTableReady)
     <script type="text/javascript">
         $(function () {
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
@@ -566,6 +568,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
             var isLoadingNotifications = false;
             var audioContext = null;
             var audioUnlocked = false;
+            var pusherKey = @json(config('broadcasting.connections.pusher.key'));
+            var pusherCluster = @json(config('broadcasting.connections.pusher.options.cluster'));
 
             function getAudioContext() {
                 if (!audioContext) {
@@ -773,23 +777,25 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 unlockNotificationSound();
             });
 
-            var pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
-                cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
-                forceTLS: true,
-                channelAuthorization: {
-                    endpoint: '/broadcasting/auth',
-                    transport: 'ajax',
-                    headers: {
-                        'X-CSRF-Token': csrfToken
+            if (window.Pusher && pusherKey) {
+                var pusher = new Pusher(pusherKey, {
+                    cluster: pusherCluster,
+                    forceTLS: true,
+                    channelAuthorization: {
+                        endpoint: '/broadcasting/auth',
+                        transport: 'ajax',
+                        headers: {
+                            'X-CSRF-Token': csrfToken
+                        }
                     }
-                }
-            });
+                });
 
-            var channel = pusher.subscribe('private-App.User.{{ Auth::id() }}');
-            channel.bind('admin.transaction.created', function (notification) {
-                prependNotification(notification);
-                playNotificationSound();
-            });
+                var channel = pusher.subscribe('private-App.User.{{ Auth::id() }}');
+                channel.bind('admin.transaction.created', function (notification) {
+                    prependNotification(notification);
+                    playNotificationSound();
+                });
+            }
         });
     </script>
     @endif
