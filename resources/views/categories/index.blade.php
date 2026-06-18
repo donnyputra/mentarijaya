@@ -33,7 +33,7 @@
                             <div class="table-responsive">
                                 <div class="card">
                                     <div class="card-body">
-                                        @livewire('categories-table')
+                                        @livewire(\App\Http\Livewire\CategoriesTable::class)
                                     </div>
                                 </div>
                             </div>

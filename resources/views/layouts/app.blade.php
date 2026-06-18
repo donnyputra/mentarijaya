@@ -57,7 +57,6 @@
                                     <a class="dropdown-item" href="{{ route('allocations.index') }}">{{ __("Allocation") }}</a>
                                     <a class="dropdown-item" href="{{ route('itemstatuses.index') }}">{{ __("Item Status") }}</a>
                                     <a class="dropdown-item" href="{{ route('inventorystatuses.index') }}">{{ __("Inventory Status") }}</a>
-                                    <a class="dropdown-item" href="{{ route('buybackstatuses.index') }}">{{ __("Buyback Status") }}</a>
                                     <a class="dropdown-item" href="{{ route('salesstatuses.index') }}">{{ __("Sales Status") }}</a>
                                     <a class="dropdown-item" href="{{ route('gold-prices.index') }}">{{ __("Gold Price") }}</a>
                                 </div>

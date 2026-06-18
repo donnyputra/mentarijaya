@@ -268,11 +268,6 @@ class DashboardController extends Controller
     private function buildTodaySalesSummary($userId = null)
     {
         $today = Carbon::today();
-        $rateLabels = [
-            '30.00' => '30%',
-            '37.50' => '37.5%',
-            '42.00' => '42%',
-        ];
         $categories = Category::query()
             ->orderBy('id', 'asc')
             ->get(['code']);
@@ -282,11 +277,6 @@ class DashboardController extends Controller
             ->whereNull('item.deleted_at')
             ->whereNotNull('item.sales_at')
             ->whereDate('item.sales_at', $today->format('Y-m-d'));
-
-        if ($userId !== null) {
-            $baseQuery->where('item.sales_by', $userId)
-                ->whereNull('item.sales_approved_at');
-        }
 
         $categoryRows = (clone $baseQuery)
             ->selectRaw('category.code as category_code, COUNT(item.id) as item_count')
@@ -301,6 +291,20 @@ class DashboardController extends Controller
             ->keyBy(function ($row) {
                 return number_format((float) $row->item_gold_rate, 2, '.', '');
             });
+
+        $rateLabels = DB::table('item')
+            ->whereNull('deleted_at')
+            ->whereNotNull('item_gold_rate')
+            ->selectRaw('ROUND(item_gold_rate, 2) as item_gold_rate')
+            ->distinct()
+            ->orderBy('item_gold_rate', 'asc')
+            ->pluck('item_gold_rate')
+            ->mapWithKeys(function ($rate) {
+                $rateKey = number_format((float) $rate, 2, '.', '');
+
+                return [$rateKey => $this->formatSalesSummaryRateLabel($rate)];
+            })
+            ->all();
 
         $totals = (clone $baseQuery)
             ->selectRaw('SUM(item.item_weight) as total_weight, SUM(item.sales_price) as total_sales')
@@ -345,6 +349,14 @@ class DashboardController extends Controller
             'category_counts' => $categoryCounts,
             'metric_rows' => $metricRows,
         ];
+    }
+
+    private function formatSalesSummaryRateLabel($rate)
+    {
+        $formattedRate = number_format((float) $rate, 2, '.', '');
+        $formattedRate = rtrim(rtrim($formattedRate, '0'), '.');
+
+        return $formattedRate . '%';
     }
 
 }

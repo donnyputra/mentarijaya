@@ -33,7 +33,7 @@
                             <div class="table-responsive">
                                 <div class="card">
                                     <div class="card-body">
-                                        @livewire('allocations-table')
+                                        @livewire(\App\Http\Livewire\AllocationsTable::class)
                                     </div>
                                 </div>
                             </div>

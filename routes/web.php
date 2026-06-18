@@ -115,6 +115,7 @@ Route::get('admin/checkout/entry', 'ItemController@checkoutEntry')->name('checko
 Route::post('admin/checkout/submit', 'ItemController@checkoutSubmit')->name('checkout.admin.submit');
 Route::get('employee/checkout/entry', 'ItemController@checkoutEntry')->name('checkout.employee.entry');
 Route::post('employee/checkout/submit', 'ItemController@checkoutSubmit')->name('checkout.employee.submit');
+Route::get('notifications', 'NotificationController@index')->name('notifications.index');
 Route::post('notifications/read-all', 'NotificationController@readAll')->name('notifications.read-all');
 
 // Dashboard
@@ -129,6 +130,7 @@ Route::get('/pdf/items', 'PdfController@itemsPdf')->name('pdf.items');
 Route::resource('receipts', 'ReceiptsController')->only('index', 'show', 'edit');
 Route::post('receipts/{receipt}/update', 'ReceiptsController@update')->name('receipts.update');
 Route::post('receipts/{receipt}/approve', 'ReceiptsController@approve')->name('receipts.approve');
+Route::post('receipts/{receipt}/cancel', 'ReceiptsController@cancel')->name('receipts.cancel');
 Route::get('receipts/{receipt}/pdf', 'ReceiptsController@pdf')->name('receipts.pdf');
 
 Route::resource('photos', 'PhotosController')->only('store');
