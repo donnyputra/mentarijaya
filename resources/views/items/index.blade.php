@@ -521,6 +521,11 @@
                         <input type="checkbox" name="printed[]" value=15> Store
                     </label>
                 </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="printed[]" value=16 checked> Service Fee
+                    </label>
+                </div>
                 
             </div> <!-- /.modal-body -->
             <div class="modal-footer">

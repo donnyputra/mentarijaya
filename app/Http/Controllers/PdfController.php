@@ -106,7 +106,7 @@ class PdfController extends Controller
 
         $items = $items->orderBy($sortBy, $sortDirection);
 
-        $printed = explode(",", $request->get('printed'));
+        $printed = array_filter(explode(",", (string) $request->get('printed', '')));
 
         //Implement pagination
         $itemPerPage = 10; // default
@@ -115,7 +115,7 @@ class PdfController extends Controller
         $items = $items->paginate($itemPerPage);
 
         $total_weight = 0;
-        $total_price = 0;
+        $total_sales = 0;
         $item_count = 0;
         $storage_item_count = 0;
         $weight37 = 0;
@@ -127,7 +127,7 @@ class PdfController extends Controller
             } else if ($item->item_gold_rate == 42.0 && $item->allocation_id == 2) {
                 $weight42 = $weight42 + $item->item_weight;
             }
-            $total_price = $total_price + $item->sales_price;
+            $total_sales = $total_sales + ($item->sales_price ?? 0) + ($item->service_fee ?? 0);
             if($item->allocation_id == 2) {
                 $storage_item_count++;
             }
@@ -140,7 +140,7 @@ class PdfController extends Controller
             'total_weight' => $total_weight,
             'weight37' => $weight37,
             'weight42' => $weight42,
-            'total_price' => $total_price,
+            'total_sales' => $total_sales,
             'item_count' => $item_count,
             'storage_item_count' => $storage_item_count
         ]);

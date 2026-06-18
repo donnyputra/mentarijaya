@@ -68,6 +68,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 @if (in_array(4, $printed))
                 <th class="text-center">Sales Price</th>
                 @endif
+                @if (in_array(16, $printed))
+                <th class="text-center">Service Fee</th>
+                @endif
                 @if (in_array(5, $printed))
                 <th class="text-center">Sales At</th>
                 @endif
@@ -122,6 +125,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <td>{!! $item->sales_price == null ? "-" : ("<div id='harga'><p class='rupiah'>Rp</p><p class='nominal'>" . number_format($item->sales_price, 0, ",", ".") . "</p></div>") !!}
                 </td>
                 @endif
+                @if (in_array(16, $printed))
+                <td>{!! !isset($item->service_fee) || $item->service_fee === null ? "-" : ("<div id='harga'><p class='rupiah'>Rp</p><p class='nominal'>" . number_format($item->service_fee, 0, ",", ".") . "</p></div>") !!}</td>
+                @endif
                 @if (in_array(5, $printed))
                 <td class="text-center">{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('d-M-Y') }}
                 </td>
@@ -173,7 +179,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <th class="text-center">Weight Total</th>
                 <th class="text-center">Weight Storage 37,50%</th>
                 <th class="text-center">Weight Storage 42,00%</th>
-                <th class="text-center">Price Total</th>
+                <th class="text-center">Total Sales</th>
                 <th class="text-center">Item Count</th>
                 <th class="text-center">From Storage</th>
             </tr>
@@ -184,7 +190,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <td class="text-center" style="vertical-align:middle">{{$total_weight}} gr</td>
                 <th class="text-center">{{StringHelper::formatDecimalDisplay($weight37)}} gr</th>
                 <th class="text-center">{{StringHelper::formatDecimalDisplay($weight42)}} gr</th>
-                <td class="text-center" style="vertical-align:middle">{{"Rp " . StringHelper::formatDecimalDisplay($total_price)}}</td>
+                <td class="text-center" style="vertical-align:middle">{{"Rp " . StringHelper::formatDecimalDisplay($total_sales)}}</td>
                 <td class="text-center" style="vertical-align:middle">{{$item_count}} pcs</td>
                 <td class="text-center" style="vertical-align:middle">{{$storage_item_count}} pcs</td>
             </tr>
