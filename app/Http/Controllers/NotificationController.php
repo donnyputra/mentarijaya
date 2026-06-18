@@ -21,7 +21,10 @@ class NotificationController extends Controller
 
         Auth::user()->unreadNotifications->markAsRead();
 
-        return response()->json(['status' => 'ok']);
+        return response()->json([
+            'status' => 'ok',
+            'unread_count' => Auth::user()->fresh()->unreadNotifications()->count(),
+        ]);
     }
 
     public function index(Request $request)
@@ -46,6 +49,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'status' => 'ok',
+            'unread_count' => Auth::user()->unreadNotifications()->count(),
             'notifications' => $notifications->map(function ($notification) {
                 return [
                     'id' => $notification->id,

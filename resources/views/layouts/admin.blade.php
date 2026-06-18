@@ -712,10 +712,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     }
                 }).done(function (response) {
                     var notifications = response.notifications || [];
+                    if (typeof response.unread_count !== 'undefined') {
+                        notificationCount = parseInt(response.unread_count, 10) || 0;
+                        syncNotificationCount();
+                    }
                     notificationsHasMore = !!response.has_more;
                     renderNotifications(notifications, resetList);
                     notificationOffset = response.next_offset || (notificationOffset + notifications.length);
                     setLoadMoreVisibility();
+                }).fail(function () {
+                    toastr.error('{{ __("Unable to load notifications.") }}');
                 }).always(function () {
                     isLoadingNotifications = false;
                     $loadMoreButton.prop('disabled', false);
@@ -742,10 +748,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     headers: {
                         'X-CSRF-TOKEN': csrfToken
                     }
-                }).done(function () {
+                }).done(function (response) {
                     notificationCount = 0;
+                    if (typeof response.unread_count !== 'undefined') {
+                        notificationCount = parseInt(response.unread_count, 10) || 0;
+                    }
                     syncNotificationCount();
                     markNotificationItemsRead();
+                    loadNotifications(true);
+                }).fail(function () {
+                    toastr.error('{{ __("Unable to mark notifications as read.") }}');
                 });
             });
 
