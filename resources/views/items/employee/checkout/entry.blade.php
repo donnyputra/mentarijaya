@@ -130,8 +130,8 @@
                                                 <td class="text-right">{{ number_format((float) ($oldItemGoldRates[$index] ?? 0), 2, ',', '.') }}%</td>
                                                 <td class="text-right recommended-sales-price-display">{{ ($oldRecommendedSalesPrices[$index] ?? '') !== '' ? ('Rp ' . number_format((float) $oldRecommendedSalesPrices[$index], 2, ',', '.')) : '-' }}</td>
                                                 <td>
-                                                    <input type="hidden" class="sales-price-input" name="sales_prices[]" value="{{ $oldSalesPrices[$index] ?? ($oldRecommendedSalesPrices[$index] ?? '') }}">
-                                                    <input type="text" inputmode="decimal" class="form-control text-right sales-price-display-input" value="{{ ($oldSalesPrices[$index] ?? ($oldRecommendedSalesPrices[$index] ?? '')) !== '' ? number_format((float) ($oldSalesPrices[$index] ?? ($oldRecommendedSalesPrices[$index] ?? 0)), 2, ',', '.') : '' }}" required>
+                                                    <input type="hidden" class="sales-price-input" name="sales_prices[]" value="{{ $oldSalesPrices[$index] ?? '' }}">
+                                                    <input type="text" inputmode="decimal" class="form-control text-right sales-price-display-input" value="{{ ($oldSalesPrices[$index] ?? '') !== '' ? number_format((float) ($oldSalesPrices[$index] ?? 0), 2, ',', '.') : '' }}" required>
                                                 </td>
                                                 <td>
                                                     <input type="hidden" class="service-fee-input" name="service_fees[]" value="{{ $oldServiceFees[$index] ?? 0 }}">
@@ -292,8 +292,8 @@
                 <td class="text-right">${formatDecimal(item.item_gold_rate)}%</td>
                 <td class="text-right recommended-sales-price-display">${item.recommended_sales_price !== null ? formatIdr(item.recommended_sales_price) : '-'}</td>
                 <td>
-                    <input type="hidden" class="sales-price-input" name="sales_prices[]" value="${item.recommended_sales_price !== null ? item.recommended_sales_price : ''}">
-                    <input type="text" inputmode="decimal" class="form-control text-right sales-price-display-input" value="${item.recommended_sales_price !== null ? formatLocaleNumber(item.recommended_sales_price) : ''}" required>
+                    <input type="hidden" class="sales-price-input" name="sales_prices[]" value="${item.sales_price !== null ? item.sales_price : ''}">
+                    <input type="text" inputmode="decimal" class="form-control text-right sales-price-display-input" value="${item.sales_price !== null ? formatLocaleNumber(item.sales_price) : ''}" required>
                 </td>
                 <td>
                     <input type="hidden" class="service-fee-input" name="service_fees[]" value="${item.service_fee !== null ? item.service_fee : 0}">

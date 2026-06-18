@@ -116,13 +116,13 @@
                                             if ($detail->item && $detail->item->base_gold_price !== null && $detail->item_weight !== null) {
                                                 $recommendedServiceFeePerGram = (float) ($detail->item->base_service_fee ?? 0);
                                                 $recommendedSalesPrice = max(0, (
-                                                    ((float) $detail->item->base_gold_price - $recommendedServiceFeePerGram) * (float) $detail->item_weight
+                                                    ((float) $detail->item->base_gold_price + $recommendedServiceFeePerGram) * (float) $detail->item_weight
                                                 ));
                                             }
 
                                             $averageSalesPrice = null;
-                                            if ($detail->line_total !== null && (float) $detail->item_weight > 0) {
-                                                $averageSalesPrice = (float) $detail->line_total / (float) $detail->item_weight;
+                                            if ($detail->sales_price !== null && (float) $detail->item_weight > 0) {
+                                                $averageSalesPrice = (float) $detail->sales_price / (float) $detail->item_weight;
                                             }
 
                                             $inventoryStatus = optional(optional($detail->item)->inventoryStatus)->description

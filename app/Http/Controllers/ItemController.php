@@ -1075,13 +1075,13 @@ class ItemController extends Controller
                 $recommendedServiceFee = round((float) $item->item_weight * (float) $todayServiceFee, 2);
             }
             if ($recommendedItemPrice !== null && $recommendedServiceFee !== null) {
-                $recommendedSalesPrice = max(0, round($recommendedItemPrice - $recommendedServiceFee, 2));
+                $recommendedSalesPrice = max(0, round($recommendedItemPrice + $recommendedServiceFee, 2));
             }
         }
 
         $defaultSalesPrice = $item && $item->sales_price !== null
             ? round((float) $item->sales_price, 2)
-            : $recommendedSalesPrice;
+            : $recommendedItemPrice;
         $defaultServiceFee = (Schema::hasColumn('item', 'service_fee') && $item && $item->service_fee !== null)
             ? round((float) $item->service_fee, 2)
             : $recommendedServiceFee;
@@ -1140,12 +1140,14 @@ class ItemController extends Controller
                 'base_price' => null,
                 'service_fee' => 0,
             ];
+            $recommendedItemPrice = null;
             $recommendedSalesPrice = null;
             $recommendedServiceFee = 0;
             if (($todayGoldPriceSetting['base_price'] ?? null) !== null && $item->item_weight !== null) {
+                $recommendedItemPrice = round((float) $todayGoldPriceSetting['base_price'] * (float) $item->item_weight, 2);
                 $recommendedServiceFee = round((float) $todayGoldPriceSetting['service_fee'] * (float) $item->item_weight, 2);
                 $recommendedSalesPrice = max(0, round(
-                    ((float) $todayGoldPriceSetting['base_price'] * (float) $item->item_weight) - $recommendedServiceFee,
+                    $recommendedItemPrice + $recommendedServiceFee,
                     2
                 ));
             }
@@ -1158,6 +1160,7 @@ class ItemController extends Controller
                 'item_weight' => $item->item_weight,
                 'item_gold_rate' => $item->item_gold_rate,
                 'store_id' => $item->store_id,
+                'sales_price' => $recommendedItemPrice,
                 'recommended_sales_price' => $recommendedSalesPrice,
                 'service_fee' => $recommendedServiceFee,
             ];
