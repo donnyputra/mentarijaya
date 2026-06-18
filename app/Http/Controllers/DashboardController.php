@@ -278,11 +278,6 @@ class DashboardController extends Controller
             ->whereNotNull('item.sales_at')
             ->whereDate('item.sales_at', $today->format('Y-m-d'));
 
-        if ($userId !== null) {
-            $baseQuery->where('item.sales_by', $userId)
-                ->whereNull('item.sales_approved_at');
-        }
-
         $categoryRows = (clone $baseQuery)
             ->selectRaw('category.code as category_code, COUNT(item.id) as item_count')
             ->groupBy('category.code')
