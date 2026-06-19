@@ -21,6 +21,8 @@
     $checkoutCreateInventoryStatuses = $checkoutCreateItemData['inventorystatuses'];
     $checkoutCreateAllocation = $checkoutCreateItemData['allocation'];
     $checkoutCreateItemStatus = $checkoutCreateItemData['item_status'];
+    $checkoutCreateItemEnabled = $checkoutCreateItemData['can_create'];
+    $checkoutCreateItemDisabledReason = $checkoutCreateItemData['disabled_reason'];
 @endphp
 <div class="container">
     <div class="row justify-content-center">
@@ -87,9 +89,20 @@
                                     </div>
                                     <div class="col-4 d-flex">
                                         <button type="button" id="add-item" class="btn btn-primary mr-2">{{ __("Add Item") }}</button>
-                                        <button type="button" id="open-create-item-modal" class="btn btn-outline-secondary">{{ __("New Item") }}</button>
+                                        <button
+                                            type="button"
+                                            id="open-create-item-modal"
+                                            class="btn btn-outline-secondary"
+                                            {{ $checkoutCreateItemEnabled ? '' : 'disabled' }}
+                                            title="{{ $checkoutCreateItemDisabledReason ?: __('New Item') }}"
+                                        >{{ __("New Item") }}</button>
                                     </div>
                                 </div>
+                                @if(!$checkoutCreateItemEnabled)
+                                <div class="alert alert-warning mt-3 mb-0">
+                                    {{ $checkoutCreateItemDisabledReason }}
+                                </div>
+                                @endif
                             </div>
                         </div>
 

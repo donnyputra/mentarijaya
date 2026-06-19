@@ -1141,7 +1141,19 @@ class ItemController extends Controller
         }
 
         $dalamAllocation = $this->getCheckoutDalamAllocation();
-        $newItemStatus = \App\ItemStatus::where('code', 'new')->firstOrFail();
+        $newItemStatus = $this->getCheckoutNewItemStatus();
+
+        if (!$dalamAllocation) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'allocation_id' => __('Penyimpanan Dalam allocation was not found.'),
+            ]);
+        }
+
+        if (!$newItemStatus) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'item_status_id' => __('New item status was not found.'),
+            ]);
+        }
 
         $item = DB::transaction(function () use ($request, $itemWeight, $itemGoldRate, $dalamAllocation, $newItemStatus) {
             $item = new Item([
@@ -1988,26 +2000,58 @@ class ItemController extends Controller
     private function getCheckoutCreateItemData()
     {
         $dalamAllocation = $this->getCheckoutDalamAllocation();
-        $newItemStatus = \App\ItemStatus::where('code', 'new')->firstOrFail();
+        $newItemStatus = $this->getCheckoutNewItemStatus();
+        $missingSetup = [];
+
+        if (!$dalamAllocation) {
+            $missingSetup[] = __('Penyimpanan Dalam allocation');
+        }
+
+        if (!$newItemStatus) {
+            $missingSetup[] = __('New item status');
+        }
 
         return [
             'stores' => \App\Store::orderBy('name', 'asc')->get(['id', 'name', 'code']),
             'categories' => \App\Category::orderBy('description', 'asc')->get(['id', 'description', 'code']),
             'inventorystatuses' => \App\InventoryStatus::orderBy('description', 'asc')->get(['id', 'description']),
-            'allocation' => $dalamAllocation,
-            'item_status' => $newItemStatus,
+            'allocation' => $dalamAllocation ?: (object) ['description' => __('Penyimpanan Dalam allocation is missing.')],
+            'item_status' => $newItemStatus ?: (object) ['description' => __('New item status is missing.')],
+            'can_create' => count($missingSetup) === 0,
+            'disabled_reason' => count($missingSetup) > 0
+                ? __('New item popup is disabled because setup is missing: :setup', ['setup' => implode(', ', $missingSetup)])
+                : null,
         ];
     }
 
     private function getCheckoutDalamAllocation()
     {
-        return \App\Allocation::query()
+        $allocation = \App\Allocation::query()
             ->where(function ($query) {
                 $query->where('code', 'STORAGE')
-                    ->orWhere('description', 'Penyimpanan Dalam');
+                    ->orWhere('code', 'STRG')
+                    ->orWhere('description', 'Penyimpanan Dalam')
+                    ->orWhere('description', 'like', '%Dalam%');
             })
             ->orderBy('id', 'asc')
-            ->firstOrFail();
+            ->first();
+
+        if ($allocation) {
+            return $allocation;
+        }
+
+        return \App\Allocation::where('id', 2)->first();
+    }
+
+    private function getCheckoutNewItemStatus()
+    {
+        $itemStatus = \App\ItemStatus::where('code', 'new')->first();
+
+        if ($itemStatus) {
+            return $itemStatus;
+        }
+
+        return \App\ItemStatus::where('id', 1)->first();
     }
 
     private function storeItemPhotos(Item $item, array $images = [])
