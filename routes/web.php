@@ -112,8 +112,10 @@ Route::get('admin/sales/search-items', 'ItemController@employeeSearchAvailableIt
 Route::get('admin/sales/form/{itemId}', 'ItemController@employeeSalesForm')->name('sales.admin.form');
 Route::post('admin/sales/form/save', 'ItemController@employeeSalesFormSave')->name('sales.admin.form.save');
 Route::get('admin/checkout/entry', 'ItemController@checkoutEntry')->name('checkout.admin.entry');
+Route::post('admin/checkout/create-item', 'ItemController@checkoutCreateItem')->name('checkout.admin.create-item');
 Route::post('admin/checkout/submit', 'ItemController@checkoutSubmit')->name('checkout.admin.submit');
 Route::get('employee/checkout/entry', 'ItemController@checkoutEntry')->name('checkout.employee.entry');
+Route::post('employee/checkout/create-item', 'ItemController@checkoutCreateItem')->name('checkout.employee.create-item');
 Route::post('employee/checkout/submit', 'ItemController@checkoutSubmit')->name('checkout.employee.submit');
 Route::get('notifications', 'NotificationController@index')->name('notifications.index');
 Route::post('notifications/read-all', 'NotificationController@readAll')->name('notifications.read-all');

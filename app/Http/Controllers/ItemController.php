@@ -1108,6 +1108,65 @@ class ItemController extends Controller
     {
         return view('items.employee.checkout.entry', [
             'checkoutSubmitRouteName' => $this->getCheckoutSubmitRouteName(),
+            'checkoutCreateItemRouteName' => $this->getCheckoutCreateItemRouteName(),
+            'checkoutCreateItemData' => $this->getCheckoutCreateItemData(),
+        ]);
+    }
+
+    public function checkoutCreateItem(Request $request)
+    {
+        $request->validate([
+            'item_name' => 'required|string|max:255',
+            'item_weight' => 'required',
+            'item_gold_rate' => 'required',
+            'inventory_status_id' => 'required|numeric|exists:inventory_status,id',
+            'category_id' => 'required|numeric|exists:category,id',
+            'store_id' => 'required|numeric|exists:store,id',
+            'images.*' => 'nullable|image',
+        ]);
+
+        $itemWeight = $this->normalizeLocalizedPrice($request->get('item_weight'));
+        $itemGoldRate = $this->normalizeLocalizedPrice($request->get('item_gold_rate'));
+
+        if ($itemWeight === null || !is_numeric($itemWeight) || (float) $itemWeight <= 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'item_weight' => __('Item weight format is invalid.'),
+            ]);
+        }
+
+        if ($itemGoldRate === null || !is_numeric($itemGoldRate) || (float) $itemGoldRate <= 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'item_gold_rate' => __('Gold rate format is invalid.'),
+            ]);
+        }
+
+        $dalamAllocation = $this->getCheckoutDalamAllocation();
+        $newItemStatus = \App\ItemStatus::where('code', 'new')->firstOrFail();
+
+        $item = DB::transaction(function () use ($request, $itemWeight, $itemGoldRate, $dalamAllocation, $newItemStatus) {
+            $item = new Item([
+                'item_no' => $this->generateItemNo($request->get('category_id')),
+                'item_name' => $request->get('item_name'),
+                'item_weight' => round((float) $itemWeight, 2),
+                'item_gold_rate' => round((float) $itemGoldRate, 2),
+                'item_status_id' => $newItemStatus->id,
+                'inventory_status_id' => $request->get('inventory_status_id'),
+                'category_id' => $request->get('category_id'),
+                'allocation_id' => $dalamAllocation->id,
+                'store_id' => $request->get('store_id'),
+                'created_by' => Auth::id(),
+            ]);
+            $item->save();
+
+            $this->storeItemPhotos($item, $request->file('images', []));
+
+            return $item;
+        });
+
+        return response()->json([
+            'status' => 'ok',
+            'message' => __('Item has been created.'),
+            'item' => $this->buildCheckoutSelectableItemPayload($item),
         ]);
     }
 
@@ -1135,35 +1194,7 @@ class ItemController extends Controller
         $goldPriceSettings = $this->getTodayGoldPriceSettingsForItems($paginator->getCollection());
 
         $results = $paginator->getCollection()->map(function ($item) use ($goldPriceSettings) {
-            $cacheKey = $this->makeGoldPriceSettingKey($item->item_gold_rate, $item->inventory_status_id);
-            $todayGoldPriceSetting = $goldPriceSettings[$cacheKey] ?? [
-                'base_price' => null,
-                'service_fee' => 0,
-            ];
-            $recommendedItemPrice = null;
-            $recommendedSalesPrice = null;
-            $recommendedServiceFee = 0;
-            if (($todayGoldPriceSetting['base_price'] ?? null) !== null && $item->item_weight !== null) {
-                $recommendedItemPrice = round((float) $todayGoldPriceSetting['base_price'] * (float) $item->item_weight, 2);
-                $recommendedServiceFee = round((float) $todayGoldPriceSetting['service_fee'] * (float) $item->item_weight, 2);
-                $recommendedSalesPrice = max(0, round(
-                    $recommendedItemPrice + $recommendedServiceFee,
-                    2
-                ));
-            }
-
-            return [
-                'id' => $item->id,
-                'text' => $item->item_no . ' - ' . $item->item_name,
-                'item_no' => $item->item_no,
-                'item_name' => $item->item_name,
-                'item_weight' => $item->item_weight,
-                'item_gold_rate' => $item->item_gold_rate,
-                'store_id' => $item->store_id,
-                'sales_price' => $recommendedItemPrice,
-                'recommended_sales_price' => $recommendedSalesPrice,
-                'service_fee' => $recommendedServiceFee,
-            ];
+            return $this->buildCheckoutSelectableItemPayload($item, $goldPriceSettings);
         })->values();
 
         return response()->json([
@@ -1926,6 +1957,76 @@ class ItemController extends Controller
         return $goldRatePart . '|' . $inventoryStatusPart;
     }
 
+    private function buildCheckoutSelectableItemPayload(Item $item, array $goldPriceSettings = [])
+    {
+        $cacheKey = $this->makeGoldPriceSettingKey($item->item_gold_rate, $item->inventory_status_id);
+        $todayGoldPriceSetting = $goldPriceSettings[$cacheKey] ?? $this->getTodayGoldPriceSetting($item->item_gold_rate, $item->inventory_status_id);
+        $recommendedItemPrice = null;
+        $recommendedSalesPrice = null;
+        $recommendedServiceFee = 0;
+
+        if (($todayGoldPriceSetting['base_price'] ?? null) !== null && $item->item_weight !== null) {
+            $recommendedItemPrice = round((float) $todayGoldPriceSetting['base_price'] * (float) $item->item_weight, 2);
+            $recommendedServiceFee = round((float) ($todayGoldPriceSetting['service_fee'] ?? 0) * (float) $item->item_weight, 2);
+            $recommendedSalesPrice = max(0, round($recommendedItemPrice + $recommendedServiceFee, 2));
+        }
+
+        return [
+            'id' => $item->id,
+            'text' => $item->item_no . ' - ' . $item->item_name,
+            'item_no' => $item->item_no,
+            'item_name' => $item->item_name,
+            'item_weight' => $item->item_weight,
+            'item_gold_rate' => $item->item_gold_rate,
+            'store_id' => $item->store_id,
+            'sales_price' => $recommendedItemPrice,
+            'recommended_sales_price' => $recommendedSalesPrice,
+            'service_fee' => $recommendedServiceFee,
+        ];
+    }
+
+    private function getCheckoutCreateItemData()
+    {
+        $dalamAllocation = $this->getCheckoutDalamAllocation();
+        $newItemStatus = \App\ItemStatus::where('code', 'new')->firstOrFail();
+
+        return [
+            'stores' => \App\Store::orderBy('name', 'asc')->get(['id', 'name', 'code']),
+            'categories' => \App\Category::orderBy('description', 'asc')->get(['id', 'description', 'code']),
+            'inventorystatuses' => \App\InventoryStatus::orderBy('description', 'asc')->get(['id', 'description']),
+            'allocation' => $dalamAllocation,
+            'item_status' => $newItemStatus,
+        ];
+    }
+
+    private function getCheckoutDalamAllocation()
+    {
+        return \App\Allocation::query()
+            ->where(function ($query) {
+                $query->where('code', 'STORAGE')
+                    ->orWhere('description', 'Penyimpanan Dalam');
+            })
+            ->orderBy('id', 'asc')
+            ->firstOrFail();
+    }
+
+    private function storeItemPhotos(Item $item, array $images = [])
+    {
+        foreach ($images as $image) {
+            if (!$image) {
+                continue;
+            }
+
+            $imageName = Str::uuid() . '.' . $image->extension();
+            $image->move(public_path('img'), $imageName);
+
+            \App\Photos::create([
+                'item_id' => $item->id,
+                'img_url' => $imageName,
+            ]);
+        }
+    }
+
     private function getEmployeeSalesSearchItemsQuery()
     {
         return \App\Item::query();
@@ -1982,6 +2083,11 @@ class ItemController extends Controller
     private function getCheckoutSubmitRouteName()
     {
         return $this->getCheckoutRoutePrefix() . '.submit';
+    }
+
+    private function getCheckoutCreateItemRouteName()
+    {
+        return $this->getCheckoutRoutePrefix() . '.create-item';
     }
 
     private function normalizeLocalizedPrice($value)
