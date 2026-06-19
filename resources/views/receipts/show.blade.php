@@ -121,8 +121,8 @@
                                             }
 
                                             $averageSalesPrice = null;
-                                            if ($detail->sales_price !== null && (float) $detail->item_weight > 0) {
-                                                $averageSalesPrice = (float) $detail->sales_price / (float) $detail->item_weight;
+                                            if ($detail->line_total !== null && (float) $detail->item_weight > 0) {
+                                                $averageSalesPrice = (float) $detail->line_total / (float) $detail->item_weight;
                                             }
 
                                             $inventoryStatus = optional(optional($detail->item)->inventoryStatus)->description
