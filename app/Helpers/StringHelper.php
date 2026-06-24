@@ -7,4 +7,8 @@ class StringHelper {
         return number_format($number, 2, ',', '.');
     }
 
+    public static function formatPriceDisplay($number) {
+        return number_format($number, 0, ',', '.');
+    }
+
 }

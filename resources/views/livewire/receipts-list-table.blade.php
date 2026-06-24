@@ -44,7 +44,7 @@
                                 {{ $receiptApproved ? __('Approved') : __('Submitted') }}
                             </span>
                         </td>
-                        <td class="text-right">Rp. {{ number_format($receipt->receipt_total, 2, ',', '.') }}</td>
+                        <td class="text-right">Rp. {{ number_format($receipt->receipt_total, 0, ',', '.') }}</td>
                         <td class="text-center">
                             <a href="{{ route('receipts.show', $receipt->id) }}" class="btn btn-sm btn-light"><span><i class="fa fa-eye"></i></span></a>
                             @if(Auth::user()->authRole()->name === 'admin')

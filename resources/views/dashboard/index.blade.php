@@ -52,8 +52,8 @@
                                                 <span class="badge badge-light mr-1 mb-1">
                                                     {{ $todayBaseGoldPrice['inventory_status'] ?? '-' }}
                                                     :
-                                                    Rp {{ number_format($todayBaseGoldPrice['base_price'], 2, ',', '.') }}
-                                                    + Fee Rp {{ number_format($todayBaseGoldPrice['service_fee'] ?? 0, 2, ',', '.') }}
+                                                    Rp {{ number_format($todayBaseGoldPrice['base_price'], 0, ',', '.') }}
+                                                    + Fee Rp {{ number_format($todayBaseGoldPrice['service_fee'] ?? 0, 0, ',', '.') }}
                                                 </span>
                                             @endforeach
                                         </div>

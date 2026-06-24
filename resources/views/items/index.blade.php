@@ -149,9 +149,9 @@
                                                         <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->item_no }}</td>
                                                         <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->item_name }}</td>
                                                         <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ StringHelper::formatDecimalDisplay($item->item_weight) . " gr" }}</td>
-                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->sales_price == null ? "-" : ("Rp " . StringHelper::formatDecimalDisplay($item->sales_price)) }}
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->sales_price == null ? "-" : ("Rp " . StringHelper::formatPriceDisplay($item->sales_price)) }}
                                                         </td>
-                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ isset($item->service_fee) && $item->service_fee !== null ? ("Rp " . StringHelper::formatDecimalDisplay($item->service_fee)) : "-" }}
+                                                        <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ isset($item->service_fee) && $item->service_fee !== null ? ("Rp " . StringHelper::formatPriceDisplay($item->service_fee)) : "-" }}
                                                         </td>
                                                         <td onclick="window.location = `{{ URL('items') }}/`+{{$item->id}}">{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('d-M-Y') }}
                                                         </td>

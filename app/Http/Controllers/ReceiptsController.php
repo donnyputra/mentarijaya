@@ -187,7 +187,7 @@ class ReceiptsController extends Controller
                 $receipt->customer_name = $request->get('customer_name');
                 $receipt->customer_address = $request->get('customer_address');
                 $receipt->receipt_total = $receiptTotal;
-                $receipt->receipt_total_string = 'Rp ' . number_format($receiptTotal, 2, ',', '.');
+                $receipt->receipt_total_string = 'Rp ' . number_format($receiptTotal, 0, ',', '.');
                 $receipt->save();
 
                 return $receipt;

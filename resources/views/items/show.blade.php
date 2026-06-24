@@ -127,9 +127,9 @@
 															<div class="card-header">
 																<div class="card-title">{{ __("Sales Information") }}</div>
 																<div class="card-tools text-muted" style="font-size: 0.9rem;">
-																	Base Gold Price: {{ $item->base_gold_price !== null ? ('Rp ' . number_format($item->base_gold_price, 2, ',', '.')) : '-' }}
+																	Base Gold Price: {{ $item->base_gold_price !== null ? ('Rp ' . number_format($item->base_gold_price, 0, ',', '.')) : '-' }}
 																	|
-																	Base Service Fee: {{ $item->base_service_fee !== null ? ('Rp ' . number_format($item->base_service_fee, 2, ',', '.')) : '-' }}
+																	Base Service Fee: {{ $item->base_service_fee !== null ? ('Rp ' . number_format($item->base_service_fee, 0, ',', '.')) : '-' }}
 																</div>
 															</div>
 														@php
@@ -159,7 +159,7 @@
 																			<div class="input-group-prepend">
 																					<div class="input-group-text">Rp</div>
 																			</div>
-																			<input type="text" class="form-control sales_price" readonly name="sales_price" value="{{ $item->sales_price }}" />
+																			<input type="text" class="form-control sales_price" readonly name="sales_price" value="{{ $item->sales_price !== null ? number_format($item->sales_price, 0, ',', '.') : '' }}" />
 																		</div>
 																	</div>
 																</div>
@@ -170,7 +170,7 @@
 																			<div class="input-group-prepend">
 																					<div class="input-group-text">Rp</div>
 																			</div>
-																			<input type="text" class="form-control" readonly name="service_fee" value="{{ $item->service_fee !== null ? number_format($item->service_fee, 2, ',', '.') : '' }}" />
+																			<input type="text" class="form-control" readonly name="service_fee" value="{{ $item->service_fee !== null ? number_format($item->service_fee, 0, ',', '.') : '' }}" />
 																		</div>
 																	</div>
 																</div>

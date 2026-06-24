@@ -30,9 +30,9 @@
                                 <div class="card-header">
                                     <div class="card-title">{{ __("Sales Information") }}</div>
                                     <div class="card-tools text-muted" style="font-size: 0.9rem;">
-                                        Base Price: {{ $todayBaseGoldPrice !== null ? ('Rp ' . number_format($todayBaseGoldPrice, 2, ',', '.')) : '-' }}
+                                        Base Price: {{ $todayBaseGoldPrice !== null ? ('Rp ' . number_format($todayBaseGoldPrice, 0, ',', '.')) : '-' }}
                                         |
-                                        Service Fee: {{ $todayServiceFee !== null ? ('Rp ' . number_format($todayServiceFee, 2, ',', '.')) : '-' }}
+                                        Service Fee: {{ $todayServiceFee !== null ? ('Rp ' . number_format($todayServiceFee, 0, ',', '.')) : '-' }}
                                     </div>
                                 </div>
                                 <div class="card-body">
@@ -68,21 +68,21 @@
 	                                        <div class="form-group row">
 	                                            <label class="col-3 col-form-label">Recommended Item Price</label>
 	                                            <div class="col-9">
-                                                {{ $recommendedItemPrice !== null ? ('Rp ' . number_format($recommendedItemPrice, 2, ',', '.')) : '-' }}
+                                                {{ $recommendedItemPrice !== null ? ('Rp ' . number_format($recommendedItemPrice, 0, ',', '.')) : '-' }}
                                             </div>
                                         </div>
 
                                         <div class="form-group row">
                                             <label class="col-3 col-form-label">Recommended Service Fee</label>
                                             <div class="col-9">
-                                                {{ $recommendedServiceFee !== null ? ('Rp ' . number_format($recommendedServiceFee, 2, ',', '.')) : '-' }}
+                                                {{ $recommendedServiceFee !== null ? ('Rp ' . number_format($recommendedServiceFee, 0, ',', '.')) : '-' }}
                                             </div>
                                         </div>
 
                                         <div class="form-group row">
                                             <label class="col-3 col-form-label">Recommended Sales Price</label>
                                             <div class="col-9">
-                                                {{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 2, ',', '.')) : '-' }}
+                                                {{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 0, ',', '.')) : '-' }}
                                                 <small class="form-text text-muted">Recommendation only. You can still change the service fee and sales price.</small>
                                             </div>
                                         </div>
@@ -92,14 +92,14 @@
                                             <div class="col-9">
                                                 @php
                                                     $defaultServiceFeeInput = $defaultServiceFee !== null
-                                                        ? number_format((float) $defaultServiceFee, 2, ',', '.')
+                                                        ? number_format((float) $defaultServiceFee, 0, ',', '.')
                                                         : '';
                                                 @endphp
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                             <div class="input-group-text">Rp</div>
                                                     </div>
-                                                    <input type="text" inputmode="decimal" class="form-control rupiah-input" id="service_fee" name="service_fee" value="{{ old('service_fee', $defaultServiceFeeInput) }}" />
+                                                    <input type="text" inputmode="numeric" class="form-control rupiah-input" id="service_fee" name="service_fee" value="{{ old('service_fee', $defaultServiceFeeInput) }}" />
                                                 </div>
                                             </div>
                                         </div>
@@ -109,14 +109,14 @@
                                             <div class="col-9">
                                                 @php
                                                     $defaultSalesPriceInput = $defaultSalesPrice !== null
-                                                        ? number_format((float) $defaultSalesPrice, 2, ',', '.')
+                                                        ? number_format((float) $defaultSalesPrice, 0, ',', '.')
                                                         : '';
                                                 @endphp
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                             <div class="input-group-text">Rp</div>
                                                     </div>
-                                                    <input type="text" inputmode="decimal" class="form-control rupiah-input" id="sales_price" name="sales_price" value="{{ old('sales_price', $defaultSalesPriceInput) }}" />
+                                                    <input type="text" inputmode="numeric" class="form-control rupiah-input" id="sales_price" name="sales_price" value="{{ old('sales_price', $defaultSalesPriceInput) }}" />
                                                 </div>
                                             </div>
                                         </div>
@@ -207,8 +207,8 @@
             }
 
             return numeric.toLocaleString('id-ID', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
             });
         }
 

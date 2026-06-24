@@ -190,7 +190,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <td class="text-center" style="vertical-align:middle">{{$total_weight}} gr</td>
                 <th class="text-center">{{StringHelper::formatDecimalDisplay($weight37)}} gr</th>
                 <th class="text-center">{{StringHelper::formatDecimalDisplay($weight42)}} gr</th>
-                <td class="text-center" style="vertical-align:middle">{{"Rp " . StringHelper::formatDecimalDisplay($total_sales)}}</td>
+                <td class="text-center" style="vertical-align:middle">{{"Rp " . StringHelper::formatPriceDisplay($total_sales)}}</td>
                 <td class="text-center" style="vertical-align:middle">{{$item_count}} pcs</td>
                 <td class="text-center" style="vertical-align:middle">{{$storage_item_count}} pcs</td>
             </tr>

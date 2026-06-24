@@ -1121,12 +1121,13 @@ class ItemController extends Controller
             'item_gold_rate' => 'required',
             'inventory_status_id' => 'required|numeric|exists:inventory_status,id',
             'category_id' => 'required|numeric|exists:category,id',
+            'allocation_id' => 'required|numeric|exists:allocation,id',
             'store_id' => 'required|numeric|exists:store,id',
             'images.*' => 'nullable|image',
         ]);
 
-        $itemWeight = $this->normalizeLocalizedPrice($request->get('item_weight'));
-        $itemGoldRate = $this->normalizeLocalizedPrice($request->get('item_gold_rate'));
+        $itemWeight = $this->normalizeLocalizedDecimal($request->get('item_weight'));
+        $itemGoldRate = $this->normalizeLocalizedDecimal($request->get('item_gold_rate'));
 
         if ($itemWeight === null || !is_numeric($itemWeight) || (float) $itemWeight <= 0) {
             throw \Illuminate\Validation\ValidationException::withMessages([
@@ -1140,14 +1141,7 @@ class ItemController extends Controller
             ]);
         }
 
-        $dalamAllocation = $this->getCheckoutDalamAllocation();
         $newItemStatus = $this->getCheckoutNewItemStatus();
-
-        if (!$dalamAllocation) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'allocation_id' => __('Penyimpanan Dalam allocation was not found.'),
-            ]);
-        }
 
         if (!$newItemStatus) {
             throw \Illuminate\Validation\ValidationException::withMessages([
@@ -1155,7 +1149,7 @@ class ItemController extends Controller
             ]);
         }
 
-        $item = DB::transaction(function () use ($request, $itemWeight, $itemGoldRate, $dalamAllocation, $newItemStatus) {
+        $item = DB::transaction(function () use ($request, $itemWeight, $itemGoldRate, $newItemStatus) {
             $item = new Item([
                 'item_no' => $this->generateItemNo($request->get('category_id')),
                 'item_name' => $request->get('item_name'),
@@ -1164,7 +1158,7 @@ class ItemController extends Controller
                 'item_status_id' => $newItemStatus->id,
                 'inventory_status_id' => $request->get('inventory_status_id'),
                 'category_id' => $request->get('category_id'),
-                'allocation_id' => $dalamAllocation->id,
+                'allocation_id' => $request->get('allocation_id'),
                 'store_id' => $request->get('store_id'),
                 'created_by' => Auth::id(),
             ]);
@@ -1453,7 +1447,7 @@ class ItemController extends Controller
         $receipt->customer_name = $request->get('customer_name');
         $receipt->customer_address = $request->get('customer_address');
         $receipt->receipt_total = $lineTotal;
-        $receipt->receipt_total_string = 'Rp ' . number_format($lineTotal, 2, ',', '.');
+        $receipt->receipt_total_string = 'Rp ' . number_format($lineTotal, 0, ',', '.');
         $receipt->save();
 
         if (!$receiptDetail) {
@@ -1522,7 +1516,7 @@ class ItemController extends Controller
         }
 
         $receipt->receipt_total = $receiptTotal;
-        $receipt->receipt_total_string = 'Rp ' . number_format($receiptTotal, 2, ',', '.');
+        $receipt->receipt_total_string = 'Rp ' . number_format($receiptTotal, 0, ',', '.');
         $receipt->save();
 
         foreach ($payload as $row) {
@@ -1591,7 +1585,7 @@ class ItemController extends Controller
         }
 
         $receipt->receipt_total = $lineTotal;
-        $receipt->receipt_total_string = 'Rp ' . number_format($lineTotal, 2, ',', '.');
+        $receipt->receipt_total_string = 'Rp ' . number_format($lineTotal, 0, ',', '.');
         $receipt->save();
 
         if (!$receiptDetail) {
@@ -1665,7 +1659,7 @@ class ItemController extends Controller
         $receipt->receipt_total = (float) $details->sum(function ($detail) {
             return (float) ($detail->line_total ?? 0);
         });
-        $receipt->receipt_total_string = 'Rp ' . number_format((float) $receipt->receipt_total, 2, ',', '.');
+        $receipt->receipt_total_string = 'Rp ' . number_format((float) $receipt->receipt_total, 0, ',', '.');
 
         $firstDetail = $details->first();
         if ($firstDetail && $firstDetail->receipt_date) {
@@ -1804,7 +1798,7 @@ class ItemController extends Controller
             'item_no' => $firstItem ? $firstItem->item_no : null,
             'item_count' => $itemCount,
             'receipt_total' => (float) $receipt->receipt_total,
-            'receipt_total_string' => 'Rp ' . number_format((float) $receipt->receipt_total, 2, ',', '.'),
+            'receipt_total_string' => 'Rp ' . number_format((float) $receipt->receipt_total, 0, ',', '.'),
             'url' => route('receipts.show', $receipt->id),
         ];
     }
@@ -1999,12 +1993,12 @@ class ItemController extends Controller
 
     private function getCheckoutCreateItemData()
     {
-        $dalamAllocation = $this->getCheckoutDalamAllocation();
+        $allocations = \App\Allocation::orderBy('description', 'asc')->get(['id', 'description', 'code']);
         $newItemStatus = $this->getCheckoutNewItemStatus();
         $missingSetup = [];
 
-        if (!$dalamAllocation) {
-            $missingSetup[] = __('Penyimpanan Dalam allocation');
+        if ($allocations->isEmpty()) {
+            $missingSetup[] = __('Allocation');
         }
 
         if (!$newItemStatus) {
@@ -2015,32 +2009,13 @@ class ItemController extends Controller
             'stores' => \App\Store::orderBy('name', 'asc')->get(['id', 'name', 'code']),
             'categories' => \App\Category::orderBy('description', 'asc')->get(['id', 'description', 'code']),
             'inventorystatuses' => \App\InventoryStatus::orderBy('description', 'asc')->get(['id', 'description']),
-            'allocation' => $dalamAllocation ?: (object) ['description' => __('Penyimpanan Dalam allocation is missing.')],
+            'allocations' => $allocations,
             'item_status' => $newItemStatus ?: (object) ['description' => __('New item status is missing.')],
             'can_create' => count($missingSetup) === 0,
             'disabled_reason' => count($missingSetup) > 0
                 ? __('New item popup is disabled because setup is missing: :setup', ['setup' => implode(', ', $missingSetup)])
                 : null,
         ];
-    }
-
-    private function getCheckoutDalamAllocation()
-    {
-        $allocation = \App\Allocation::query()
-            ->where(function ($query) {
-                $query->where('code', 'STORAGE')
-                    ->orWhere('code', 'STRG')
-                    ->orWhere('description', 'Penyimpanan Dalam')
-                    ->orWhere('description', 'like', '%Dalam%');
-            })
-            ->orderBy('id', 'asc')
-            ->first();
-
-        if ($allocation) {
-            return $allocation;
-        }
-
-        return \App\Allocation::where('id', 2)->first();
     }
 
     private function getCheckoutNewItemStatus()
@@ -2149,6 +2124,24 @@ class ItemController extends Controller
             $value = str_replace(',', '.', $value);
         } elseif (preg_match('/^\d{1,3}(\.\d{3})+$/', $value)) {
             $value = str_replace('.', '', $value);
+        }
+
+        return $value;
+    }
+
+    private function normalizeLocalizedDecimal($value)
+    {
+        $value = trim((string) $value);
+        $value = str_ireplace('rp', '', $value);
+        $value = preg_replace('/\s+/', '', $value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        if (strpos($value, ',') !== false) {
+            $value = str_replace('.', '', $value);
+            $value = str_replace(',', '.', $value);
         }
 
         return $value;

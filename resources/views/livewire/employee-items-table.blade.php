@@ -157,7 +157,7 @@
                         <td>{{ $item->item_name }}</td>
                         <td>{{ $item->category_description }}</td>
                         <td>{{ ($item->item_weight) . " gr" }}</td>
-                        {{-- <td>{{ $item->sales_price == null ? "-" : ("Rp " . number_format($item->sales_price, 2, ',', '.')) }}</td>
+                        {{-- <td>{{ $item->sales_price == null ? "-" : ("Rp " . number_format($item->sales_price, 0, ',', '.')) }}</td>
                         <td>{{ $item->sales_at == null ? "-" : Carbon\Carbon::parse($item->sales_at)->format('m/d/Y') }}</td>
                         <td>{{ $item->sales_status_description == null ? "-" : $item->sales_status_description }}</td> --}}
 
@@ -165,7 +165,7 @@
                         <td>{{ $item->item_status_description}}</td>
                         <td>{{ $item->inventory_status_description}}</td>
                         <td>{{ ($item->item_gold_rate) . "%" }}</td>
-                        <td>{{ isset($item->service_fee) && $item->service_fee !== null ? ("Rp " . number_format($item->service_fee, 2, ',', '.')) : "-" }}</td>
+                        <td>{{ isset($item->service_fee) && $item->service_fee !== null ? ("Rp " . number_format($item->service_fee, 0, ',', '.')) : "-" }}</td>
                         {{-- <td>{{ $item->created_by == null ? "-" : $item->created_by_name }}</td>
                         <td>{{ $item->sales_by == null ? "-" : $item->sales_by_name }}</td> --}}
                         <td>{{ Carbon\Carbon::parse($item->created_at)->format('m/d/Y') }}</td>

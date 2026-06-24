@@ -44,8 +44,8 @@
                                                 <span class="badge badge-light mr-1 mb-1">
                                                     {{ $todayBasePrice['inventory_status'] ?? '-' }}
                                                     :
-                                                    Rp {{ number_format($todayBasePrice['base_price'], 2, ',', '.') }}
-                                                    + Fee Rp {{ number_format($todayBasePrice['service_fee'] ?? 0, 2, ',', '.') }}
+                                                    Rp {{ number_format($todayBasePrice['base_price'], 0, ',', '.') }}
+                                                    + Fee Rp {{ number_format($todayBasePrice['service_fee'] ?? 0, 0, ',', '.') }}
                                                 </span>
                                             @endforeach
                                         </div>
@@ -98,11 +98,11 @@
                                                                 <td>
                                                                     @php
                                                                         $defaultBasePrice = $matrixDefaults[$inventoryStatus->id][$rateColumn['key']]['base_price'] ?? null;
-                                                                        $defaultBasePriceDisplay = $defaultBasePrice !== null ? number_format((float) $defaultBasePrice, 2, ',', '.') : '';
+                                                                        $defaultBasePriceDisplay = $defaultBasePrice !== null ? number_format((float) $defaultBasePrice, 0, ',', '.') : '';
                                                                     @endphp
                                                                     <input
                                                                         type="text"
-                                                                        inputmode="decimal"
+                                                                        inputmode="numeric"
                                                                         class="form-control form-control-sm rupiah-input matrix-input text-right"
                                                                         name="matrix[{{ $inventoryStatus->id }}][{{ $rateColumn['key'] }}][base_price]"
                                                                         value="{{ old('matrix.' . $inventoryStatus->id . '.' . $rateColumn['key'] . '.base_price', $defaultBasePriceDisplay) }}"
@@ -116,11 +116,11 @@
                                                                 <td>
                                                                     @php
                                                                         $defaultServiceFee = $matrixDefaults[$inventoryStatus->id][$rateColumn['key']]['service_fee'] ?? null;
-                                                                        $defaultServiceFeeDisplay = $defaultServiceFee !== null ? number_format((float) $defaultServiceFee, 2, ',', '.') : '';
+                                                                        $defaultServiceFeeDisplay = $defaultServiceFee !== null ? number_format((float) $defaultServiceFee, 0, ',', '.') : '';
                                                                     @endphp
                                                                     <input
                                                                         type="text"
-                                                                        inputmode="decimal"
+                                                                        inputmode="numeric"
                                                                         class="form-control form-control-sm rupiah-input matrix-input text-right"
                                                                         name="matrix[{{ $inventoryStatus->id }}][{{ $rateColumn['key'] }}][service_fee]"
                                                                         value="{{ old('matrix.' . $inventoryStatus->id . '.' . $rateColumn['key'] . '.service_fee', $defaultServiceFeeDisplay) }}"
@@ -194,7 +194,7 @@
                                                                 $historyBasePrice = $historyMatrix['matrix'][$inventoryStatus->id][$rateColumn['key']]['base_price'] ?? null;
                                                             @endphp
                                                             <td class="text-right">
-                                                                {{ $historyBasePrice !== null ? ('Rp ' . number_format((float) $historyBasePrice, 2, ',', '.')) : '-' }}
+                                                                {{ $historyBasePrice !== null ? ('Rp ' . number_format((float) $historyBasePrice, 0, ',', '.')) : '-' }}
                                                             </td>
                                                             @endforeach
                                                         </tr>
@@ -205,7 +205,7 @@
                                                                 $historyServiceFee = $historyMatrix['matrix'][$inventoryStatus->id][$rateColumn['key']]['service_fee'] ?? null;
                                                             @endphp
                                                             <td class="text-right">
-                                                                {{ $historyServiceFee !== null ? ('Rp ' . number_format((float) $historyServiceFee, 2, ',', '.')) : '-' }}
+                                                                {{ $historyServiceFee !== null ? ('Rp ' . number_format((float) $historyServiceFee, 0, ',', '.')) : '-' }}
                                                             </td>
                                                             @endforeach
                                                         </tr>
@@ -317,8 +317,8 @@
             }
 
             return numeric.toLocaleString('id-ID', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
             });
         }
 

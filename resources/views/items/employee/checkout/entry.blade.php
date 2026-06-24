@@ -19,7 +19,7 @@
     $checkoutCreateStores = $checkoutCreateItemData['stores'];
     $checkoutCreateCategories = $checkoutCreateItemData['categories'];
     $checkoutCreateInventoryStatuses = $checkoutCreateItemData['inventorystatuses'];
-    $checkoutCreateAllocation = $checkoutCreateItemData['allocation'];
+    $checkoutCreateAllocations = $checkoutCreateItemData['allocations'];
     $checkoutCreateItemStatus = $checkoutCreateItemData['item_status'];
     $checkoutCreateItemEnabled = $checkoutCreateItemData['can_create'];
     $checkoutCreateItemDisabledReason = $checkoutCreateItemData['disabled_reason'];
@@ -147,16 +147,16 @@
                                                 <td>{{ $oldItemNames[$index] ?? '-' }}</td>
                                                 <td class="text-right item-weight-display">{{ number_format((float) ($oldItemWeights[$index] ?? 0), 2, ',', '.') }} gr</td>
                                                 <td class="text-right">{{ number_format((float) ($oldItemGoldRates[$index] ?? 0), 2, ',', '.') }}%</td>
-                                                <td class="text-right recommended-sales-price-display">{{ ($oldRecommendedSalesPrices[$index] ?? '') !== '' ? ('Rp ' . number_format((float) $oldRecommendedSalesPrices[$index], 2, ',', '.')) : '-' }}</td>
+                                                <td class="text-right recommended-sales-price-display">{{ ($oldRecommendedSalesPrices[$index] ?? '') !== '' ? ('Rp ' . number_format((float) $oldRecommendedSalesPrices[$index], 0, ',', '.')) : '-' }}</td>
                                                 <td>
                                                     <input type="hidden" class="sales-price-input" name="sales_prices[]" value="{{ $oldSalesPrices[$index] ?? '' }}">
-                                                    <input type="text" inputmode="decimal" class="form-control text-right sales-price-display-input" value="{{ ($oldSalesPrices[$index] ?? '') !== '' ? number_format((float) ($oldSalesPrices[$index] ?? 0), 2, ',', '.') : '' }}" required>
+                                                    <input type="text" inputmode="numeric" class="form-control text-right sales-price-display-input" value="{{ ($oldSalesPrices[$index] ?? '') !== '' ? number_format((float) ($oldSalesPrices[$index] ?? 0), 0, ',', '.') : '' }}" required>
                                                 </td>
                                                 <td>
                                                     <input type="hidden" class="service-fee-input" name="service_fees[]" value="{{ $oldServiceFees[$index] ?? 0 }}">
-                                                    <input type="text" inputmode="decimal" class="form-control text-right service-fee-display-input" value="{{ number_format((float) ($oldServiceFees[$index] ?? 0), 2, ',', '.') }}">
+                                                    <input type="text" inputmode="numeric" class="form-control text-right service-fee-display-input" value="{{ number_format((float) ($oldServiceFees[$index] ?? 0), 0, ',', '.') }}">
                                                 </td>
-                                                <td class="text-right line-total-display">Rp 0,00</td>
+                                                <td class="text-right line-total-display">Rp 0</td>
                                                 <td>
                                                     <textarea class="form-control" name="item_notes[]" rows="2">{{ $oldItemNotes[$index] ?? '' }}</textarea>
                                                 </td>
@@ -176,7 +176,7 @@
                                                 <th></th>
                                                 <th></th>
                                                 <th></th>
-                                                <th class="text-right" id="checkout-grand-total">Rp 0,00</th>
+                                                <th class="text-right" id="checkout-grand-total">Rp 0</th>
                                                 <th class="text-center" id="checkout-total-items">0 item(s)</th>
                                             </tr>
                                         </tfoot>
@@ -270,9 +270,14 @@
                                         </div>
 
                                         <div class="form-group row">
-                                            <label class="col-sm-3 col-form-label">Allocation</label>
+                                            <label for="checkout_create_allocation_id" class="col-sm-3 col-form-label">Allocation <span style="color: red">*</span></label>
                                             <div class="col-sm-9">
-                                                <input type="text" class="form-control" value="{{ $checkoutCreateAllocation->description }}" readonly>
+                                                <select class="form-control" id="checkout_create_allocation_id" name="allocation_id">
+                                                    @foreach ($checkoutCreateAllocations as $allocation)
+                                                    <option value="{{ $allocation->id }}">{{ $allocation->description }}{{ $allocation->code ? ' (' . $allocation->code . ')' : '' }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="invalid-feedback" data-field-error="allocation_id"></div>
                                             </div>
                                         </div>
 
@@ -333,8 +338,8 @@
 
     function formatIdr(value) {
         return 'Rp ' + Number(value || 0).toLocaleString('id-ID', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         });
     }
 
@@ -347,20 +352,20 @@
 
     function formatLocaleNumber(value) {
         return Number(value || 0).toLocaleString('id-ID', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         });
     }
 
     function parseLocaleNumber(value) {
-        const rawValue = String(value || '').trim();
+        const rawValue = String(value || '').trim().replace(/rp/ig, '').replace(/\s+/g, '');
         let normalized = rawValue;
 
         if (rawValue.indexOf(',') !== -1) {
             normalized = rawValue.replace(/\./g, '').replace(',', '.');
         } else {
-            const dotCount = (rawValue.match(/\./g) || []).length;
-            normalized = dotCount > 1 ? rawValue.replace(/\./g, '') : rawValue;
+            const hasIndonesianThousands = /^\d{1,3}(\.\d{3})+$/.test(rawValue);
+            normalized = hasIndonesianThousands ? rawValue.replace(/\./g, '') : rawValue;
             normalized = normalized.replace(/,/g, '');
         }
 
@@ -374,14 +379,14 @@
         const $row = $input.closest('tr');
         const parsedValue = parseLocaleNumber($input.val());
 
-        $row.find('.sales-price-input').val(parsedValue > 0 ? parsedValue.toFixed(2) : '');
+        $row.find('.sales-price-input').val(parsedValue > 0 ? parsedValue.toFixed(0) : '');
     }
 
     function syncServiceFeeField($input) {
         const $row = $input.closest('tr');
         const parsedValue = parseLocaleNumber($input.val());
 
-        $row.find('.service-fee-input').val(parsedValue > 0 ? parsedValue.toFixed(2) : '0.00');
+        $row.find('.service-fee-input').val(parsedValue > 0 ? parsedValue.toFixed(0) : '0');
     }
 
     function formatEditableNumber(value) {
@@ -391,11 +396,7 @@
             return '';
         }
 
-        if (Math.floor(numericValue) === numericValue) {
-            return String(numericValue);
-        }
-
-        return numericValue.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+        return String(Math.round(numericValue));
     }
 
     function initializeSalesPriceFields(context) {
@@ -511,11 +512,11 @@
                 <td class="text-right recommended-sales-price-display">${item.recommended_sales_price !== null ? formatIdr(item.recommended_sales_price) : '-'}</td>
                 <td>
                     <input type="hidden" class="sales-price-input" name="sales_prices[]" value="${item.sales_price !== null ? item.sales_price : ''}">
-                    <input type="text" inputmode="decimal" class="form-control text-right sales-price-display-input" value="${item.sales_price !== null ? formatLocaleNumber(item.sales_price) : ''}" required>
+                    <input type="text" inputmode="numeric" class="form-control text-right sales-price-display-input" value="${item.sales_price !== null ? formatLocaleNumber(item.sales_price) : ''}" required>
                 </td>
                 <td>
                     <input type="hidden" class="service-fee-input" name="service_fees[]" value="${item.service_fee !== null ? item.service_fee : 0}">
-                    <input type="text" inputmode="decimal" class="form-control text-right service-fee-display-input" value="${formatLocaleNumber(item.service_fee !== null ? item.service_fee : 0)}">
+                    <input type="text" inputmode="numeric" class="form-control text-right service-fee-display-input" value="${formatLocaleNumber(item.service_fee !== null ? item.service_fee : 0)}">
                 </td>
                 <td class="text-right line-total-display">${formatIdr(0)}</td>
                 <td>

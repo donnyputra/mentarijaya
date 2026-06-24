@@ -78,7 +78,7 @@
                                 <div class="col-md-6">
                                     <div><strong>Customer Name:</strong> {{ $receipt->customer_name ?: '-' }}</div>
                                     <div><strong>Customer Address:</strong> {{ $receipt->customer_address ?: '-' }}</div>
-                                    <div><strong>Total:</strong> Rp {{ number_format($receipt->receipt_total, 2, ',', '.') }}</div>
+                                    <div><strong>Total:</strong> Rp {{ number_format($receipt->receipt_total, 0, ',', '.') }}</div>
                                     <div><strong>Status:</strong> {{ $receiptApproved ? 'Approved' : 'Submitted - waiting for admin approval' }}</div>
                                 </div>
                             </div>
@@ -95,17 +95,15 @@
                                         <tr>
                                             <th class="col-item-no">Item No</th>
                                             <th class="col-item-name">Name</th>
-                                            <th class="col-inventory-status">Inventory</th>
-                                            <th class="text-right col-weight">Weight</th>
+                                            <th class="col-inventory-status">Inven.</th>
                                             <th class="text-right col-gold-rate">Rate</th>
-                                            <th class="text-right col-recommended">Reco</th>
-                                            <th class="text-right col-average-price">AVG Sales</th>
-                                            <th class="text-right col-sales-price">Sales Price</th>
+                                            <th class="text-right col-weight">Weight</th>
                                             <th class="col-notes">Notes</th>
-                                            @if($showServiceFee)
-                                            <th class="text-right col-service-fee">Service Fee</th>
-                                            @endif
+                                            <th class="text-right col-sales-price">Sales Price</th>
+                                            <th class="text-right col-service-fee">Svc Fee</th>
                                             <th class="text-right col-line-total">Line Total</th>
+                                            <th class="text-right col-average-price">AVG Sales</th>
+                                            <th class="text-right col-recommended">Reco</th>
                                             <th class="col-action">Action</th>
                                         </tr>
                                     </thead>
@@ -136,16 +134,14 @@
                                             <td>{{ $detail->item_no ?: optional($detail->item)->item_no ?: '-' }}</td>
                                             <td>{{ $detail->item_name }}</td>
                                             <td>{{ $inventoryStatus }}</td>
-                                            <td class="text-right">{{ number_format($detail->item_weight, 2, ',', '.') }} gr</td>
                                             <td class="text-right">{{ number_format((float) $detail->item_gold_rate, 1, ',', '.') }}%</td>
-                                            <td class="text-right money-cell">{{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 2, ',', '.')) : '-' }}</td>
-                                            <td class="text-right money-cell">{{ $averageSalesPrice !== null ? ('Rp ' . number_format($averageSalesPrice, 2, ',', '.') . ' / gr') : '-' }}</td>
-                                            <td class="text-right money-cell">{{ $detail->sales_price !== null ? ('Rp ' . number_format($detail->sales_price, 2, ',', '.')) : '-' }}</td>
+                                            <td class="text-right">{{ number_format($detail->item_weight, 2, ',', '.') }} gr</td>
                                             <td>{{ $detail->notes ?: '-' }}</td>
-                                            @if($showServiceFee)
-                                            <td class="text-right money-cell">{{ $detail->service_fee !== null ? ('Rp ' . number_format($detail->service_fee, 2, ',', '.')) : '-' }}</td>
-                                            @endif
-                                            <td class="text-right money-cell">{{ $detail->line_total !== null ? ('Rp ' . number_format($detail->line_total, 2, ',', '.')) : '-' }}</td>
+                                            <td class="text-right money-cell">{{ $detail->sales_price !== null ? ('Rp ' . number_format($detail->sales_price, 0, ',', '.')) : '-' }}</td>
+                                            <td class="text-right money-cell">{{ $detail->service_fee !== null ? ('Rp ' . number_format($detail->service_fee, 0, ',', '.')) : '-' }}</td>
+                                            <td class="text-right money-cell">{{ $detail->line_total !== null ? ('Rp ' . number_format($detail->line_total, 0, ',', '.')) : '-' }}</td>
+                                            <td class="text-right money-cell">{{ $averageSalesPrice !== null ? ('Rp ' . number_format($averageSalesPrice, 0, ',', '.') . ' / gr') : '-' }}</td>
+                                            <td class="text-right money-cell">{{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 0, ',', '.')) : '-' }}</td>
                                             <td>
                                                 @if($detail->item)
                                                 <a class="btn btn-sm btn-light" href="{{ route('items.show', $detail->item->id) }}" role="button">
@@ -160,8 +156,9 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <th colspan="{{ $showServiceFee ? 11 : 10 }}" class="text-right">Grand Total</th>
-                                            <th class="text-right">Rp {{ number_format($receipt->receipt_total, 2, ',', '.') }}</th>
+                                            <th colspan="8" class="text-right">Grand Total</th>
+                                            <th class="text-right">Rp {{ number_format($receipt->receipt_total, 0, ',', '.') }}</th>
+                                            <th colspan="3"></th>
                                         </tr>
                                     </tfoot>
                                 </table>

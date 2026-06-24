@@ -111,16 +111,16 @@
                                                 <td>{{ $detail->item_name }}</td>
                                                 <td class="text-right">{{ number_format((float) $detail->item_weight, 2, ',', '.') }} gr</td>
                                                 <td class="text-right">{{ number_format((float) $detail->item_gold_rate, 2, ',', '.') }}%</td>
-                                                <td class="text-right">{{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 2, ',', '.')) : '-' }}</td>
+                                                <td class="text-right">{{ $recommendedSalesPrice !== null ? ('Rp ' . number_format($recommendedSalesPrice, 0, ',', '.')) : '-' }}</td>
                                                 <td>
-                                                    <input type="hidden" class="sales-price-input" name="sales_prices[]" value="{{ $salesPriceValue !== null ? number_format((float) $salesPriceValue, 2, '.', '') : '' }}">
-                                                    <input type="text" inputmode="decimal" class="form-control text-right sales-price-display-input" value="{{ $salesPriceValue !== null ? number_format((float) $salesPriceValue, 2, ',', '.') : '' }}" required>
+                                                    <input type="hidden" class="sales-price-input" name="sales_prices[]" value="{{ $salesPriceValue !== null ? number_format((float) $salesPriceValue, 0, '.', '') : '' }}">
+                                                    <input type="text" inputmode="numeric" class="form-control text-right sales-price-display-input" value="{{ $salesPriceValue !== null ? number_format((float) $salesPriceValue, 0, ',', '.') : '' }}" required>
                                                 </td>
                                                 <td>
-                                                    <input type="hidden" class="service-fee-input" name="service_fees[]" value="{{ $serviceFeeValue !== null ? number_format((float) $serviceFeeValue, 2, '.', '') : '0.00' }}">
-                                                    <input type="text" inputmode="decimal" class="form-control text-right service-fee-display-input" value="{{ number_format((float) $serviceFeeValue, 2, ',', '.') }}">
+                                                    <input type="hidden" class="service-fee-input" name="service_fees[]" value="{{ $serviceFeeValue !== null ? number_format((float) $serviceFeeValue, 0, '.', '') : '0' }}">
+                                                    <input type="text" inputmode="numeric" class="form-control text-right service-fee-display-input" value="{{ number_format((float) $serviceFeeValue, 0, ',', '.') }}">
                                                 </td>
-                                                <td class="text-right line-total-display">Rp 0,00</td>
+                                                <td class="text-right line-total-display">Rp 0</td>
                                                 <td>
                                                     <textarea class="form-control" name="item_notes[]" rows="2">{{ old('item_notes.' . $loop->index, $detail->notes) }}</textarea>
                                                 </td>
@@ -135,7 +135,7 @@
                                                 <th></th>
                                                 <th></th>
                                                 <th></th>
-                                                <th class="text-right" id="receipt-grand-total">Rp 0,00</th>
+                                                <th class="text-right" id="receipt-grand-total">Rp 0</th>
                                                 <th class="text-center" id="receipt-total-items">0 item(s)</th>
                                             </tr>
                                         </tfoot>
@@ -164,8 +164,8 @@
 <script type="text/javascript">
     function formatIdr(value) {
         return 'Rp ' + Number(value || 0).toLocaleString('id-ID', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         });
     }
 
@@ -178,20 +178,20 @@
 
     function formatLocaleNumber(value) {
         return Number(value || 0).toLocaleString('id-ID', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         });
     }
 
     function parseLocaleNumber(value) {
-        const rawValue = String(value || '').trim();
+        const rawValue = String(value || '').trim().replace(/rp/ig, '').replace(/\s+/g, '');
         let normalized = rawValue;
 
         if (rawValue.indexOf(',') !== -1) {
             normalized = rawValue.replace(/\./g, '').replace(',', '.');
         } else {
-            const dotCount = (rawValue.match(/\./g) || []).length;
-            normalized = dotCount > 1 ? rawValue.replace(/\./g, '') : rawValue;
+            const hasIndonesianThousands = /^\d{1,3}(\.\d{3})+$/.test(rawValue);
+            normalized = hasIndonesianThousands ? rawValue.replace(/\./g, '') : rawValue;
             normalized = normalized.replace(/,/g, '');
         }
 
@@ -208,21 +208,17 @@
             return '';
         }
 
-        if (Math.floor(numericValue) === numericValue) {
-            return String(numericValue);
-        }
-
-        return numericValue.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+        return String(Math.round(numericValue));
     }
 
     function syncSalesPriceField($input) {
         const parsedValue = parseLocaleNumber($input.val());
-        $input.closest('tr').find('.sales-price-input').val(parsedValue > 0 ? parsedValue.toFixed(2) : '');
+        $input.closest('tr').find('.sales-price-input').val(parsedValue > 0 ? parsedValue.toFixed(0) : '');
     }
 
     function syncServiceFeeField($input) {
         const parsedValue = parseLocaleNumber($input.val());
-        $input.closest('tr').find('.service-fee-input').val(parsedValue > 0 ? parsedValue.toFixed(2) : '0.00');
+        $input.closest('tr').find('.service-fee-input').val(parsedValue > 0 ? parsedValue.toFixed(0) : '0');
     }
 
     function initializeCurrencyInputs() {

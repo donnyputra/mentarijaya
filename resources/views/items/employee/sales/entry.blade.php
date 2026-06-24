@@ -74,8 +74,8 @@
                                                 <span class="badge badge-light mr-1 mb-1">
                                                     {{ $todayGoldPrice['inventory_status'] ?? '-' }}
                                                     :
-                                                    Rp {{ number_format($todayGoldPrice['base_price'], 2, ',', '.') }}
-                                                    + Fee Rp {{ number_format($todayGoldPrice['service_fee'] ?? 0, 2, ',', '.') }}
+                                                    Rp {{ number_format($todayGoldPrice['base_price'], 0, ',', '.') }}
+                                                    + Fee Rp {{ number_format($todayGoldPrice['service_fee'] ?? 0, 0, ',', '.') }}
                                                 </span>
                                             @endforeach
                                         </div>
@@ -152,7 +152,7 @@
                                                 <td>{{ $row->sales_at }}</td>
                                                 <td>{{ $row->item_no }}</td>
                                                 <td>{{ StringHelper::formatDecimalDisplay($row->item_weight) }} gr</td>
-                                                <td>Rp {{ StringHelper::formatDecimalDisplay($row->sales_price) }}</td>
+                                                <td>Rp {{ StringHelper::formatPriceDisplay($row->sales_price) }}</td>
                                             </tr>
 
                                             <?php 
@@ -212,7 +212,7 @@
                                     <div class="card-title">{{ __("Total Sales") }}</div>
                                 </div>
                                 <div class="card-body">
-                                    <h1>Rp {{ StringHelper::formatDecimalDisplay($totalSales) }}</h1>
+                                    <h1>Rp {{ StringHelper::formatPriceDisplay($totalSales) }}</h1>
                                 </div>
                             </div>
                         </div>
