@@ -21,6 +21,8 @@ Route::get('/', function () {
 	}
 });
 
+Route::get('/healthz', 'Api\BbbbController@health');
+
 Auth::routes();
 
 Route::get('/testemail', function() {
